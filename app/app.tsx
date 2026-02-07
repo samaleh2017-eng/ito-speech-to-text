@@ -10,7 +10,7 @@ import {
 } from '@/app/store/useOnboardingStore'
 import { useAuth } from '@/app/components/auth/useAuth'
 import { WindowContextProvider } from '@/lib/window'
-import { Auth0Provider } from '@/app/components/auth/Auth0Provider'
+import { SupabaseProvider } from '@/app/components/auth/SupabaseProvider'
 import { useDeviceChangeListener } from './hooks/useDeviceChangeListener'
 import { verifyStoredMicrophone } from './media/microphone'
 import { useEffect } from 'react'
@@ -51,7 +51,7 @@ const MainApp = () => {
 
 export default function App() {
   return (
-    <Auth0Provider>
+    <SupabaseProvider>
       <HashRouter>
         <Routes>
           {/* Route for the pill window */}
@@ -79,6 +79,6 @@ export default function App() {
           />
         </Routes>
       </HashRouter>
-    </Auth0Provider>
+    </SupabaseProvider>
   )
 }
