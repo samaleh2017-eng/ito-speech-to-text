@@ -25,7 +25,7 @@ export const SupabaseProvider: React.FC<SupabaseProviderProps> = ({
 }) => {
   const [session, setSession] = useState<Session | null>(null)
   const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(!AUTH_DISABLED)
+  const [isLoading, setIsLoading] = useState(!AUTH_DISABLED && !!supabase)
 
   useEffect(() => {
     if (AUTH_DISABLED || !supabase) {
@@ -33,20 +33,42 @@ export const SupabaseProvider: React.FC<SupabaseProviderProps> = ({
       return
     }
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      setIsLoading(false)
-    })
+    let mounted = true
+
+    const initSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
+        if (error) {
+          console.error('Error getting session:', error)
+        }
+        if (mounted) {
+          setSession(session)
+          setUser(session?.user ?? null)
+          setIsLoading(false)
+        }
+      } catch (error) {
+        console.error('Failed to get session:', error)
+        if (mounted) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    initSession()
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-      setUser(session?.user ?? null)
+      if (mounted) {
+        setSession(session)
+        setUser(session?.user ?? null)
+      }
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      mounted = false
+      subscription.unsubscribe()
+    }
   }, [])
 
   return (
