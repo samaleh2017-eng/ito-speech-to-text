@@ -15,11 +15,6 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        fromService:
-          type: web
-          name: ito-server
-          property: port
       - key: DB_HOST
         fromDatabase:
           name: ito-db
