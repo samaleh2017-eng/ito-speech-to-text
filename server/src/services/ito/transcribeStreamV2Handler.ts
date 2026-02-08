@@ -114,6 +114,7 @@ export class TranscribeStreamV2Handler {
         contextText: mergedConfig.context?.contextText || '',
         browserUrl: mergedConfig.context?.browserUrl || '',
         browserDomain: mergedConfig.context?.browserDomain || '',
+        tonePrompt: mergedConfig.context?.tonePrompt || '',
       }
 
       const mode = mergedConfig.context?.mode ?? detectItoMode(transcript)
@@ -388,7 +389,11 @@ export class TranscribeStreamV2Handler {
       return transcript
     }
 
-    const userPromptPrefix = getPromptForMode(mode, advancedSettings)
+    const userPromptPrefix = getPromptForMode(
+      mode,
+      advancedSettings,
+      windowContext.tonePrompt,
+    )
     const userPrompt = createUserPromptWithContext(transcript, windowContext)
     const llmProvider = getLlmProvider(advancedSettings.llmProvider)
 
@@ -440,6 +445,10 @@ export class TranscribeStreamV2Handler {
           updateCtx.browserDomain !== ''
             ? updateCtx.browserDomain
             : baseCtx.browserDomain,
+        tonePrompt:
+          updateCtx.tonePrompt !== ''
+            ? updateCtx.tonePrompt
+            : baseCtx.tonePrompt,
       }
     }
 
