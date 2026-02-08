@@ -6,6 +6,7 @@ import {
   getSelectedTextString,
   getCursorContext,
 } from '../../media/selected-text-reader'
+import { getBrowserUrl } from '../../media/browser-url'
 import { canGetContextFromCurrentApp } from '../../utils/applicationDetection'
 import log from 'electron-log'
 import { timingCollector, TimingEventName } from '../timing/TimingCollector'
@@ -16,6 +17,8 @@ export interface ContextData {
   windowTitle: string
   appName: string
   contextText: string
+  browserUrl: string | null
+  browserDomain: string | null
   advancedSettings: ReturnType<typeof getAdvancedSettings>
 }
 
@@ -34,10 +37,17 @@ export class ContextGrabber {
     const vocabularyWords = await this.getVocabulary()
 
     // Get active window context
-    const { windowTitle, appName } = await timingCollector.timeAsync(
+    const windowContext = await timingCollector.timeAsync(
       TimingEventName.WINDOW_CONTEXT_GATHER,
       async () => await this.getWindowContext(),
     )
+
+    // Get browser URL if in a browser
+    const { url: browserUrl, domain: browserDomain } =
+      await timingCollector.timeAsync(
+        TimingEventName.BROWSER_URL_GATHER,
+        async () => await getBrowserUrl(windowContext),
+      )
 
     // Get selected text if in EDIT mode
     const contextText = await this.getContextText(mode)
@@ -49,9 +59,11 @@ export class ContextGrabber {
 
     return {
       vocabularyWords,
-      windowTitle,
-      appName,
+      windowTitle: windowContext?.title || '',
+      appName: windowContext?.appName || '',
       contextText,
+      browserUrl,
+      browserDomain,
       advancedSettings,
     }
   }
@@ -70,21 +82,19 @@ export class ContextGrabber {
   }
 
   private async getWindowContext(): Promise<{
-    windowTitle: string
+    title: string
     appName: string
-  }> {
+  } | null> {
     try {
       const windowContext = await getActiveWindow()
+      if (!windowContext) return null
       return {
-        windowTitle: windowContext?.title || '',
-        appName: windowContext?.appName || '',
+        title: windowContext.title || '',
+        appName: windowContext.appName || '',
       }
     } catch (error) {
       log.error('[ContextGrabber] Error getting window context:', error)
-      return {
-        windowTitle: '',
-        appName: '',
-      }
+      return null
     }
   }
 
