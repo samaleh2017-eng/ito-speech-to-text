@@ -97,6 +97,7 @@ message ContextInfo {
   optional ItoMode mode = 4;
   optional string browser_url = 5;
   optional string browser_domain = 6;
+  optional string tone_prompt = 7;
 }
 
 // Configuration that can be sent in-stream for TranscribeStreamV2.

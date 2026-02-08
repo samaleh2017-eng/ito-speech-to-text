@@ -178,20 +178,25 @@ export function detectItoMode(transcript: string): ItoMode {
 export function getPromptForMode(
   mode: ItoMode,
   advancedSettingsHeaders: ReturnType<typeof getAdvancedSettingsHeaders>,
+  tonePrompt?: string,
 ): string {
+  let basePrompt: string
   switch (mode) {
     case ItoMode.EDIT:
-      return (
-        // TODO: Figure out how to version advanced settings such that we can overwrite user settings when a significant change is made
-        // advancedSettingsHeaders.editingPrompt || ITO_MODE_PROMPT[ItoMode.EDIT]
-        ITO_MODE_PROMPT[ItoMode.EDIT]
-      )
+      basePrompt = ITO_MODE_PROMPT[ItoMode.EDIT]
+      break
     case ItoMode.TRANSCRIBE:
-      return (
+      basePrompt =
         advancedSettingsHeaders.transcriptionPrompt ||
         ITO_MODE_PROMPT[ItoMode.TRANSCRIBE]
-      )
+      break
     default:
-      return ITO_MODE_PROMPT[ItoMode.TRANSCRIBE]
+      basePrompt = ITO_MODE_PROMPT[ItoMode.TRANSCRIBE]
   }
+
+  if (tonePrompt && tonePrompt.trim()) {
+    return `${tonePrompt}\n\n${basePrompt}`
+  }
+
+  return basePrompt
 }

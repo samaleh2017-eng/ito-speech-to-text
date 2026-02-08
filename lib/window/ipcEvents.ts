@@ -35,6 +35,9 @@ import {
   InteractionsTable,
   UserMetadataTable,
 } from '../main/sqlite/repo'
+import { AppTargetTable, ToneTable } from '../main/sqlite/appTargetRepo'
+import { getActiveWindow } from '../media/active-application'
+import { normalizeAppTargetId } from '../utils/appTargetUtils'
 import { audioRecorderService } from '../media/audio'
 import { voiceInputService } from '../main/voiceInputService'
 import { itoSessionManager } from '../main/itoSessionManager'
@@ -934,4 +937,80 @@ ipcMain.on(IPC_EVENTS.ONBOARDING_UPDATE, async (_event, onboarding: any) => {
 // Forwards user authentication updates from the main window to the pill window
 ipcMain.on(IPC_EVENTS.USER_AUTH_UPDATE, (_event, authUser: any) => {
   getPillWindow()?.webContents.send(IPC_EVENTS.USER_AUTH_UPDATE, authUser)
+})
+
+// App Targets
+ipcMain.handle('app-targets:list', async () => {
+  const userId = getCurrentUserId()
+  if (!userId) return []
+  return AppTargetTable.findAll(userId)
+})
+
+ipcMain.handle(
+  'app-targets:upsert',
+  async (
+    _event,
+    data: {
+      id: string
+      name: string
+      toneId?: string | null
+      iconBase64?: string | null
+    }
+  ) => {
+    const userId = getCurrentUserId()
+    if (!userId) return null
+    return AppTargetTable.upsert({ ...data, userId })
+  }
+)
+
+ipcMain.handle(
+  'app-targets:update-tone',
+  async (_event, id: string, toneId: string | null) => {
+    const userId = getCurrentUserId()
+    if (!userId) return
+    return AppTargetTable.updateTone(id, userId, toneId)
+  }
+)
+
+ipcMain.handle('app-targets:delete', async (_event, id: string) => {
+  const userId = getCurrentUserId()
+  if (!userId) return
+  return AppTargetTable.delete(id, userId)
+})
+
+ipcMain.handle('app-targets:register-current', async () => {
+  const userId = getCurrentUserId()
+  if (!userId) return null
+
+  const window = await getActiveWindow()
+  if (!window) return null
+
+  const id = normalizeAppTargetId(window.appName)
+  return AppTargetTable.upsert({
+    id,
+    userId,
+    name: window.appName,
+  })
+})
+
+ipcMain.handle('app-targets:get-current', async () => {
+  const userId = getCurrentUserId()
+  if (!userId) return null
+
+  const window = await getActiveWindow()
+  if (!window) return null
+
+  const id = normalizeAppTargetId(window.appName)
+  return AppTargetTable.findById(id, userId)
+})
+
+// Tones
+ipcMain.handle('tones:list', async () => {
+  const userId = getCurrentUserId()
+  if (!userId) return []
+  return ToneTable.findAll(userId)
+})
+
+ipcMain.handle('tones:get', async (_event, id: string) => {
+  return ToneTable.findById(id)
 })

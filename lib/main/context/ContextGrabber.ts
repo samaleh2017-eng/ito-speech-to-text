@@ -1,5 +1,6 @@
 import { ItoMode } from '@/app/generated/ito_pb'
 import { DictionaryTable } from '../sqlite/repo'
+import { AppTargetTable, ToneTable, type Tone } from '../sqlite/appTargetRepo'
 import { getCurrentUserId, getAdvancedSettings } from '../store'
 import { getActiveWindow } from '../../media/active-application'
 import {
@@ -8,6 +9,7 @@ import {
 } from '../../media/selected-text-reader'
 import { getBrowserUrl } from '../../media/browser-url'
 import { canGetContextFromCurrentApp } from '../../utils/applicationDetection'
+import { normalizeAppTargetId, DEFAULT_TONE_ID } from '../../utils/appTargetUtils'
 import log from 'electron-log'
 import { timingCollector, TimingEventName } from '../timing/TimingCollector'
 import { macOSAccessibilityContextProvider } from '../../media/macOSAccessibilityContextProvider'
@@ -20,6 +22,7 @@ export interface ContextData {
   browserUrl: string | null
   browserDomain: string | null
   advancedSettings: ReturnType<typeof getAdvancedSettings>
+  tone: Tone | null
 }
 
 /**
@@ -55,6 +58,9 @@ export class ContextGrabber {
     // Get advanced settings
     const advancedSettings = getAdvancedSettings()
 
+    // Get tone for current app
+    const tone = await this.getToneForCurrentApp(windowContext?.appName)
+
     console.log('[ContextGrabber] Context gathered successfully')
 
     return {
@@ -65,6 +71,7 @@ export class ContextGrabber {
       browserUrl,
       browserDomain,
       advancedSettings,
+      tone,
     }
   }
 
@@ -94,6 +101,22 @@ export class ContextGrabber {
       }
     } catch (error) {
       log.error('[ContextGrabber] Error getting window context:', error)
+      return null
+    }
+  }
+
+  private async getToneForCurrentApp(appName?: string): Promise<Tone | null> {
+    try {
+      const userId = getCurrentUserId()
+      if (!userId || !appName) return null
+
+      const appId = normalizeAppTargetId(appName)
+      const appTarget = await AppTargetTable.findById(appId, userId)
+
+      const toneId = appTarget?.toneId || DEFAULT_TONE_ID
+      return ToneTable.findById(toneId)
+    } catch (error) {
+      log.error('[ContextGrabber] Error getting tone:', error)
       return null
     }
   }
