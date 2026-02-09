@@ -994,7 +994,12 @@ ipcMain.handle('app-targets:register-current', async () => {
 
   const window = await getActiveWindow()
 
-  if (mainWindow && !mainWindow.isDestroyed()) {
+  if (isMac) {
+    app.show()
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.focus()
+    }
+  } else if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.restore()
     mainWindow.show()
     mainWindow.focus()
@@ -1004,7 +1009,8 @@ ipcMain.handle('app-targets:register-current', async () => {
 
   const appName = window.appName
   const lowerName = appName.toLowerCase()
-  if (lowerName.includes('electron') || lowerName.includes('ito')) {
+  const blockedApps = ['electron', 'ito', 'explorer', 'finder', 'desktop', 'shell']
+  if (blockedApps.some(blocked => lowerName.includes(blocked))) {
     return null
   }
 
