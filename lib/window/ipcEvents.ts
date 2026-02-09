@@ -37,6 +37,7 @@ import {
 } from '../main/sqlite/repo'
 import { AppTargetTable, ToneTable } from '../main/sqlite/appTargetRepo'
 import { getActiveWindow } from '../media/active-application'
+import { getBrowserUrl } from '../media/browser-url'
 import { normalizeAppTargetId } from '../utils/appTargetUtils'
 import { audioRecorderService } from '../media/audio'
 import { voiceInputService } from '../main/voiceInputService'
@@ -954,6 +955,8 @@ ipcMain.handle(
     data: {
       id: string
       name: string
+      matchType?: MatchType
+      domain?: string | null
       toneId?: string | null
       iconBase64?: string | null
     }
@@ -976,9 +979,7 @@ ipcMain.handle('app-targets:delete', async (_event, id: string) => {
   return AppTargetTable.delete(id, userId)
 })
 
-ipcMain.handle('app-targets:register-current', async () => {
-  const userId = getCurrentUserId() || DEFAULT_LOCAL_USER_ID
-
+ipcMain.handle('app-targets:detect-current', async () => {
   const isMac = process.platform === 'darwin'
 
   if (isMac) {
@@ -990,6 +991,7 @@ ipcMain.handle('app-targets:register-current', async () => {
   await new Promise(resolve => setTimeout(resolve, 2500))
 
   const window = await getActiveWindow()
+  const browserInfo = await getBrowserUrl(window)
 
   if (isMac) {
     app.show()
@@ -1011,12 +1013,12 @@ ipcMain.handle('app-targets:register-current', async () => {
     return null
   }
 
-  const id = normalizeAppTargetId(appName)
-  return AppTargetTable.upsert({
-    id,
-    userId,
-    name: appName,
-  })
+  return {
+    appName,
+    browserUrl: browserInfo.url,
+    browserDomain: browserInfo.domain,
+    suggestedMatchType: browserInfo.domain ? 'domain' : 'app',
+  }
 })
 
 ipcMain.handle('app-targets:get-current', async () => {
