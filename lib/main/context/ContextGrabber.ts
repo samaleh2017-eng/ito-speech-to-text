@@ -11,6 +11,8 @@ import { getBrowserUrl } from '../../media/browser-url'
 import { canGetContextFromCurrentApp } from '../../utils/applicationDetection'
 import { normalizeAppTargetId, DEFAULT_TONE_ID } from '../../utils/appTargetUtils'
 import log from 'electron-log'
+
+const DEFAULT_LOCAL_USER_ID = 'local-user'
 import { timingCollector, TimingEventName } from '../timing/TimingCollector'
 import { macOSAccessibilityContextProvider } from '../../media/macOSAccessibilityContextProvider'
 
@@ -77,7 +79,7 @@ export class ContextGrabber {
 
   private async getVocabulary(): Promise<string[]> {
     try {
-      const userId = getCurrentUserId()
+      const userId = getCurrentUserId() || DEFAULT_LOCAL_USER_ID
       const dictionaryItems = await DictionaryTable.findAll(userId)
       return dictionaryItems
         .filter(item => item.deleted_at === null)
@@ -107,8 +109,8 @@ export class ContextGrabber {
 
   private async getToneForCurrentApp(appName?: string): Promise<Tone | null> {
     try {
-      const userId = getCurrentUserId()
-      if (!userId || !appName) return null
+      const userId = getCurrentUserId() || DEFAULT_LOCAL_USER_ID
+      if (!appName) return null
 
       const appId = normalizeAppTargetId(appName)
       const appTarget = await AppTargetTable.findById(appId, userId)
