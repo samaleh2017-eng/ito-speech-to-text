@@ -63,6 +63,8 @@ export class ContextGrabber {
     // Get tone for current app
     const tone = await this.getToneForCurrentApp(windowContext?.appName)
 
+    console.log('[ContextGrabber] App name:', windowContext?.appName)
+    console.log('[ContextGrabber] Tone found:', tone?.name, '| Template:', tone?.promptTemplate?.substring(0, 50))
     console.log('[ContextGrabber] Context gathered successfully')
 
     return {
@@ -113,10 +115,16 @@ export class ContextGrabber {
       if (!appName) return null
 
       const appId = normalizeAppTargetId(appName)
+      console.log('[ContextGrabber] Looking for tone - userId:', userId, '| appId:', appId)
+      
       const appTarget = await AppTargetTable.findById(appId, userId)
+      console.log('[ContextGrabber] AppTarget found:', appTarget?.name, '| toneId:', appTarget?.toneId)
 
       const toneId = appTarget?.toneId || DEFAULT_TONE_ID
-      return ToneTable.findById(toneId)
+      const tone = await ToneTable.findById(toneId)
+      console.log('[ContextGrabber] Tone loaded:', tone?.name)
+      
+      return tone
     } catch (error) {
       log.error('[ContextGrabber] Error getting tone:', error)
       return null
