@@ -982,26 +982,43 @@ ipcMain.handle('app-targets:register-current', async () => {
   const userId = getCurrentUserId()
   if (!userId) return null
 
-  if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.hide()
+  const isMac = process.platform === 'darwin'
+
+  if (isMac) {
+    app.hide()
+  } else if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.minimize()
   }
 
-  await new Promise(resolve => setTimeout(resolve, 300))
+  await new Promise(resolve => setTimeout(resolve, 2500))
 
   const window = await getActiveWindow()
 
-  if (mainWindow && !mainWindow.isDestroyed()) {
+  if (isMac) {
+    app.show()
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.focus()
+    }
+  } else if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.restore()
     mainWindow.show()
     mainWindow.focus()
   }
 
   if (!window) return null
 
-  const id = normalizeAppTargetId(window.appName)
+  const appName = window.appName
+  const lowerName = appName.toLowerCase()
+  const blockedApps = ['electron', 'ito', 'explorer', 'finder', 'desktop', 'shell']
+  if (blockedApps.some(blocked => lowerName.includes(blocked))) {
+    return null
+  }
+
+  const id = normalizeAppTargetId(appName)
   return AppTargetTable.upsert({
     id,
     userId,
-    name: window.appName,
+    name: appName,
   })
 })
 
