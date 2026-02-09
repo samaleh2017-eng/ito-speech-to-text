@@ -11,6 +11,8 @@ import { getBrowserUrl } from '../../media/browser-url'
 import { canGetContextFromCurrentApp } from '../../utils/applicationDetection'
 import { normalizeAppTargetId, DEFAULT_TONE_ID } from '../../utils/appTargetUtils'
 import log from 'electron-log'
+
+const DEFAULT_LOCAL_USER_ID = 'local-user'
 import { timingCollector, TimingEventName } from '../timing/TimingCollector'
 import { macOSAccessibilityContextProvider } from '../../media/macOSAccessibilityContextProvider'
 
@@ -61,6 +63,8 @@ export class ContextGrabber {
     // Get tone for current app
     const tone = await this.getToneForCurrentApp(windowContext?.appName)
 
+    console.log('[ContextGrabber] App name:', windowContext?.appName)
+    console.log('[ContextGrabber] Tone found:', tone?.name, '| Template:', tone?.promptTemplate?.substring(0, 50))
     console.log('[ContextGrabber] Context gathered successfully')
 
     return {
@@ -77,7 +81,7 @@ export class ContextGrabber {
 
   private async getVocabulary(): Promise<string[]> {
     try {
-      const userId = getCurrentUserId()
+      const userId = getCurrentUserId() || DEFAULT_LOCAL_USER_ID
       const dictionaryItems = await DictionaryTable.findAll(userId)
       return dictionaryItems
         .filter(item => item.deleted_at === null)
@@ -107,14 +111,20 @@ export class ContextGrabber {
 
   private async getToneForCurrentApp(appName?: string): Promise<Tone | null> {
     try {
-      const userId = getCurrentUserId()
-      if (!userId || !appName) return null
+      const userId = getCurrentUserId() || DEFAULT_LOCAL_USER_ID
+      if (!appName) return null
 
       const appId = normalizeAppTargetId(appName)
+      console.log('[ContextGrabber] Looking for tone - userId:', userId, '| appId:', appId)
+      
       const appTarget = await AppTargetTable.findById(appId, userId)
+      console.log('[ContextGrabber] AppTarget found:', appTarget?.name, '| toneId:', appTarget?.toneId)
 
       const toneId = appTarget?.toneId || DEFAULT_TONE_ID
-      return ToneTable.findById(toneId)
+      const tone = await ToneTable.findById(toneId)
+      console.log('[ContextGrabber] Tone loaded:', tone?.name)
+      
+      return tone
     } catch (error) {
       log.error('[ContextGrabber] Error getting tone:', error)
       return null
