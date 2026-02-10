@@ -12,7 +12,7 @@ const noopAsync = async () => {}
 const noopAsyncSuccess = async () => ({ success: true as const })
 
 const localUser: AuthUser = {
-  id: 'local-user',
+  id: 'self-hosted',
   email: 'local@ito.app',
   name: 'Local User',
   picture: undefined,
@@ -80,20 +80,24 @@ export function useAuth() {
     })
 
     if (AUTH_DISABLED) {
-      const selfHostedProfile = {
-        id: 'self-hosted',
-        email: undefined,
-        name: 'Self-Hosted User',
-      }
-      console.log('[DEBUG][useAuth] AUTH_DISABLED - calling notifyLoginSuccess with:', selfHostedProfile)
-      window.api.notifyLoginSuccess(selfHostedProfile, null, null)
       if (!storeIsAuthenticated) {
+        const selfHostedProfile = {
+          id: 'self-hosted',
+          email: undefined,
+          name: 'Self-Hosted User',
+        }
+        console.log('[DEBUG][useAuth] AUTH_DISABLED - calling notifyLoginSuccess with:', selfHostedProfile)
+        window.api.notifyLoginSuccess(selfHostedProfile, null, null)
         setSelfHostedMode()
       }
       return
     }
 
     if (session && supabaseUser && authUser) {
+      if (storeIsAuthenticated && storedUser?.id === supabaseUser.id) {
+        return
+      }
+      
       const profile = {
         id: supabaseUser.id,
         email: supabaseUser.email,
@@ -102,9 +106,6 @@ export function useAuth() {
       console.log('[DEBUG][useAuth] Valid session - calling notifyLoginSuccess with profile:', profile)
       window.api.notifyLoginSuccess(profile, session.access_token, session.access_token)
       
-      if (storeIsAuthenticated && storedUser?.id === supabaseUser.id) {
-        return
-      }
       const authTokens: AuthTokens = {
         access_token: session.access_token,
         id_token: session.access_token,
