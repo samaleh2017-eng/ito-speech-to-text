@@ -142,22 +142,105 @@ export const shouldRefreshToken = (expiresAt: number): boolean => {
   return Date.now() >= expiresAt - fiveMinutes
 }
 
-// Check token validity (Supabase handles actual refresh)
+// Refresh tokens via the renderer's Supabase client over IPC
 export const ensureValidTokens = async () => {
   const storedAuth = store.get(STORE_KEYS.AUTH)
   const tokens = storedAuth?.tokens
+  const storedAccessToken = store.get(STORE_KEYS.ACCESS_TOKEN) as string | undefined
 
-  if (!tokens || !tokens.access_token) {
+  const accessToken = tokens?.access_token || storedAccessToken
+  if (!accessToken) {
     return { success: false, error: 'No access token available' }
   }
 
-  if (tokens.expires_at && shouldRefreshToken(tokens.expires_at)) {
-    console.log('Access token needs refresh')
+  const needsRefresh =
+    isTokenExpired(accessToken) ||
+    (tokens?.expires_at && shouldRefreshToken(tokens.expires_at))
+
+  if (!needsRefresh) {
+    return { success: true, tokens }
+  }
+
+  console.log('[ensureValidTokens] Token needs refresh, requesting via IPC')
+
+  if (!mainWindow || mainWindow.isDestroyed()) {
+    console.warn('[ensureValidTokens] No main window available for IPC refresh')
+    return { success: false, error: 'No main window available for token refresh' }
+  }
+
+  const safeSupabaseUrl = JSON.stringify(import.meta.env.VITE_SUPABASE_URL || '')
+  const safeAnonKey = JSON.stringify(import.meta.env.VITE_SUPABASE_ANON_KEY || '')
+
+  try {
+    const result = await mainWindow.webContents.executeJavaScript(
+      `(async () => {
+        try {
+          const storageKeys = Object.keys(localStorage).filter(k => k.startsWith('sb-'));
+          const authKey = storageKeys.find(k => k.endsWith('-auth-token'));
+          if (!authKey) return { success: false, error: 'No Supabase session in storage' };
+          const raw = localStorage.getItem(authKey);
+          if (!raw) return { success: false, error: 'Empty Supabase session' };
+          const parsed = JSON.parse(raw);
+          const refreshToken = parsed?.refresh_token;
+          if (!refreshToken) return { success: false, error: 'No refresh token' };
+
+          const supabaseUrl = ${safeSupabaseUrl};
+          const supabaseAnonKey = ${safeAnonKey};
+          const resp = await fetch(supabaseUrl + '/auth/v1/token?grant_type=refresh_token', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': supabaseAnonKey,
+            },
+            body: JSON.stringify({ refresh_token: refreshToken }),
+          });
+          if (!resp.ok) {
+            const body = await resp.text();
+            return { success: false, error: 'Refresh failed: ' + resp.status + ' ' + body };
+          }
+          const data = await resp.json();
+          if (data.access_token) {
+            const updated = { ...parsed, access_token: data.access_token, refresh_token: data.refresh_token || refreshToken, expires_at: data.expires_at, expires_in: data.expires_in };
+            localStorage.setItem(authKey, JSON.stringify(updated));
+            return { success: true, access_token: data.access_token, refresh_token: data.refresh_token || refreshToken, expires_at: data.expires_at };
+          }
+          return { success: false, error: 'No access_token in response' };
+        } catch (e) {
+          return { success: false, error: e.message || String(e) };
+        }
+      })()`,
+    )
+
+    if (result?.success && result.access_token) {
+      console.log('[ensureValidTokens] Token refresh succeeded')
+
+      const newTokens = {
+        ...tokens,
+        access_token: result.access_token,
+        refresh_token: result.refresh_token,
+        expires_at: result.expires_at,
+      }
+
+      if (storedAuth) {
+        store.set(STORE_KEYS.AUTH, { ...storedAuth, tokens: newTokens })
+      }
+      store.set(STORE_KEYS.ACCESS_TOKEN, result.access_token)
+
+      grpcClient.setAuthToken(result.access_token)
+
+      return { success: true, tokens: newTokens }
+    }
+
+    console.warn('[ensureValidTokens] Refresh failed:', result?.error)
+    if (!mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('auth-token-expired')
+    }
+    return { success: false, error: result?.error || 'Token refresh failed' }
+  } catch (err) {
+    console.error('[ensureValidTokens] IPC refresh error:', err)
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.webContents.send('auth-token-expired')
     }
-    return { success: false, error: 'Token expired, requires re-authentication' }
+    return { success: false, error: 'IPC refresh error' }
   }
-
-  return { success: true, tokens }
 }

@@ -33,6 +33,7 @@ import { itoSessionManager } from './itoSessionManager'
 import { initializeAutoUpdater } from './autoUpdaterWrapper'
 import { teardown } from './teardown'
 import { ITO_ENV } from './env'
+import { startServerKeepAlive, stopServerKeepAlive } from './serverKeepAlive'
 
 protocol.registerSchemesAsPrivileged([
   {
@@ -79,6 +80,9 @@ app.whenReady().then(async () => {
 
   // Always start sync service (works with or without auth for self-hosted mode)
   syncService.start()
+
+  // Keep Render server warm to avoid cold-start 401s
+  startServerKeepAlive(import.meta.env.VITE_GRPC_BASE_URL as string)
 
   // Setup protocol handling for deep links
   setupProtocolHandling()
@@ -148,6 +152,7 @@ app.whenReady().then(async () => {
 
   app.on('before-quit', () => {
     console.log('App is quitting, cleaning up resources...')
+    stopServerKeepAlive()
     setIsQuitting(true)
     teardown()
   })

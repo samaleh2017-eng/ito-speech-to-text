@@ -43,7 +43,7 @@ import {
   store,
 } from '../main/store'
 import { getSelectedTextString } from '../media/selected-text-reader'
-import { ensureValidTokens } from '../auth/events'
+import { ensureValidTokens, isTokenExpired } from '../auth/events'
 import { getActiveWindow } from '../media/active-application'
 import { STORE_KEYS } from '../constants/store-keys.js'
 
@@ -97,8 +97,13 @@ class GrpcClient {
 
   private getHeaders() {
     if (!this.authToken) {
-      // Though we have guards elsewhere, this is a final check.
-      // Throwing here helps us pinpoint auth issues during development.
+      const storedToken = store.get(STORE_KEYS.ACCESS_TOKEN) as string | undefined
+      if (storedToken) {
+        this.authToken = storedToken
+      }
+    }
+    if (!this.authToken) {
+      console.warn('[GrpcClient] No auth token available, sending request without Authorization header')
       return new Headers()
     }
     return new Headers({ Authorization: `Bearer ${this.authToken}` })
@@ -205,7 +210,36 @@ class GrpcClient {
     return headers
   }
 
+  private async ensureTokenFresh() {
+    if (!this.authToken) {
+      const storedToken = store.get(STORE_KEYS.ACCESS_TOKEN) as string | undefined
+      if (storedToken) {
+        this.authToken = storedToken
+      } else {
+        return
+      }
+    }
+
+    try {
+      if (isTokenExpired(this.authToken)) {
+        console.log('[GrpcClient] Token expired, attempting proactive refresh')
+        const refreshResult = await ensureValidTokens()
+        if (
+          refreshResult.success &&
+          'tokens' in refreshResult &&
+          refreshResult.tokens?.access_token
+        ) {
+          this.authToken = refreshResult.tokens.access_token
+        }
+      }
+    } catch (err) {
+      console.warn('[GrpcClient] Proactive token check failed:', err)
+    }
+  }
+
   private async withRetry<T>(operation: () => Promise<T>): Promise<T> {
+    await this.ensureTokenFresh()
+
     try {
       return await operation()
     } catch (error) {

@@ -180,6 +180,10 @@ export const startServer = async () => {
     reply.send('Welcome to the Ito Connect RPC server!')
   })
 
+  connectRpcServer.get('/health', async (_, reply) => {
+    reply.send({ status: 'ok' })
+  })
+
   connectRpcServer.get('/callback', async (request, reply) => {
     const { code, state } = request.query as {
       code: string
