@@ -74,6 +74,10 @@ const mockContextGrabber = {
       appName: 'Test App',
       contextText: 'Test context',
       vocabularyWords: ['test', 'word'],
+      replacements: [],
+      browserUrl: null,
+      browserDomain: null,
+      tone: null,
       advancedSettings: {
         llm: {
           asrModel: 'whisper-1',

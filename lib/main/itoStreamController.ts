@@ -5,6 +5,7 @@ import {
   StreamConfigSchema,
   ContextInfoSchema,
   LlmSettingsSchema,
+  ReplacementEntrySchema,
 } from '@/app/generated/ito_pb'
 import { create } from '@bufbuild/protobuf'
 import { grpcClient } from '../clients/grpcClient'
@@ -243,6 +244,12 @@ export class ItoStreamController {
           }),
           vocabulary: context.vocabularyWords,
           interactionId: interactionId || undefined,
+          replacements: context.replacements.map(r =>
+            create(ReplacementEntrySchema, {
+              fromText: r.from,
+              toText: r.to,
+            }),
+          ),
         }),
       },
     })

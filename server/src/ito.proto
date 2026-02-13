@@ -100,6 +100,11 @@ message ContextInfo {
   optional string tone_prompt = 7;
 }
 
+message ReplacementEntry {
+  string from_text = 1;
+  string to_text = 2;
+}
+
 // Configuration that can be sent in-stream for TranscribeStreamV2.
 // All fields are optional and will be merged by the server.
 // Multiple config messages received during the stream are progressively merged.
@@ -108,6 +113,7 @@ message StreamConfig {
   optional LlmSettings llm_settings = 2;
   repeated string vocabulary = 3;
   optional string interaction_id = 4;
+  repeated ReplacementEntry replacements = 5;
 }
 
 // Request message for TranscribeStreamV2.

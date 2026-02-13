@@ -11,7 +11,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file ito.proto.
  */
 export const file_ito: GenFile = /*@__PURE__*/
-  fileDesc("CglpdG8ucHJvdG8SA2l0byIHCgVFbXB0eSLRAQoLQ2xpZW50RXJyb3ISDAoEY29kZRgBIAEoCRIcCgR0eXBlGAIgASgOMg4uaXRvLkVycm9yVHlwZRIPCgdtZXNzYWdlGAMgASgJEiUKCHByb3ZpZGVyGAQgASgOMhMuaXRvLkNsaWVudFByb3ZpZGVyEi4KB2RldGFpbHMYBSADKAsyHS5pdG8uQ2xpZW50RXJyb3IuRGV0YWlsc0VudHJ5Gi4KDERldGFpbHNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBIisKCkF1ZGlvQ2h1bmsSHQoKYXVkaW9fZGF0YRgBIAEoDEIJukgGegQYgIBAIrcCCgtDb250ZXh0SW5mbxIZCgx3aW5kb3dfdGl0bGUYASABKAlIAIgBARIVCghhcHBfbmFtZRgCIAEoCUgBiAEBEhkKDGNvbnRleHRfdGV4dBgDIAEoCUgCiAEBEh8KBG1vZGUYBCABKA4yDC5pdG8uSXRvTW9kZUgDiAEBEhgKC2Jyb3dzZXJfdXJsGAUgASgJSASIAQESGwoOYnJvd3Nlcl9kb21haW4YBiABKAlIBYgBARIYCgt0b25lX3Byb21wdBgHIAEoCUgGiAEBQg8KDV93aW5kb3dfdGl0bGVCCwoJX2FwcF9uYW1lQg8KDV9jb250ZXh0X3RleHRCBwoFX21vZGVCDgoMX2Jyb3dzZXJfdXJsQhEKD19icm93c2VyX2RvbWFpbkIOCgxfdG9uZV9wcm9tcHQixAEKDFN0cmVhbUNvbmZpZxImCgdjb250ZXh0GAEgASgLMhAuaXRvLkNvbnRleHRJbmZvSACIAQESKwoMbGxtX3NldHRpbmdzGAIgASgLMhAuaXRvLkxsbVNldHRpbmdzSAGIAQESEgoKdm9jYWJ1bGFyeRgDIAMoCRIbCg5pbnRlcmFjdGlvbl9pZBgEIAEoCUgCiAEBQgoKCF9jb250ZXh0Qg8KDV9sbG1fc2V0dGluZ3NCEQoPX2ludGVyYWN0aW9uX2lkImoKF1RyYW5zY3JpYmVTdHJlYW1SZXF1ZXN0EiMKBmNvbmZpZxgBIAEoCzIRLml0by5TdHJlYW1Db25maWdIABIfCgphdWRpb19kYXRhGAIgASgMQgm6SAZ6BBiAgEBIAEIJCgdwYXlsb2FkIkwKFVRyYW5zY3JpcHRpb25SZXNwb25zZRISCgp0cmFuc2NyaXB0GAEgASgJEh8KBWVycm9yGAIgASgLMhAuaXRvLkNsaWVudEVycm9yIogBCgROb3RlEgoKAmlkGAEgASgJEg8KB3VzZXJfaWQYAiABKAkSFgoOaW50ZXJhY3Rpb25faWQYAyABKAkSDwoHY29udGVudBgEIAEoCRISCgpjcmVhdGVkX2F0GAUgASgJEhIKCnVwZGF0ZWRfYXQYBiABKAkSEgoKZGVsZXRlZF9hdBgHIAEoCSJIChFDcmVhdGVOb3RlUmVxdWVzdBIKCgJpZBgBIAEoCRIWCg5pbnRlcmFjdGlvbl9pZBgCIAEoCRIPCgdjb250ZW50GAMgASgJIhwKDkdldE5vdGVSZXF1ZXN0EgoKAmlkGAEgASgJIisKEExpc3ROb3Rlc1JlcXVlc3QSFwoPc2luY2VfdGltZXN0YW1wGAEgASgJIi0KEUxpc3ROb3Rlc1Jlc3BvbnNlEhgKBW5vdGVzGAEgAygLMgkuaXRvLk5vdGUiMAoRVXBkYXRlTm90ZVJlcXVlc3QSCgoCaWQYASABKAkSDwoHY29udGVudBgCIAEoCSIfChFEZWxldGVOb3RlUmVxdWVzdBIKCgJpZBgBIAEoCSL9AQoLSW50ZXJhY3Rpb24SCgoCaWQYASABKAkSDwoHdXNlcl9pZBgCIAEoCRINCgV0aXRsZRgDIAEoCRISCgphc3Jfb3V0cHV0GAQgASgJEhIKCmxsbV9vdXRwdXQYBSABKAkSHQoJcmF3X2F1ZGlvGAYgASgMQgq6SAd6BRiAwtcvEhMKC2R1cmF0aW9uX21zGAcgASgFEhIKCmNyZWF0ZWRfYXQYCCABKAkSEgoKdXBkYXRlZF9hdBgJIAEoCRISCgpkZWxldGVkX2F0GAogASgJEhkKDHJhd19hdWRpb19pZBgLIAEoCUgAiAEBQg8KDV9yYXdfYXVkaW9faWQikQEKGENyZWF0ZUludGVyYWN0aW9uUmVxdWVzdBIKCgJpZBgBIAEoCRINCgV0aXRsZRgCIAEoCRISCgphc3Jfb3V0cHV0GAMgASgJEhIKCmxsbV9vdXRwdXQYBCABKAkSHQoJcmF3X2F1ZGlvGAUgASgMQgq6SAd6BRiAwtcvEhMKC2R1cmF0aW9uX21zGAYgASgFIiMKFUdldEludGVyYWN0aW9uUmVxdWVzdBIKCgJpZBgBIAEoCSIyChdMaXN0SW50ZXJhY3Rpb25zUmVxdWVzdBIXCg9zaW5jZV90aW1lc3RhbXAYASABKAkiQgoYTGlzdEludGVyYWN0aW9uc1Jlc3BvbnNlEiYKDGludGVyYWN0aW9ucxgBIAMoCzIQLml0by5JbnRlcmFjdGlvbiI1ChhVcGRhdGVJbnRlcmFjdGlvblJlcXVlc3QSCgoCaWQYASABKAkSDQoFdGl0bGUYAiABKAkiJgoYRGVsZXRlSW50ZXJhY3Rpb25SZXF1ZXN0EgoKAmlkGAEgASgJIo4BCg5EaWN0aW9uYXJ5SXRlbRIKCgJpZBgBIAEoCRIPCgd1c2VyX2lkGAIgASgJEgwKBHdvcmQYAyABKAkSFQoNcHJvbnVuY2lhdGlvbhgEIAEoCRISCgpjcmVhdGVkX2F0GAUgASgJEhIKCnVwZGF0ZWRfYXQYBiABKAkSEgoKZGVsZXRlZF9hdBgHIAEoCSJOChtDcmVhdGVEaWN0aW9uYXJ5SXRlbVJlcXVlc3QSCgoCaWQYASABKAkSDAoEd29yZBgCIAEoCRIVCg1wcm9udW5jaWF0aW9uGAMgASgJIjUKGkxpc3REaWN0aW9uYXJ5SXRlbXNSZXF1ZXN0EhcKD3NpbmNlX3RpbWVzdGFtcBgBIAEoCSJBChtMaXN0RGljdGlvbmFyeUl0ZW1zUmVzcG9uc2USIgoFaXRlbXMYASADKAsyEy5pdG8uRGljdGlvbmFyeUl0ZW0iTgobVXBkYXRlRGljdGlvbmFyeUl0ZW1SZXF1ZXN0EgoKAmlkGAEgASgJEgwKBHdvcmQYAiABKAkSFQoNcHJvbnVuY2lhdGlvbhgDIAEoCSIpChtEZWxldGVEaWN0aW9uYXJ5SXRlbVJlcXVlc3QSCgoCaWQYASABKAkiFwoVRGVsZXRlVXNlckRhdGFSZXF1ZXN0Iu8DCgtMbG1TZXR0aW5ncxIWCglhc3JfbW9kZWwYASABKAlIAIgBARIZCgxhc3JfcHJvdmlkZXIYAiABKAlIAYgBARIXCgphc3JfcHJvbXB0GAMgASgJSAKIAQESGQoMbGxtX3Byb3ZpZGVyGAQgASgJSAOIAQESFgoJbGxtX21vZGVsGAUgASgJSASIAQESHAoPbGxtX3RlbXBlcmF0dXJlGAYgASgCSAWIAQESIQoUdHJhbnNjcmlwdGlvbl9wcm9tcHQYByABKAlIBogBARIbCg5lZGl0aW5nX3Byb21wdBgIIAEoCUgHiAEBEiAKE25vX3NwZWVjaF90aHJlc2hvbGQYCSABKAJICIgBARIiChVsb3dfcXVhbGl0eV90aHJlc2hvbGQYCiABKAJICYgBAUIMCgpfYXNyX21vZGVsQg8KDV9hc3JfcHJvdmlkZXJCDQoLX2Fzcl9wcm9tcHRCDwoNX2xsbV9wcm92aWRlckIMCgpfbGxtX21vZGVsQhIKEF9sbG1fdGVtcGVyYXR1cmVCFwoVX3RyYW5zY3JpcHRpb25fcHJvbXB0QhEKD19lZGl0aW5nX3Byb21wdEIWChRfbm9fc3BlZWNoX3RocmVzaG9sZEIYChZfbG93X3F1YWxpdHlfdGhyZXNob2xkIpkBChBBZHZhbmNlZFNldHRpbmdzEgoKAmlkGAEgASgJEg8KB3VzZXJfaWQYAiABKAkSEgoKY3JlYXRlZF9hdBgDIAEoCRISCgp1cGRhdGVkX2F0GAQgASgJEh0KA2xsbRgFIAEoCzIQLml0by5MbG1TZXR0aW5ncxIhCgdkZWZhdWx0GAYgASgLMhAuaXRvLkxsbVNldHRpbmdzIhwKGkdldEFkdmFuY2VkU2V0dGluZ3NSZXF1ZXN0Ij4KHVVwZGF0ZUFkdmFuY2VkU2V0dGluZ3NSZXF1ZXN0Eh0KA2xsbRgBIAEoCzIQLml0by5MbG1TZXR0aW5ncyJ3CgtUaW1pbmdFdmVudBIMCgRuYW1lGAEgASgJEhAKCHN0YXJ0X21zGAIgASgBEhMKBmVuZF9tcxgDIAEoAUgAiAEBEhgKC2R1cmF0aW9uX21zGAQgASgBSAGIAQFCCQoHX2VuZF9tc0IOCgxfZHVyYXRpb25fbXMi1gEKDFRpbWluZ1JlcG9ydBIWCg5pbnRlcmFjdGlvbl9pZBgBIAEoCRIPCgd1c2VyX2lkGAIgASgJEhAKCHBsYXRmb3JtGAMgASgJEhMKC2FwcF92ZXJzaW9uGAQgASgJEhAKCGhvc3RuYW1lGAUgASgJEhQKDGFyY2hpdGVjdHVyZRgGIAEoCRIRCgl0aW1lc3RhbXAYByABKAkSIAoGZXZlbnRzGAggAygLMhAuaXRvLlRpbWluZ0V2ZW50EhkKEXRvdGFsX2R1cmF0aW9uX21zGAkgASgBIkAKGlN1Ym1pdFRpbWluZ1JlcG9ydHNSZXF1ZXN0EiIKB3JlcG9ydHMYASADKAsyES5pdG8uVGltaW5nUmVwb3J0Ih0KG1N1Ym1pdFRpbWluZ1JlcG9ydHNSZXNwb25zZSojCgdJdG9Nb2RlEg4KClRSQU5TQ1JJQkUQABIICgRFRElUEAEqKAoOQ2xpZW50UHJvdmlkZXISCAoER1JPURAAEgwKCENFUkVCUkFTEAEqRAoJRXJyb3JUeXBlEhEKDUNPTkZJR1VSQVRJT04QABIQCgxBVkFJTEFCSUxJVFkQARIJCgVBVURJTxACEgcKA0FQSRADMpUKCgpJdG9TZXJ2aWNlEkEKEFRyYW5zY3JpYmVTdHJlYW0SDy5pdG8uQXVkaW9DaHVuaxoaLml0by5UcmFuc2NyaXB0aW9uUmVzcG9uc2UoARJQChJUcmFuc2NyaWJlU3RyZWFtVjISHC5pdG8uVHJhbnNjcmliZVN0cmVhbVJlcXVlc3QaGi5pdG8uVHJhbnNjcmlwdGlvblJlc3BvbnNlKAESLwoKQ3JlYXRlTm90ZRIWLml0by5DcmVhdGVOb3RlUmVxdWVzdBoJLml0by5Ob3RlEikKB0dldE5vdGUSEy5pdG8uR2V0Tm90ZVJlcXVlc3QaCS5pdG8uTm90ZRI6CglMaXN0Tm90ZXMSFS5pdG8uTGlzdE5vdGVzUmVxdWVzdBoWLml0by5MaXN0Tm90ZXNSZXNwb25zZRIvCgpVcGRhdGVOb3RlEhYuaXRvLlVwZGF0ZU5vdGVSZXF1ZXN0GgkuaXRvLk5vdGUSMAoKRGVsZXRlTm90ZRIWLml0by5EZWxldGVOb3RlUmVxdWVzdBoKLml0by5FbXB0eRJEChFDcmVhdGVJbnRlcmFjdGlvbhIdLml0by5DcmVhdGVJbnRlcmFjdGlvblJlcXVlc3QaEC5pdG8uSW50ZXJhY3Rpb24SPgoOR2V0SW50ZXJhY3Rpb24SGi5pdG8uR2V0SW50ZXJhY3Rpb25SZXF1ZXN0GhAuaXRvLkludGVyYWN0aW9uEk8KEExpc3RJbnRlcmFjdGlvbnMSHC5pdG8uTGlzdEludGVyYWN0aW9uc1JlcXVlc3QaHS5pdG8uTGlzdEludGVyYWN0aW9uc1Jlc3BvbnNlEkQKEVVwZGF0ZUludGVyYWN0aW9uEh0uaXRvLlVwZGF0ZUludGVyYWN0aW9uUmVxdWVzdBoQLml0by5JbnRlcmFjdGlvbhI+ChFEZWxldGVJbnRlcmFjdGlvbhIdLml0by5EZWxldGVJbnRlcmFjdGlvblJlcXVlc3QaCi5pdG8uRW1wdHkSTQoUQ3JlYXRlRGljdGlvbmFyeUl0ZW0SIC5pdG8uQ3JlYXRlRGljdGlvbmFyeUl0ZW1SZXF1ZXN0GhMuaXRvLkRpY3Rpb25hcnlJdGVtElgKE0xpc3REaWN0aW9uYXJ5SXRlbXMSHy5pdG8uTGlzdERpY3Rpb25hcnlJdGVtc1JlcXVlc3QaIC5pdG8uTGlzdERpY3Rpb25hcnlJdGVtc1Jlc3BvbnNlEk0KFFVwZGF0ZURpY3Rpb25hcnlJdGVtEiAuaXRvLlVwZGF0ZURpY3Rpb25hcnlJdGVtUmVxdWVzdBoTLml0by5EaWN0aW9uYXJ5SXRlbRJEChREZWxldGVEaWN0aW9uYXJ5SXRlbRIgLml0by5EZWxldGVEaWN0aW9uYXJ5SXRlbVJlcXVlc3QaCi5pdG8uRW1wdHkSOAoORGVsZXRlVXNlckRhdGESGi5pdG8uRGVsZXRlVXNlckRhdGFSZXF1ZXN0GgouaXRvLkVtcHR5Ek0KE0dldEFkdmFuY2VkU2V0dGluZ3MSHy5pdG8uR2V0QWR2YW5jZWRTZXR0aW5nc1JlcXVlc3QaFS5pdG8uQWR2YW5jZWRTZXR0aW5ncxJTChZVcGRhdGVBZHZhbmNlZFNldHRpbmdzEiIuaXRvLlVwZGF0ZUFkdmFuY2VkU2V0dGluZ3NSZXF1ZXN0GhUuaXRvLkFkdmFuY2VkU2V0dGluZ3MyaQoNVGltaW5nU2VydmljZRJYChNTdWJtaXRUaW1pbmdSZXBvcnRzEh8uaXRvLlN1Ym1pdFRpbWluZ1JlcG9ydHNSZXF1ZXN0GiAuaXRvLlN1Ym1pdFRpbWluZ1JlcG9ydHNSZXNwb25zZWIGcHJvdG8z", [file_buf_validate_validate]);
+  fileDesc("CglpdG8ucHJvdG8SA2l0byIHCgVFbXB0eSLRAQoLQ2xpZW50RXJyb3ISDAoEY29kZRgBIAEoCRIcCgR0eXBlGAIgASgOMg4uaXRvLkVycm9yVHlwZRIPCgdtZXNzYWdlGAMgASgJEiUKCHByb3ZpZGVyGAQgASgOMhMuaXRvLkNsaWVudFByb3ZpZGVyEi4KB2RldGFpbHMYBSADKAsyHS5pdG8uQ2xpZW50RXJyb3IuRGV0YWlsc0VudHJ5Gi4KDERldGFpbHNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBIisKCkF1ZGlvQ2h1bmsSHQoKYXVkaW9fZGF0YRgBIAEoDEIJukgGegQYgIBAIrcCCgtDb250ZXh0SW5mbxIZCgx3aW5kb3dfdGl0bGUYASABKAlIAIgBARIVCghhcHBfbmFtZRgCIAEoCUgBiAEBEhkKDGNvbnRleHRfdGV4dBgDIAEoCUgCiAEBEh8KBG1vZGUYBCABKA4yDC5pdG8uSXRvTW9kZUgDiAEBEhgKC2Jyb3dzZXJfdXJsGAUgASgJSASIAQESGwoOYnJvd3Nlcl9kb21haW4YBiABKAlIBYgBARIYCgt0b25lX3Byb21wdBgHIAEoCUgGiAEBQg8KDV93aW5kb3dfdGl0bGVCCwoJX2FwcF9uYW1lQg8KDV9jb250ZXh0X3RleHRCBwoFX21vZGVCDgoMX2Jyb3dzZXJfdXJsQhEKD19icm93c2VyX2RvbWFpbkIOCgxfdG9uZV9wcm9tcHQiNgoQUmVwbGFjZW1lbnRFbnRyeRIRCglmcm9tX3RleHQYASABKAkSDwoHdG9fdGV4dBgCIAEoCSLxAQoMU3RyZWFtQ29uZmlnEiYKB2NvbnRleHQYASABKAsyEC5pdG8uQ29udGV4dEluZm9IAIgBARIrCgxsbG1fc2V0dGluZ3MYAiABKAsyEC5pdG8uTGxtU2V0dGluZ3NIAYgBARISCgp2b2NhYnVsYXJ5GAMgAygJEhsKDmludGVyYWN0aW9uX2lkGAQgASgJSAKIAQESKwoMcmVwbGFjZW1lbnRzGAUgAygLMhUuaXRvLlJlcGxhY2VtZW50RW50cnlCCgoIX2NvbnRleHRCDwoNX2xsbV9zZXR0aW5nc0IRCg9faW50ZXJhY3Rpb25faWQiagoXVHJhbnNjcmliZVN0cmVhbVJlcXVlc3QSIwoGY29uZmlnGAEgASgLMhEuaXRvLlN0cmVhbUNvbmZpZ0gAEh8KCmF1ZGlvX2RhdGEYAiABKAxCCbpIBnoEGICAQEgAQgkKB3BheWxvYWQiTAoVVHJhbnNjcmlwdGlvblJlc3BvbnNlEhIKCnRyYW5zY3JpcHQYASABKAkSHwoFZXJyb3IYAiABKAsyEC5pdG8uQ2xpZW50RXJyb3IiiAEKBE5vdGUSCgoCaWQYASABKAkSDwoHdXNlcl9pZBgCIAEoCRIWCg5pbnRlcmFjdGlvbl9pZBgDIAEoCRIPCgdjb250ZW50GAQgASgJEhIKCmNyZWF0ZWRfYXQYBSABKAkSEgoKdXBkYXRlZF9hdBgGIAEoCRISCgpkZWxldGVkX2F0GAcgASgJIkgKEUNyZWF0ZU5vdGVSZXF1ZXN0EgoKAmlkGAEgASgJEhYKDmludGVyYWN0aW9uX2lkGAIgASgJEg8KB2NvbnRlbnQYAyABKAkiHAoOR2V0Tm90ZVJlcXVlc3QSCgoCaWQYASABKAkiKwoQTGlzdE5vdGVzUmVxdWVzdBIXCg9zaW5jZV90aW1lc3RhbXAYASABKAkiLQoRTGlzdE5vdGVzUmVzcG9uc2USGAoFbm90ZXMYASADKAsyCS5pdG8uTm90ZSIwChFVcGRhdGVOb3RlUmVxdWVzdBIKCgJpZBgBIAEoCRIPCgdjb250ZW50GAIgASgJIh8KEURlbGV0ZU5vdGVSZXF1ZXN0EgoKAmlkGAEgASgJIv0BCgtJbnRlcmFjdGlvbhIKCgJpZBgBIAEoCRIPCgd1c2VyX2lkGAIgASgJEg0KBXRpdGxlGAMgASgJEhIKCmFzcl9vdXRwdXQYBCABKAkSEgoKbGxtX291dHB1dBgFIAEoCRIdCglyYXdfYXVkaW8YBiABKAxCCrpIB3oFGIDC1y8SEwoLZHVyYXRpb25fbXMYByABKAUSEgoKY3JlYXRlZF9hdBgIIAEoCRISCgp1cGRhdGVkX2F0GAkgASgJEhIKCmRlbGV0ZWRfYXQYCiABKAkSGQoMcmF3X2F1ZGlvX2lkGAsgASgJSACIAQFCDwoNX3Jhd19hdWRpb19pZCKRAQoYQ3JlYXRlSW50ZXJhY3Rpb25SZXF1ZXN0EgoKAmlkGAEgASgJEg0KBXRpdGxlGAIgASgJEhIKCmFzcl9vdXRwdXQYAyABKAkSEgoKbGxtX291dHB1dBgEIAEoCRIdCglyYXdfYXVkaW8YBSABKAxCCrpIB3oFGIDC1y8SEwoLZHVyYXRpb25fbXMYBiABKAUiIwoVR2V0SW50ZXJhY3Rpb25SZXF1ZXN0EgoKAmlkGAEgASgJIjIKF0xpc3RJbnRlcmFjdGlvbnNSZXF1ZXN0EhcKD3NpbmNlX3RpbWVzdGFtcBgBIAEoCSJCChhMaXN0SW50ZXJhY3Rpb25zUmVzcG9uc2USJgoMaW50ZXJhY3Rpb25zGAEgAygLMhAuaXRvLkludGVyYWN0aW9uIjUKGFVwZGF0ZUludGVyYWN0aW9uUmVxdWVzdBIKCgJpZBgBIAEoCRINCgV0aXRsZRgCIAEoCSImChhEZWxldGVJbnRlcmFjdGlvblJlcXVlc3QSCgoCaWQYASABKAkijgEKDkRpY3Rpb25hcnlJdGVtEgoKAmlkGAEgASgJEg8KB3VzZXJfaWQYAiABKAkSDAoEd29yZBgDIAEoCRIVCg1wcm9udW5jaWF0aW9uGAQgASgJEhIKCmNyZWF0ZWRfYXQYBSABKAkSEgoKdXBkYXRlZF9hdBgGIAEoCRISCgpkZWxldGVkX2F0GAcgASgJIk4KG0NyZWF0ZURpY3Rpb25hcnlJdGVtUmVxdWVzdBIKCgJpZBgBIAEoCRIMCgR3b3JkGAIgASgJEhUKDXByb251bmNpYXRpb24YAyABKAkiNQoaTGlzdERpY3Rpb25hcnlJdGVtc1JlcXVlc3QSFwoPc2luY2VfdGltZXN0YW1wGAEgASgJIkEKG0xpc3REaWN0aW9uYXJ5SXRlbXNSZXNwb25zZRIiCgVpdGVtcxgBIAMoCzITLml0by5EaWN0aW9uYXJ5SXRlbSJOChtVcGRhdGVEaWN0aW9uYXJ5SXRlbVJlcXVlc3QSCgoCaWQYASABKAkSDAoEd29yZBgCIAEoCRIVCg1wcm9udW5jaWF0aW9uGAMgASgJIikKG0RlbGV0ZURpY3Rpb25hcnlJdGVtUmVxdWVzdBIKCgJpZBgBIAEoCSIXChVEZWxldGVVc2VyRGF0YVJlcXVlc3Qi7wMKC0xsbVNldHRpbmdzEhYKCWFzcl9tb2RlbBgBIAEoCUgAiAEBEhkKDGFzcl9wcm92aWRlchgCIAEoCUgBiAEBEhcKCmFzcl9wcm9tcHQYAyABKAlIAogBARIZCgxsbG1fcHJvdmlkZXIYBCABKAlIA4gBARIWCglsbG1fbW9kZWwYBSABKAlIBIgBARIcCg9sbG1fdGVtcGVyYXR1cmUYBiABKAJIBYgBARIhChR0cmFuc2NyaXB0aW9uX3Byb21wdBgHIAEoCUgGiAEBEhsKDmVkaXRpbmdfcHJvbXB0GAggASgJSAeIAQESIAoTbm9fc3BlZWNoX3RocmVzaG9sZBgJIAEoAkgIiAEBEiIKFWxvd19xdWFsaXR5X3RocmVzaG9sZBgKIAEoAkgJiAEBQgwKCl9hc3JfbW9kZWxCDwoNX2Fzcl9wcm92aWRlckINCgtfYXNyX3Byb21wdEIPCg1fbGxtX3Byb3ZpZGVyQgwKCl9sbG1fbW9kZWxCEgoQX2xsbV90ZW1wZXJhdHVyZUIXChVfdHJhbnNjcmlwdGlvbl9wcm9tcHRCEQoPX2VkaXRpbmdfcHJvbXB0QhYKFF9ub19zcGVlY2hfdGhyZXNob2xkQhgKFl9sb3dfcXVhbGl0eV90aHJlc2hvbGQimQEKEEFkdmFuY2VkU2V0dGluZ3MSCgoCaWQYASABKAkSDwoHdXNlcl9pZBgCIAEoCRISCgpjcmVhdGVkX2F0GAMgASgJEhIKCnVwZGF0ZWRfYXQYBCABKAkSHQoDbGxtGAUgASgLMhAuaXRvLkxsbVNldHRpbmdzEiEKB2RlZmF1bHQYBiABKAsyEC5pdG8uTGxtU2V0dGluZ3MiHAoaR2V0QWR2YW5jZWRTZXR0aW5nc1JlcXVlc3QiPgodVXBkYXRlQWR2YW5jZWRTZXR0aW5nc1JlcXVlc3QSHQoDbGxtGAEgASgLMhAuaXRvLkxsbVNldHRpbmdzIncKC1RpbWluZ0V2ZW50EgwKBG5hbWUYASABKAkSEAoIc3RhcnRfbXMYAiABKAESEwoGZW5kX21zGAMgASgBSACIAQESGAoLZHVyYXRpb25fbXMYBCABKAFIAYgBAUIJCgdfZW5kX21zQg4KDF9kdXJhdGlvbl9tcyLWAQoMVGltaW5nUmVwb3J0EhYKDmludGVyYWN0aW9uX2lkGAEgASgJEg8KB3VzZXJfaWQYAiABKAkSEAoIcGxhdGZvcm0YAyABKAkSEwoLYXBwX3ZlcnNpb24YBCABKAkSEAoIaG9zdG5hbWUYBSABKAkSFAoMYXJjaGl0ZWN0dXJlGAYgASgJEhEKCXRpbWVzdGFtcBgHIAEoCRIgCgZldmVudHMYCCADKAsyEC5pdG8uVGltaW5nRXZlbnQSGQoRdG90YWxfZHVyYXRpb25fbXMYCSABKAEiQAoaU3VibWl0VGltaW5nUmVwb3J0c1JlcXVlc3QSIgoHcmVwb3J0cxgBIAMoCzIRLml0by5UaW1pbmdSZXBvcnQiHQobU3VibWl0VGltaW5nUmVwb3J0c1Jlc3BvbnNlKiMKB0l0b01vZGUSDgoKVFJBTlNDUklCRRAAEggKBEVESVQQASooCg5DbGllbnRQcm92aWRlchIICgRHUk9REAASDAoIQ0VSRUJSQVMQASpECglFcnJvclR5cGUSEQoNQ09ORklHVVJBVElPThAAEhAKDEFWQUlMQUJJTElUWRABEgkKBUFVRElPEAISBwoDQVBJEAMylQoKCkl0b1NlcnZpY2USQQoQVHJhbnNjcmliZVN0cmVhbRIPLml0by5BdWRpb0NodW5rGhouaXRvLlRyYW5zY3JpcHRpb25SZXNwb25zZSgBElAKElRyYW5zY3JpYmVTdHJlYW1WMhIcLml0by5UcmFuc2NyaWJlU3RyZWFtUmVxdWVzdBoaLml0by5UcmFuc2NyaXB0aW9uUmVzcG9uc2UoARIvCgpDcmVhdGVOb3RlEhYuaXRvLkNyZWF0ZU5vdGVSZXF1ZXN0GgkuaXRvLk5vdGUSKQoHR2V0Tm90ZRITLml0by5HZXROb3RlUmVxdWVzdBoJLml0by5Ob3RlEjoKCUxpc3ROb3RlcxIVLml0by5MaXN0Tm90ZXNSZXF1ZXN0GhYuaXRvLkxpc3ROb3Rlc1Jlc3BvbnNlEi8KClVwZGF0ZU5vdGUSFi5pdG8uVXBkYXRlTm90ZVJlcXVlc3QaCS5pdG8uTm90ZRIwCgpEZWxldGVOb3RlEhYuaXRvLkRlbGV0ZU5vdGVSZXF1ZXN0GgouaXRvLkVtcHR5EkQKEUNyZWF0ZUludGVyYWN0aW9uEh0uaXRvLkNyZWF0ZUludGVyYWN0aW9uUmVxdWVzdBoQLml0by5JbnRlcmFjdGlvbhI+Cg5HZXRJbnRlcmFjdGlvbhIaLml0by5HZXRJbnRlcmFjdGlvblJlcXVlc3QaEC5pdG8uSW50ZXJhY3Rpb24STwoQTGlzdEludGVyYWN0aW9ucxIcLml0by5MaXN0SW50ZXJhY3Rpb25zUmVxdWVzdBodLml0by5MaXN0SW50ZXJhY3Rpb25zUmVzcG9uc2USRAoRVXBkYXRlSW50ZXJhY3Rpb24SHS5pdG8uVXBkYXRlSW50ZXJhY3Rpb25SZXF1ZXN0GhAuaXRvLkludGVyYWN0aW9uEj4KEURlbGV0ZUludGVyYWN0aW9uEh0uaXRvLkRlbGV0ZUludGVyYWN0aW9uUmVxdWVzdBoKLml0by5FbXB0eRJNChRDcmVhdGVEaWN0aW9uYXJ5SXRlbRIgLml0by5DcmVhdGVEaWN0aW9uYXJ5SXRlbVJlcXVlc3QaEy5pdG8uRGljdGlvbmFyeUl0ZW0SWAoTTGlzdERpY3Rpb25hcnlJdGVtcxIfLml0by5MaXN0RGljdGlvbmFyeUl0ZW1zUmVxdWVzdBogLml0by5MaXN0RGljdGlvbmFyeUl0ZW1zUmVzcG9uc2USTQoUVXBkYXRlRGljdGlvbmFyeUl0ZW0SIC5pdG8uVXBkYXRlRGljdGlvbmFyeUl0ZW1SZXF1ZXN0GhMuaXRvLkRpY3Rpb25hcnlJdGVtEkQKFERlbGV0ZURpY3Rpb25hcnlJdGVtEiAuaXRvLkRlbGV0ZURpY3Rpb25hcnlJdGVtUmVxdWVzdBoKLml0by5FbXB0eRI4Cg5EZWxldGVVc2VyRGF0YRIaLml0by5EZWxldGVVc2VyRGF0YVJlcXVlc3QaCi5pdG8uRW1wdHkSTQoTR2V0QWR2YW5jZWRTZXR0aW5ncxIfLml0by5HZXRBZHZhbmNlZFNldHRpbmdzUmVxdWVzdBoVLml0by5BZHZhbmNlZFNldHRpbmdzElMKFlVwZGF0ZUFkdmFuY2VkU2V0dGluZ3MSIi5pdG8uVXBkYXRlQWR2YW5jZWRTZXR0aW5nc1JlcXVlc3QaFS5pdG8uQWR2YW5jZWRTZXR0aW5nczJpCg1UaW1pbmdTZXJ2aWNlElgKE1N1Ym1pdFRpbWluZ1JlcG9ydHMSHy5pdG8uU3VibWl0VGltaW5nUmVwb3J0c1JlcXVlc3QaIC5pdG8uU3VibWl0VGltaW5nUmVwb3J0c1Jlc3BvbnNlYgZwcm90bzM", [file_buf_validate_validate]);
 
 /**
  * General
@@ -139,6 +139,28 @@ export const ContextInfoSchema: GenMessage<ContextInfo> = /*@__PURE__*/
   messageDesc(file_ito, 3);
 
 /**
+ * @generated from message ito.ReplacementEntry
+ */
+export type ReplacementEntry = Message<"ito.ReplacementEntry"> & {
+  /**
+   * @generated from field: string from_text = 1;
+   */
+  fromText: string;
+
+  /**
+   * @generated from field: string to_text = 2;
+   */
+  toText: string;
+};
+
+/**
+ * Describes the message ito.ReplacementEntry.
+ * Use `create(ReplacementEntrySchema)` to create a new message.
+ */
+export const ReplacementEntrySchema: GenMessage<ReplacementEntry> = /*@__PURE__*/
+  messageDesc(file_ito, 4);
+
+/**
  * Configuration that can be sent in-stream for TranscribeStreamV2.
  * All fields are optional and will be merged by the server.
  * Multiple config messages received during the stream are progressively merged.
@@ -165,6 +187,11 @@ export type StreamConfig = Message<"ito.StreamConfig"> & {
    * @generated from field: optional string interaction_id = 4;
    */
   interactionId?: string;
+
+  /**
+   * @generated from field: repeated ito.ReplacementEntry replacements = 5;
+   */
+  replacements: ReplacementEntry[];
 };
 
 /**
@@ -172,7 +199,7 @@ export type StreamConfig = Message<"ito.StreamConfig"> & {
  * Use `create(StreamConfigSchema)` to create a new message.
  */
 export const StreamConfigSchema: GenMessage<StreamConfig> = /*@__PURE__*/
-  messageDesc(file_ito, 4);
+  messageDesc(file_ito, 5);
 
 /**
  * Request message for TranscribeStreamV2.
@@ -208,7 +235,7 @@ export type TranscribeStreamRequest = Message<"ito.TranscribeStreamRequest"> & {
  * Use `create(TranscribeStreamRequestSchema)` to create a new message.
  */
 export const TranscribeStreamRequestSchema: GenMessage<TranscribeStreamRequest> = /*@__PURE__*/
-  messageDesc(file_ito, 5);
+  messageDesc(file_ito, 6);
 
 /**
  * The response message containing the final transcript.
@@ -232,7 +259,7 @@ export type TranscriptionResponse = Message<"ito.TranscriptionResponse"> & {
  * Use `create(TranscriptionResponseSchema)` to create a new message.
  */
 export const TranscriptionResponseSchema: GenMessage<TranscriptionResponse> = /*@__PURE__*/
-  messageDesc(file_ito, 6);
+  messageDesc(file_ito, 7);
 
 /**
  * Notes
@@ -282,7 +309,7 @@ export type Note = Message<"ito.Note"> & {
  * Use `create(NoteSchema)` to create a new message.
  */
 export const NoteSchema: GenMessage<Note> = /*@__PURE__*/
-  messageDesc(file_ito, 7);
+  messageDesc(file_ito, 8);
 
 /**
  * @generated from message ito.CreateNoteRequest
@@ -309,7 +336,7 @@ export type CreateNoteRequest = Message<"ito.CreateNoteRequest"> & {
  * Use `create(CreateNoteRequestSchema)` to create a new message.
  */
 export const CreateNoteRequestSchema: GenMessage<CreateNoteRequest> = /*@__PURE__*/
-  messageDesc(file_ito, 8);
+  messageDesc(file_ito, 9);
 
 /**
  * @generated from message ito.GetNoteRequest
@@ -326,7 +353,7 @@ export type GetNoteRequest = Message<"ito.GetNoteRequest"> & {
  * Use `create(GetNoteRequestSchema)` to create a new message.
  */
 export const GetNoteRequestSchema: GenMessage<GetNoteRequest> = /*@__PURE__*/
-  messageDesc(file_ito, 9);
+  messageDesc(file_ito, 10);
 
 /**
  * @generated from message ito.ListNotesRequest
@@ -345,7 +372,7 @@ export type ListNotesRequest = Message<"ito.ListNotesRequest"> & {
  * Use `create(ListNotesRequestSchema)` to create a new message.
  */
 export const ListNotesRequestSchema: GenMessage<ListNotesRequest> = /*@__PURE__*/
-  messageDesc(file_ito, 10);
+  messageDesc(file_ito, 11);
 
 /**
  * @generated from message ito.ListNotesResponse
@@ -362,7 +389,7 @@ export type ListNotesResponse = Message<"ito.ListNotesResponse"> & {
  * Use `create(ListNotesResponseSchema)` to create a new message.
  */
 export const ListNotesResponseSchema: GenMessage<ListNotesResponse> = /*@__PURE__*/
-  messageDesc(file_ito, 11);
+  messageDesc(file_ito, 12);
 
 /**
  * @generated from message ito.UpdateNoteRequest
@@ -384,7 +411,7 @@ export type UpdateNoteRequest = Message<"ito.UpdateNoteRequest"> & {
  * Use `create(UpdateNoteRequestSchema)` to create a new message.
  */
 export const UpdateNoteRequestSchema: GenMessage<UpdateNoteRequest> = /*@__PURE__*/
-  messageDesc(file_ito, 12);
+  messageDesc(file_ito, 13);
 
 /**
  * @generated from message ito.DeleteNoteRequest
@@ -401,7 +428,7 @@ export type DeleteNoteRequest = Message<"ito.DeleteNoteRequest"> & {
  * Use `create(DeleteNoteRequestSchema)` to create a new message.
  */
 export const DeleteNoteRequestSchema: GenMessage<DeleteNoteRequest> = /*@__PURE__*/
-  messageDesc(file_ito, 13);
+  messageDesc(file_ito, 14);
 
 /**
  * Interactions
@@ -481,7 +508,7 @@ export type Interaction = Message<"ito.Interaction"> & {
  * Use `create(InteractionSchema)` to create a new message.
  */
 export const InteractionSchema: GenMessage<Interaction> = /*@__PURE__*/
-  messageDesc(file_ito, 14);
+  messageDesc(file_ito, 15);
 
 /**
  * @generated from message ito.CreateInteractionRequest
@@ -527,7 +554,7 @@ export type CreateInteractionRequest = Message<"ito.CreateInteractionRequest"> &
  * Use `create(CreateInteractionRequestSchema)` to create a new message.
  */
 export const CreateInteractionRequestSchema: GenMessage<CreateInteractionRequest> = /*@__PURE__*/
-  messageDesc(file_ito, 15);
+  messageDesc(file_ito, 16);
 
 /**
  * @generated from message ito.GetInteractionRequest
@@ -544,7 +571,7 @@ export type GetInteractionRequest = Message<"ito.GetInteractionRequest"> & {
  * Use `create(GetInteractionRequestSchema)` to create a new message.
  */
 export const GetInteractionRequestSchema: GenMessage<GetInteractionRequest> = /*@__PURE__*/
-  messageDesc(file_ito, 16);
+  messageDesc(file_ito, 17);
 
 /**
  * @generated from message ito.ListInteractionsRequest
@@ -563,7 +590,7 @@ export type ListInteractionsRequest = Message<"ito.ListInteractionsRequest"> & {
  * Use `create(ListInteractionsRequestSchema)` to create a new message.
  */
 export const ListInteractionsRequestSchema: GenMessage<ListInteractionsRequest> = /*@__PURE__*/
-  messageDesc(file_ito, 17);
+  messageDesc(file_ito, 18);
 
 /**
  * @generated from message ito.ListInteractionsResponse
@@ -580,7 +607,7 @@ export type ListInteractionsResponse = Message<"ito.ListInteractionsResponse"> &
  * Use `create(ListInteractionsResponseSchema)` to create a new message.
  */
 export const ListInteractionsResponseSchema: GenMessage<ListInteractionsResponse> = /*@__PURE__*/
-  messageDesc(file_ito, 18);
+  messageDesc(file_ito, 19);
 
 /**
  * @generated from message ito.UpdateInteractionRequest
@@ -602,7 +629,7 @@ export type UpdateInteractionRequest = Message<"ito.UpdateInteractionRequest"> &
  * Use `create(UpdateInteractionRequestSchema)` to create a new message.
  */
 export const UpdateInteractionRequestSchema: GenMessage<UpdateInteractionRequest> = /*@__PURE__*/
-  messageDesc(file_ito, 19);
+  messageDesc(file_ito, 20);
 
 /**
  * @generated from message ito.DeleteInteractionRequest
@@ -619,7 +646,7 @@ export type DeleteInteractionRequest = Message<"ito.DeleteInteractionRequest"> &
  * Use `create(DeleteInteractionRequestSchema)` to create a new message.
  */
 export const DeleteInteractionRequestSchema: GenMessage<DeleteInteractionRequest> = /*@__PURE__*/
-  messageDesc(file_ito, 20);
+  messageDesc(file_ito, 21);
 
 /**
  * Dictionary
@@ -669,7 +696,7 @@ export type DictionaryItem = Message<"ito.DictionaryItem"> & {
  * Use `create(DictionaryItemSchema)` to create a new message.
  */
 export const DictionaryItemSchema: GenMessage<DictionaryItem> = /*@__PURE__*/
-  messageDesc(file_ito, 21);
+  messageDesc(file_ito, 22);
 
 /**
  * @generated from message ito.CreateDictionaryItemRequest
@@ -696,7 +723,7 @@ export type CreateDictionaryItemRequest = Message<"ito.CreateDictionaryItemReque
  * Use `create(CreateDictionaryItemRequestSchema)` to create a new message.
  */
 export const CreateDictionaryItemRequestSchema: GenMessage<CreateDictionaryItemRequest> = /*@__PURE__*/
-  messageDesc(file_ito, 22);
+  messageDesc(file_ito, 23);
 
 /**
  * @generated from message ito.ListDictionaryItemsRequest
@@ -715,7 +742,7 @@ export type ListDictionaryItemsRequest = Message<"ito.ListDictionaryItemsRequest
  * Use `create(ListDictionaryItemsRequestSchema)` to create a new message.
  */
 export const ListDictionaryItemsRequestSchema: GenMessage<ListDictionaryItemsRequest> = /*@__PURE__*/
-  messageDesc(file_ito, 23);
+  messageDesc(file_ito, 24);
 
 /**
  * @generated from message ito.ListDictionaryItemsResponse
@@ -732,7 +759,7 @@ export type ListDictionaryItemsResponse = Message<"ito.ListDictionaryItemsRespon
  * Use `create(ListDictionaryItemsResponseSchema)` to create a new message.
  */
 export const ListDictionaryItemsResponseSchema: GenMessage<ListDictionaryItemsResponse> = /*@__PURE__*/
-  messageDesc(file_ito, 24);
+  messageDesc(file_ito, 25);
 
 /**
  * @generated from message ito.UpdateDictionaryItemRequest
@@ -759,7 +786,7 @@ export type UpdateDictionaryItemRequest = Message<"ito.UpdateDictionaryItemReque
  * Use `create(UpdateDictionaryItemRequestSchema)` to create a new message.
  */
 export const UpdateDictionaryItemRequestSchema: GenMessage<UpdateDictionaryItemRequest> = /*@__PURE__*/
-  messageDesc(file_ito, 25);
+  messageDesc(file_ito, 26);
 
 /**
  * @generated from message ito.DeleteDictionaryItemRequest
@@ -776,7 +803,7 @@ export type DeleteDictionaryItemRequest = Message<"ito.DeleteDictionaryItemReque
  * Use `create(DeleteDictionaryItemRequestSchema)` to create a new message.
  */
 export const DeleteDictionaryItemRequestSchema: GenMessage<DeleteDictionaryItemRequest> = /*@__PURE__*/
-  messageDesc(file_ito, 26);
+  messageDesc(file_ito, 27);
 
 /**
  * User Data
@@ -794,7 +821,7 @@ export type DeleteUserDataRequest = Message<"ito.DeleteUserDataRequest"> & {
  * Use `create(DeleteUserDataRequestSchema)` to create a new message.
  */
 export const DeleteUserDataRequestSchema: GenMessage<DeleteUserDataRequest> = /*@__PURE__*/
-  messageDesc(file_ito, 27);
+  messageDesc(file_ito, 28);
 
 /**
  * @generated from message ito.LlmSettings
@@ -856,7 +883,7 @@ export type LlmSettings = Message<"ito.LlmSettings"> & {
  * Use `create(LlmSettingsSchema)` to create a new message.
  */
 export const LlmSettingsSchema: GenMessage<LlmSettings> = /*@__PURE__*/
-  messageDesc(file_ito, 28);
+  messageDesc(file_ito, 29);
 
 /**
  * @generated from message ito.AdvancedSettings
@@ -898,7 +925,7 @@ export type AdvancedSettings = Message<"ito.AdvancedSettings"> & {
  * Use `create(AdvancedSettingsSchema)` to create a new message.
  */
 export const AdvancedSettingsSchema: GenMessage<AdvancedSettings> = /*@__PURE__*/
-  messageDesc(file_ito, 29);
+  messageDesc(file_ito, 30);
 
 /**
  * Empty - user_id will be extracted from the authenticated user's token
@@ -913,7 +940,7 @@ export type GetAdvancedSettingsRequest = Message<"ito.GetAdvancedSettingsRequest
  * Use `create(GetAdvancedSettingsRequestSchema)` to create a new message.
  */
 export const GetAdvancedSettingsRequestSchema: GenMessage<GetAdvancedSettingsRequest> = /*@__PURE__*/
-  messageDesc(file_ito, 30);
+  messageDesc(file_ito, 31);
 
 /**
  * @generated from message ito.UpdateAdvancedSettingsRequest
@@ -930,7 +957,7 @@ export type UpdateAdvancedSettingsRequest = Message<"ito.UpdateAdvancedSettingsR
  * Use `create(UpdateAdvancedSettingsRequestSchema)` to create a new message.
  */
 export const UpdateAdvancedSettingsRequestSchema: GenMessage<UpdateAdvancedSettingsRequest> = /*@__PURE__*/
-  messageDesc(file_ito, 31);
+  messageDesc(file_ito, 32);
 
 /**
  * Timing Analytics
@@ -965,7 +992,7 @@ export type TimingEvent = Message<"ito.TimingEvent"> & {
  * Use `create(TimingEventSchema)` to create a new message.
  */
 export const TimingEventSchema: GenMessage<TimingEvent> = /*@__PURE__*/
-  messageDesc(file_ito, 32);
+  messageDesc(file_ito, 33);
 
 /**
  * @generated from message ito.TimingReport
@@ -1022,7 +1049,7 @@ export type TimingReport = Message<"ito.TimingReport"> & {
  * Use `create(TimingReportSchema)` to create a new message.
  */
 export const TimingReportSchema: GenMessage<TimingReport> = /*@__PURE__*/
-  messageDesc(file_ito, 33);
+  messageDesc(file_ito, 34);
 
 /**
  * @generated from message ito.SubmitTimingReportsRequest
@@ -1039,7 +1066,7 @@ export type SubmitTimingReportsRequest = Message<"ito.SubmitTimingReportsRequest
  * Use `create(SubmitTimingReportsRequestSchema)` to create a new message.
  */
 export const SubmitTimingReportsRequestSchema: GenMessage<SubmitTimingReportsRequest> = /*@__PURE__*/
-  messageDesc(file_ito, 34);
+  messageDesc(file_ito, 35);
 
 /**
  * Empty response
@@ -1054,7 +1081,7 @@ export type SubmitTimingReportsResponse = Message<"ito.SubmitTimingReportsRespon
  * Use `create(SubmitTimingReportsResponseSchema)` to create a new message.
  */
 export const SubmitTimingReportsResponseSchema: GenMessage<SubmitTimingReportsResponse> = /*@__PURE__*/
-  messageDesc(file_ito, 35);
+  messageDesc(file_ito, 36);
 
 /**
  * @generated from enum ito.ItoMode

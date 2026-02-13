@@ -4,6 +4,7 @@ import type { HandlerContext } from '@connectrpc/connect'
 import {
   ContextInfo,
   ItoMode,
+  ReplacementEntry,
   StreamConfig,
   StreamConfigSchema,
   TranscribeStreamRequest,
@@ -145,6 +146,17 @@ export class TranscribeStreamV2Handler {
         advancedSettings,
       )
 
+      const replacements = mergedConfig.replacements || []
+      if (replacements.length > 0) {
+        const beforeReplacements = transcript
+        transcript = this.applyReplacements(transcript, replacements)
+        if (transcript !== beforeReplacements) {
+          console.log(
+            `📝 [${new Date().toISOString()}] Applied ${replacements.length} replacement(s): "${beforeReplacements}" → "${transcript}"`,
+          )
+        }
+      }
+
       const duration = Date.now() - startTime
 
       // Finalize timing
@@ -197,6 +209,7 @@ export class TranscribeStreamV2Handler {
       context: undefined,
       llmSettings: undefined,
       vocabulary: [],
+      replacements: [],
     })
     let lastModeChangeTimestamp: number | null = null
     let previousMode: ItoMode | undefined = undefined
@@ -462,8 +475,31 @@ export class TranscribeStreamV2Handler {
         : base.llmSettings,
       vocabulary:
         update.vocabulary.length > 0 ? update.vocabulary : base.vocabulary,
+      replacements:
+        update.replacements.length > 0 ? update.replacements : base.replacements,
       interactionId: update.interactionId || base.interactionId,
     }
+  }
+
+  private applyReplacements(
+    transcript: string,
+    replacements: ReplacementEntry[],
+  ): string {
+    if (!replacements || replacements.length === 0) return transcript
+
+    let result = transcript
+    for (const replacement of replacements) {
+      const from = replacement.fromText
+      const to = replacement.toText
+      if (!from || !to) continue
+      if (from.toLowerCase() === to.toLowerCase()) continue
+
+      const escaped = from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const regex = new RegExp(`\\b${escaped}\\b`, 'gi')
+      result = result.replace(regex, to)
+    }
+
+    return result
   }
 }
 

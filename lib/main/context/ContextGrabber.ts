@@ -1,6 +1,11 @@
 import { ItoMode } from '@/app/generated/ito_pb'
 import { DictionaryTable } from '../sqlite/repo'
-import { AppTargetTable, ToneTable, type Tone, type AppTarget } from '../sqlite/appTargetRepo'
+import {
+  AppTargetTable,
+  ToneTable,
+  type Tone,
+  type AppTarget,
+} from '../sqlite/appTargetRepo'
 import { getCurrentUserId, getAdvancedSettings } from '../store'
 import { getActiveWindow } from '../../media/active-application'
 import {
@@ -9,7 +14,10 @@ import {
 } from '../../media/selected-text-reader'
 import { getBrowserUrl } from '../../media/browser-url'
 import { canGetContextFromCurrentApp } from '../../utils/applicationDetection'
-import { normalizeAppTargetId, DEFAULT_TONE_ID } from '../../utils/appTargetUtils'
+import {
+  normalizeAppTargetId,
+  DEFAULT_TONE_ID,
+} from '../../utils/appTargetUtils'
 import log from 'electron-log'
 
 const DEFAULT_LOCAL_USER_ID = 'local-user'
@@ -18,6 +26,7 @@ import { macOSAccessibilityContextProvider } from '../../media/macOSAccessibilit
 
 export interface ContextData {
   vocabularyWords: string[]
+  replacements: { from: string; to: string }[]
   windowTitle: string
   appName: string
   contextText: string
@@ -39,7 +48,7 @@ export class ContextGrabber {
     console.log('[ContextGrabber] Gathering context for mode:', mode)
 
     // Get vocabulary words from dictionary
-    const vocabularyWords = await this.getVocabulary()
+    const { vocabularyWords, replacements } = await this.getVocabularyAndReplacements()
 
     // Get active window context
     const windowContext = await timingCollector.timeAsync(
@@ -61,14 +70,23 @@ export class ContextGrabber {
     const advancedSettings = getAdvancedSettings()
 
     // Get tone for current app (check domain first, then app)
-    const tone = await this.getToneForCurrentApp(windowContext?.appName, browserDomain)
+    const tone = await this.getToneForCurrentApp(
+      windowContext?.appName,
+      browserDomain,
+    )
 
     console.log('[ContextGrabber] App name:', windowContext?.appName)
-    console.log('[ContextGrabber] Tone found:', tone?.name, '| Template:', tone?.promptTemplate?.substring(0, 50))
+    console.log(
+      '[ContextGrabber] Tone found:',
+      tone?.name,
+      '| Template:',
+      tone?.promptTemplate?.substring(0, 50),
+    )
     console.log('[ContextGrabber] Context gathered successfully')
 
     return {
       vocabularyWords,
+      replacements,
       windowTitle: windowContext?.title || '',
       appName: windowContext?.appName || '',
       contextText,
@@ -79,16 +97,32 @@ export class ContextGrabber {
     }
   }
 
-  private async getVocabulary(): Promise<string[]> {
+  private async getVocabularyAndReplacements(): Promise<{
+    vocabularyWords: string[]
+    replacements: { from: string; to: string }[]
+  }> {
     try {
       const userId = getCurrentUserId() || DEFAULT_LOCAL_USER_ID
       const dictionaryItems = await DictionaryTable.findAll(userId)
-      return dictionaryItems
-        .filter(item => item.deleted_at === null)
-        .map(item => item.word)
+      const activeItems = dictionaryItems.filter(item => item.deleted_at === null)
+
+      const vocabularyWords: string[] = []
+      const replacements: { from: string; to: string }[] = []
+
+      for (const item of activeItems) {
+        if (item.pronunciation !== null && item.pronunciation !== '') {
+          vocabularyWords.push(item.word)
+          vocabularyWords.push(item.pronunciation)
+          replacements.push({ from: item.word, to: item.pronunciation })
+        } else {
+          vocabularyWords.push(item.word)
+        }
+      }
+
+      return { vocabularyWords, replacements }
     } catch (error) {
       log.error('[ContextGrabber] Error getting vocabulary:', error)
-      return []
+      return { vocabularyWords: [], replacements: [] }
     }
   }
 
@@ -109,12 +143,22 @@ export class ContextGrabber {
     }
   }
 
-  private async getToneForCurrentApp(appName?: string, browserDomain?: string | null): Promise<Tone | null> {
+  private async getToneForCurrentApp(
+    appName?: string,
+    browserDomain?: string | null,
+  ): Promise<Tone | null> {
     try {
       const userId = getCurrentUserId() || DEFAULT_LOCAL_USER_ID
       if (!appName) return null
 
-      console.log('[ContextGrabber] Looking for tone - userId:', userId, '| appName:', appName, '| browserDomain:', browserDomain)
+      console.log(
+        '[ContextGrabber] Looking for tone - userId:',
+        userId,
+        '| appName:',
+        appName,
+        '| browserDomain:',
+        browserDomain,
+      )
 
       let appTarget: AppTarget | null = null
 
@@ -129,12 +173,17 @@ export class ContextGrabber {
         console.log('[ContextGrabber] App match result:', appTarget?.name)
       }
 
-      console.log('[ContextGrabber] Final AppTarget found:', appTarget?.name, '| toneId:', appTarget?.toneId)
+      console.log(
+        '[ContextGrabber] Final AppTarget found:',
+        appTarget?.name,
+        '| toneId:',
+        appTarget?.toneId,
+      )
 
       const toneId = appTarget?.toneId || DEFAULT_TONE_ID
       const tone = await ToneTable.findById(toneId)
       console.log('[ContextGrabber] Tone loaded:', tone?.name)
-      
+
       return tone
     } catch (error) {
       log.error('[ContextGrabber] Error getting tone:', error)
