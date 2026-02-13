@@ -117,6 +117,40 @@ const api = {
       ipcRenderer.invoke('dictionary:update', { id, word, pronunciation }),
     delete: (id: string) => ipcRenderer.invoke('dictionary:delete', id),
   },
+  userDetails: {
+    get: (): Promise<{
+      details: {
+        full_name: string
+        occupation: string
+        company_name: string | null
+        role: string | null
+        email: string | null
+        phone_number: string | null
+        business_address: string | null
+        website: string | null
+        linkedin: string | null
+      } | null
+      additionalInfo: {
+        info_key: string
+        info_value: string
+        sort_order: number
+      }[]
+    }> => ipcRenderer.invoke('user-details:get'),
+    save: (data: {
+      details: {
+        full_name: string
+        occupation: string
+        company_name?: string
+        role?: string
+        email?: string
+        phone_number?: string
+        business_address?: string
+        website?: string
+        linkedin?: string
+      }
+      additionalInfo: { key: string; value: string }[]
+    }) => ipcRenderer.invoke('user-details:save', data),
+  },
   userMetadata: {
     get: (): Promise<UserMetadata | null> =>
       ipcRenderer.invoke('user-metadata:get'),

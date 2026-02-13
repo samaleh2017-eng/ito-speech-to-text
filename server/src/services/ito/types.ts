@@ -5,4 +5,5 @@ export type ItoContext = {
   browserUrl: string
   browserDomain: string
   tonePrompt: string
+  userDetailsContext: string
 }

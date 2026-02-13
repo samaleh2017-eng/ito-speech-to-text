@@ -1,6 +1,10 @@
 import { ItoMode } from '@/app/generated/ito_pb'
 import { DictionaryTable } from '../sqlite/repo'
 import {
+  UserDetailsTable,
+  UserAdditionalInfoTable,
+} from '../sqlite/userDetailsRepo'
+import {
   AppTargetTable,
   ToneTable,
   type Tone,
@@ -27,6 +31,18 @@ import { macOSAccessibilityContextProvider } from '../../media/macOSAccessibilit
 export interface ContextData {
   vocabularyWords: string[]
   replacements: { from: string; to: string }[]
+  userDetails: {
+    fullName: string
+    occupation: string
+    companyName: string | null
+    role: string | null
+    email: string | null
+    phoneNumber: string | null
+    businessAddress: string | null
+    website: string | null
+    linkedin: string | null
+    additionalInfo: { key: string; value: string }[]
+  } | null
   windowTitle: string
   appName: string
   contextText: string
@@ -48,7 +64,11 @@ export class ContextGrabber {
     console.log('[ContextGrabber] Gathering context for mode:', mode)
 
     // Get vocabulary words from dictionary
-    const { vocabularyWords, replacements } = await this.getVocabularyAndReplacements()
+    const { vocabularyWords, replacements } =
+      await this.getVocabularyAndReplacements()
+
+    // Get user details
+    const userDetails = await this.getUserDetails()
 
     // Get active window context
     const windowContext = await timingCollector.timeAsync(
@@ -87,6 +107,7 @@ export class ContextGrabber {
     return {
       vocabularyWords,
       replacements,
+      userDetails,
       windowTitle: windowContext?.title || '',
       appName: windowContext?.appName || '',
       contextText,
@@ -97,6 +118,36 @@ export class ContextGrabber {
     }
   }
 
+  private async getUserDetails(): Promise<ContextData['userDetails']> {
+    try {
+      const userId = getCurrentUserId() || DEFAULT_LOCAL_USER_ID
+      const details = await UserDetailsTable.findByUserId(userId)
+      if (!details || (!details.full_name && !details.occupation)) return null
+
+      const additionalInfo =
+        await UserAdditionalInfoTable.findAllByUserId(userId)
+
+      return {
+        fullName: details.full_name,
+        occupation: details.occupation,
+        companyName: details.company_name,
+        role: details.role,
+        email: details.email,
+        phoneNumber: details.phone_number,
+        businessAddress: details.business_address,
+        website: details.website,
+        linkedin: details.linkedin,
+        additionalInfo: additionalInfo.map(item => ({
+          key: item.info_key,
+          value: item.info_value,
+        })),
+      }
+    } catch (error) {
+      log.error('[ContextGrabber] Error getting user details:', error)
+      return null
+    }
+  }
+
   private async getVocabularyAndReplacements(): Promise<{
     vocabularyWords: string[]
     replacements: { from: string; to: string }[]
@@ -104,7 +155,9 @@ export class ContextGrabber {
     try {
       const userId = getCurrentUserId() || DEFAULT_LOCAL_USER_ID
       const dictionaryItems = await DictionaryTable.findAll(userId)
-      const activeItems = dictionaryItems.filter(item => item.deleted_at === null)
+      const activeItems = dictionaryItems.filter(
+        item => item.deleted_at === null,
+      )
 
       const vocabularyWords: string[] = []
       const replacements: { from: string; to: string }[] = []

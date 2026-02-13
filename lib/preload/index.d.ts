@@ -87,6 +87,40 @@ declare global {
         ) => Promise<void>
         delete: (id: string) => Promise<void>
       }
+      userDetails: {
+        get: () => Promise<{
+          details: {
+            full_name: string
+            occupation: string
+            company_name: string | null
+            role: string | null
+            email: string | null
+            phone_number: string | null
+            business_address: string | null
+            website: string | null
+            linkedin: string | null
+          } | null
+          additionalInfo: {
+            info_key: string
+            info_value: string
+            sort_order: number
+          }[]
+        }>
+        save: (data: {
+          details: {
+            full_name: string
+            occupation: string
+            company_name?: string
+            role?: string
+            email?: string
+            phone_number?: string
+            business_address?: string
+            website?: string
+            linkedin?: string
+          }
+          additionalInfo: { key: string; value: string }[]
+        }) => Promise<{ success: boolean }>
+      }
       interactions: {
         getAll: () => Promise<any[]>
         getById: (id: string) => Promise<any>

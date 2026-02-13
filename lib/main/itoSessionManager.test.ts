@@ -75,6 +75,7 @@ const mockContextGrabber = {
       contextText: 'Test context',
       vocabularyWords: ['test', 'word'],
       replacements: [],
+      userDetails: null,
       browserUrl: null,
       browserDomain: null,
       tone: null,

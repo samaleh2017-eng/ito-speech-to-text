@@ -51,3 +51,28 @@ export interface UserMetadata {
   created_at: Date
   updated_at: Date
 }
+
+export interface UserDetails {
+  user_id: string
+  full_name: string
+  occupation: string
+  company_name: string | null
+  role: string | null
+  email: string | null
+  phone_number: string | null
+  business_address: string | null
+  website: string | null
+  linkedin: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface UserAdditionalInfo {
+  id: string
+  user_id: string
+  info_key: string
+  info_value: string
+  sort_order: number
+  created_at: string
+  updated_at: string
+}

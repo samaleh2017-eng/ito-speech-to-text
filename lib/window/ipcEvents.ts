@@ -19,11 +19,7 @@ import {
   registerAllHotkeys,
 } from '../media/keyboard'
 import { getPillWindow, mainWindow } from '../main/app'
-import {
-  handleLogin,
-  handleLogout,
-  ensureValidTokens,
-} from '../auth/events'
+import { handleLogin, handleLogout, ensureValidTokens } from '../auth/events'
 import { KeyValueStore } from '../main/sqlite/repo'
 import { machineId } from 'node-machine-id'
 import {
@@ -33,6 +29,10 @@ import {
   UserMetadataTable,
 } from '../main/sqlite/repo'
 import { AppTargetTable, ToneTable } from '../main/sqlite/appTargetRepo'
+import {
+  UserDetailsTable,
+  UserAdditionalInfoTable,
+} from '../main/sqlite/userDetailsRepo'
 import { getActiveWindow } from '../media/active-application'
 import { getBrowserUrl } from '../media/browser-url'
 import { normalizeAppTargetId } from '../utils/appTargetUtils'
@@ -187,9 +187,15 @@ export function registerIPC() {
   handleIPC(
     'notify-login-success',
     async (_e, { profile, idToken, accessToken }) => {
-      console.log('[DEBUG][IPC] notify-login-success called with profile:', profile)
+      console.log(
+        '[DEBUG][IPC] notify-login-success called with profile:',
+        profile,
+      )
       handleLogin(profile, idToken, accessToken)
-      console.log('[DEBUG][IPC] handleLogin completed, checking getCurrentUserId:', getCurrentUserId())
+      console.log(
+        '[DEBUG][IPC] handleLogin completed, checking getCurrentUserId:',
+        getCurrentUserId(),
+      )
     },
   )
 
@@ -324,7 +330,7 @@ export function registerIPC() {
       shell.openExternal(mailtoUrl)
     }
   })
-// Trial routes proxy
+  // Trial routes proxy
   handleIPC('trial:complete', async () => {
     return itoHttpClient.post('/trial/complete')
   })
@@ -469,6 +475,54 @@ export function registerIPC() {
   })
   handleIPC('dictionary:delete', async (_e, id) =>
     DictionaryTable.softDelete(id),
+  )
+
+  // User Details
+  handleIPC('user-details:get', async () => {
+    const user_id = getCurrentUserId()
+    if (!user_id) return { details: null, additionalInfo: [] }
+    const [details, additionalInfo] = await Promise.all([
+      UserDetailsTable.findByUserId(user_id),
+      UserAdditionalInfoTable.findAllByUserId(user_id),
+    ])
+    return { details: details ?? null, additionalInfo }
+  })
+
+  handleIPC(
+    'user-details:save',
+    async (
+      _e: any,
+      data: {
+        details: {
+          full_name: string
+          occupation: string
+          company_name?: string
+          role?: string
+          email?: string
+          phone_number?: string
+          business_address?: string
+          website?: string
+          linkedin?: string
+        }
+        additionalInfo: { key: string; value: string }[]
+      },
+    ) => {
+      const user_id = getCurrentUserId()
+      if (!user_id) throw new Error('No user logged in')
+      await UserDetailsTable.upsert(user_id, {
+        full_name: data.details.full_name,
+        occupation: data.details.occupation,
+        company_name: data.details.company_name || null,
+        role: data.details.role || null,
+        email: data.details.email || null,
+        phone_number: data.details.phone_number || null,
+        business_address: data.details.business_address || null,
+        website: data.details.website || null,
+        linkedin: data.details.linkedin || null,
+      })
+      await UserAdditionalInfoTable.replaceAll(user_id, data.additionalInfo)
+      return { success: true }
+    },
   )
 
   // User Metadata
@@ -863,11 +917,11 @@ ipcMain.handle(
       domain?: string | null
       toneId?: string | null
       iconBase64?: string | null
-    }
+    },
   ) => {
     const userId = getCurrentUserId() || DEFAULT_LOCAL_USER_ID
     return AppTargetTable.upsert({ ...data, userId })
-  }
+  },
 )
 
 ipcMain.handle(
@@ -875,7 +929,7 @@ ipcMain.handle(
   async (_event, id: string, toneId: string | null) => {
     const userId = getCurrentUserId() || DEFAULT_LOCAL_USER_ID
     return AppTargetTable.updateTone(id, userId, toneId)
-  }
+  },
 )
 
 ipcMain.handle('app-targets:delete', async (_event, id: string) => {
@@ -912,7 +966,14 @@ ipcMain.handle('app-targets:detect-current', async () => {
 
   const appName = window.appName
   const lowerName = appName.toLowerCase()
-  const blockedApps = ['electron', 'ito', 'explorer', 'finder', 'desktop', 'shell']
+  const blockedApps = [
+    'electron',
+    'ito',
+    'explorer',
+    'finder',
+    'desktop',
+    'shell',
+  ]
   if (blockedApps.some(blocked => lowerName.includes(blocked))) {
     return null
   }

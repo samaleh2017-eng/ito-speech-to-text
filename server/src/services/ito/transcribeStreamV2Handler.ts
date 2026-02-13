@@ -9,6 +9,7 @@ import {
   StreamConfigSchema,
   TranscribeStreamRequest,
   TranscriptionResponseSchema,
+  UserDetailsInfo,
 } from '../../generated/ito_pb.js'
 import { getAsrProvider, getLlmProvider } from '../../clients/providerUtils.js'
 import { DEFAULT_ADVANCED_SETTINGS } from '../../constants/generated-defaults.js'
@@ -108,6 +109,10 @@ export class TranscribeStreamV2Handler {
         interactionId,
       )
 
+      const userDetailsContext = this.buildUserDetailsContext(
+        mergedConfig.userDetails,
+      )
+
       // Prepare context and settings
       const windowContext: ItoContext = {
         windowTitle: mergedConfig.context?.windowTitle || '',
@@ -116,6 +121,7 @@ export class TranscribeStreamV2Handler {
         browserUrl: mergedConfig.context?.browserUrl || '',
         browserDomain: mergedConfig.context?.browserDomain || '',
         tonePrompt: mergedConfig.context?.tonePrompt || '',
+        userDetailsContext,
       }
 
       const mode = mergedConfig.context?.mode ?? detectItoMode(transcript)
@@ -325,7 +331,10 @@ export class TranscribeStreamV2Handler {
     noSpeechThreshold: number,
   ) {
     return {
-      asrModel: this.resolveOrDefault(asrModel, DEFAULT_ADVANCED_SETTINGS.asrModel),
+      asrModel: this.resolveOrDefault(
+        asrModel,
+        DEFAULT_ADVANCED_SETTINGS.asrModel,
+      ),
       asrProvider: this.resolveOrDefault(
         asrProvider,
         DEFAULT_ADVANCED_SETTINGS.asrProvider,
@@ -398,8 +407,9 @@ export class TranscribeStreamV2Handler {
       `[${new Date().toISOString()}] Detected mode: ${mode}, adjusting transcript`,
     )
 
-    const hasTonePrompt = windowContext.tonePrompt && windowContext.tonePrompt.trim() !== ''
-    
+    const hasTonePrompt =
+      windowContext.tonePrompt && windowContext.tonePrompt.trim() !== ''
+
     if (mode !== ItoMode.EDIT && !hasTonePrompt) {
       return transcript
     }
@@ -427,6 +437,36 @@ export class TranscribeStreamV2Handler {
     )
 
     return adjustedTranscript
+  }
+
+  private buildUserDetailsContext(
+    userDetails: UserDetailsInfo | undefined,
+  ): string {
+    if (!userDetails) return ''
+    if (!userDetails.fullName && !userDetails.occupation) return ''
+
+    const lines: string[] = []
+
+    if (userDetails.fullName) lines.push(`Name: ${userDetails.fullName}`)
+    if (userDetails.occupation)
+      lines.push(`Occupation: ${userDetails.occupation}`)
+    if (userDetails.companyName)
+      lines.push(`Company: ${userDetails.companyName}`)
+    if (userDetails.role) lines.push(`Role: ${userDetails.role}`)
+    if (userDetails.email) lines.push(`Email: ${userDetails.email}`)
+    if (userDetails.phoneNumber) lines.push(`Phone: ${userDetails.phoneNumber}`)
+    if (userDetails.businessAddress)
+      lines.push(`Address: ${userDetails.businessAddress}`)
+    if (userDetails.website) lines.push(`Website: ${userDetails.website}`)
+    if (userDetails.linkedin) lines.push(`LinkedIn: ${userDetails.linkedin}`)
+
+    if (userDetails.additionalInfo && userDetails.additionalInfo.length > 0) {
+      for (const info of userDetails.additionalInfo) {
+        if (info.trim()) lines.push(info)
+      }
+    }
+
+    return lines.join('\n')
   }
 
   private mergeStreamConfigs(
@@ -476,8 +516,11 @@ export class TranscribeStreamV2Handler {
       vocabulary:
         update.vocabulary.length > 0 ? update.vocabulary : base.vocabulary,
       replacements:
-        update.replacements.length > 0 ? update.replacements : base.replacements,
+        update.replacements.length > 0
+          ? update.replacements
+          : base.replacements,
       interactionId: update.interactionId || base.interactionId,
+      userDetails: update.userDetails || base.userDetails,
     }
   }
 

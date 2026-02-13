@@ -5,6 +5,7 @@ import AccountSettingsContent from './settings/AccountSettingsContent'
 import KeyboardSettingsContent from './settings/KeyboardSettingsContent'
 import AdvancedSettingsContent from './settings/AdvancedSettingsContent'
 import PricingBillingSettingsContent from './settings/PricingBillingSettingsContent'
+import MyDetailsSettingsContent from './settings/MyDetailsSettingsContent'
 
 export default function SettingsContent() {
   const { settingsPage, setSettingsPage } = useMainStore()
@@ -17,6 +18,11 @@ export default function SettingsContent() {
       id: 'pricing-billing',
       label: 'Pricing & Billing',
       active: settingsPage === 'pricing-billing',
+    },
+    {
+      id: 'my-details',
+      label: 'My Details',
+      active: settingsPage === 'my-details',
     },
     { id: 'account', label: 'Account', active: settingsPage === 'account' },
     { id: 'advanced', label: 'Advanced', active: settingsPage === 'advanced' },
@@ -32,6 +38,8 @@ export default function SettingsContent() {
         return <AudioSettingsContent />
       case 'pricing-billing':
         return <PricingBillingSettingsContent />
+      case 'my-details':
+        return <MyDetailsSettingsContent />
       case 'account':
         return <AccountSettingsContent />
       case 'advanced':

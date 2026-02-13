@@ -6,6 +6,7 @@ import {
   ContextInfoSchema,
   LlmSettingsSchema,
   ReplacementEntrySchema,
+  UserDetailsInfoSchema,
 } from '@/app/generated/ito_pb'
 import { create } from '@bufbuild/protobuf'
 import { grpcClient } from '../clients/grpcClient'
@@ -250,6 +251,23 @@ export class ItoStreamController {
               toText: r.to,
             }),
           ),
+          userDetails: context.userDetails
+            ? create(UserDetailsInfoSchema, {
+                fullName: context.userDetails.fullName,
+                occupation: context.userDetails.occupation,
+                companyName: context.userDetails.companyName ?? undefined,
+                role: context.userDetails.role ?? undefined,
+                email: context.userDetails.email ?? undefined,
+                phoneNumber: context.userDetails.phoneNumber ?? undefined,
+                businessAddress:
+                  context.userDetails.businessAddress ?? undefined,
+                website: context.userDetails.website ?? undefined,
+                linkedin: context.userDetails.linkedin ?? undefined,
+                additionalInfo: context.userDetails.additionalInfo
+                  .filter(item => item.key.trim() && item.value.trim())
+                  .map(item => `${item.key}: ${item.value}`),
+              })
+            : undefined,
         }),
       },
     })

@@ -105,6 +105,19 @@ message ReplacementEntry {
   string to_text = 2;
 }
 
+message UserDetailsInfo {
+  string full_name = 1;
+  string occupation = 2;
+  optional string company_name = 3;
+  optional string role = 4;
+  optional string email = 5;
+  optional string phone_number = 6;
+  optional string business_address = 7;
+  optional string website = 8;
+  optional string linkedin = 9;
+  repeated string additional_info = 10;
+}
+
 // Configuration that can be sent in-stream for TranscribeStreamV2.
 // All fields are optional and will be merged by the server.
 // Multiple config messages received during the stream are progressively merged.
@@ -114,6 +127,7 @@ message StreamConfig {
   repeated string vocabulary = 3;
   optional string interaction_id = 4;
   repeated ReplacementEntry replacements = 5;
+  optional UserDetailsInfo user_details = 6;
 }
 
 // Request message for TranscribeStreamV2.

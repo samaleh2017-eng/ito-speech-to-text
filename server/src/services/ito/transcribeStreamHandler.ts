@@ -121,7 +121,7 @@ export class TranscribeStreamHandler {
         ? Buffer.from(rawContextText.substring(7), 'base64').toString('utf8')
         : rawContextText
 
-      const windowContext: ItoContext = { windowTitle, appName, contextText, browserUrl, browserDomain, tonePrompt: '' }
+      const windowContext: ItoContext = { windowTitle, appName, contextText, browserUrl, browserDomain, tonePrompt: '', userDetailsContext: '' }
 
       const detectedMode = mode || detectItoMode(transcript)
       const userPromptPrefix = getPromptForMode(

@@ -16,6 +16,8 @@ import {
   START_CONTEXT_MARKER,
   START_USER_COMMAND_MARKER,
   START_WINDOW_TITLE_MARKER,
+  START_USER_DETAILS_MARKER,
+  END_USER_DETAILS_MARKER,
 } from '../../constants/markers.js'
 
 export function createUserPromptWithContext(
@@ -24,6 +26,9 @@ export function createUserPromptWithContext(
 ): string {
   let contextPrompt = ''
   if (context) {
+    if (context.userDetailsContext) {
+      contextPrompt += `\n${START_USER_DETAILS_MARKER}\n${context.userDetailsContext}\n${END_USER_DETAILS_MARKER}`
+    }
     if (context.windowTitle) {
       contextPrompt += `\n${START_WINDOW_TITLE_MARKER}\n${context.windowTitle}\n${END_WINDOW_TITLE_MARKER}`
     }
@@ -180,7 +185,9 @@ export function detectItoMode(transcript: string): ItoMode {
   const words = transcript.trim().split(/\s+/)
   const firstFiveWords = words.slice(0, 5).join(' ').toLowerCase()
 
-  const isEditMode = WAKE_PHRASES.some(phrase => firstFiveWords.includes(phrase))
+  const isEditMode = WAKE_PHRASES.some(phrase =>
+    firstFiveWords.includes(phrase),
+  )
   return isEditMode ? ItoMode.EDIT : ItoMode.TRANSCRIBE
 }
 

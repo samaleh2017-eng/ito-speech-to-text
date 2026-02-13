@@ -1,11 +1,18 @@
 import { create } from 'zustand'
 import { STORE_KEYS } from '../../lib/constants/store-keys'
 
-type PageType = 'home' | 'dictionary' | 'notes' | 'app-styling' | 'settings' | 'about'
+type PageType =
+  | 'home'
+  | 'dictionary'
+  | 'notes'
+  | 'app-styling'
+  | 'settings'
+  | 'about'
 type SettingsPageType =
   | 'general'
   | 'keyboard'
   | 'audio'
+  | 'my-details'
   | 'account'
   | 'advanced'
   | 'pricing-billing'
