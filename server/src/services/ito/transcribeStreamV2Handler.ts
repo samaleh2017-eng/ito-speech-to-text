@@ -442,8 +442,15 @@ export class TranscribeStreamV2Handler {
   private buildUserDetailsContext(
     userDetails: UserDetailsInfo | undefined,
   ): string {
-    if (!userDetails) return ''
-    if (!userDetails.fullName && !userDetails.occupation) return ''
+    if (!userDetails) {
+      console.log('[TranscribeStreamV2] No user details provided in stream config')
+      return ''
+    }
+    if (!userDetails.fullName && !userDetails.occupation) {
+      console.log('[TranscribeStreamV2] User details present but fullName and occupation are both empty')
+      return ''
+    }
+    console.log(`[TranscribeStreamV2] Building user details context - Name: "${userDetails.fullName}", Occupation: "${userDetails.occupation}"`)
 
     const lines: string[] = []
 
