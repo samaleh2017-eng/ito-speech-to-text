@@ -19,7 +19,6 @@ import {
   detectItoMode,
   getPromptForMode,
 } from './helpers.js'
-import { ITO_MODE_SYSTEM_PROMPT } from './constants.js'
 import type { ItoContext } from './types.js'
 import { isAbortError, createAbortError } from '../../utils/abortUtils.js'
 import {
@@ -410,26 +409,23 @@ export class TranscribeStreamV2Handler {
     const hasTonePrompt =
       windowContext.tonePrompt && windowContext.tonePrompt.trim() !== ''
 
+    const basePrompt = getPromptForMode(mode, advancedSettings)
+
     const systemPrompt = hasTonePrompt
       ? windowContext.tonePrompt
-      : ITO_MODE_SYSTEM_PROMPT[mode]
+      : basePrompt
 
-    const userPromptPrefix = getPromptForMode(
-      mode,
-      advancedSettings,
-      hasTonePrompt ? undefined : windowContext.tonePrompt,
-    )
     const userPrompt = createUserPromptWithContext(transcript, windowContext)
     const llmProvider = getLlmProvider(advancedSettings.llmProvider)
 
     console.log(
-      `[TranscribeStreamV2] LLM call - system prompt source: ${hasTonePrompt ? 'tonePrompt' : 'default'}, has user details: ${!!windowContext.userDetailsContext}`,
+      `[TranscribeStreamV2] LLM call - system prompt source: ${hasTonePrompt ? 'tonePrompt' : 'basePrompt'}, has user details: ${!!windowContext.userDetailsContext}`,
     )
 
     const adjustedTranscript = await serverTimingCollector.timeAsync(
       ServerTimingEventName.LLM_ADJUSTMENT,
       () =>
-        llmProvider.adjustTranscript(userPromptPrefix + '\n' + userPrompt, {
+        llmProvider.adjustTranscript(userPrompt, {
           temperature: advancedSettings.llmTemperature,
           model: advancedSettings.llmModel,
           prompt: systemPrompt,
