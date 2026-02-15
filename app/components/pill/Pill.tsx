@@ -1,39 +1,33 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Sparkles, Square } from 'lucide-react'
+import { X } from '@mynaui/icons-react'
 import { useSettingsStore } from '../../store/useSettingsStore'
 import {
   useOnboardingStore,
   ONBOARDING_CATEGORIES,
 } from '../../store/useOnboardingStore'
-import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip'
-import { X, StopSquare } from '@mynaui/icons-react'
 import { AudioBars } from './contents/AudioBars'
-import { PreviewAudioBars } from './contents/PreviewAudioBars'
-import { LoadingAnimation } from './contents/LoadingAnimation'
 import { useAudioStore } from '@/app/store/useAudioStore'
-import { TooltipButton } from './contents/TooltipButton'
 import { analytics, ANALYTICS_EVENTS } from '../analytics'
+import { ItoIcon } from '../icons/ItoIcon'
 import type {
   RecordingStatePayload,
   ProcessingStatePayload,
 } from '@/lib/types/ipc'
-import { ItoMode } from '@/app/generated/ito_pb'
+import type { AppTarget } from '@/app/store/useAppStylingStore'
 
 const globalStyles = `
   html, body, #app {
     height: 100%;
     margin: 0;
-    overflow: hidden; /* Prevent scrollbars */
+    overflow: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-
-    /* These styles are key to anchoring the pill to the bottom center */
-    /* of its transparent window, allowing it to expand upwards. */
     display: flex;
-    align-items: flex-end;
+    align-items: flex-start;
     justify-content: center;
-
     pointer-events: none;
-
     font-family:
       'Inter',
       system-ui,
@@ -47,20 +41,22 @@ const globalStyles = `
 
 const BAR_UPDATE_INTERVAL = 64
 
-// Color mapping for different recording modes
-const getAudioBarColor = (mode: ItoMode | undefined): string => {
-  switch (mode) {
-    case ItoMode.TRANSCRIBE:
-      return 'white'
-    case ItoMode.EDIT:
-      return '#FFCF40'
-    default:
-      return 'white' // Default to white for transcribe mode
+const springTransition = {
+  type: 'spring' as const,
+  stiffness: 400,
+  damping: 30,
+  mass: 0.5,
+  restDelta: 0.001,
+}
+
+const getDimensions = (state: 'idle' | 'listening' | 'thinking') => {
+  if (state === 'listening' || state === 'thinking') {
+    return { width: 360, height: 46, borderBottomRadius: 20 }
   }
+  return { width: 200, height: 46, borderBottomRadius: 20 }
 }
 
 const Pill = () => {
-  // Get initial values from store using separate selectors to avoid infinite re-renders
   const initialShowItoBarAlways = useSettingsStore(
     state => state.showItoBarAlways,
   )
@@ -76,7 +72,6 @@ const Pill = () => {
   const [isManualRecording, setIsManualRecording] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
-  const [recordingMode, setRecordingMode] = useState<ItoMode | undefined>()
   const isManualRecordingRef = useRef(false)
   const [showItoBarAlways, setShowItoBarAlways] = useState(
     initialShowItoBarAlways,
@@ -87,20 +82,16 @@ const Pill = () => {
   const [onboardingCompleted, setOnboardingCompleted] = useState(
     initialOnboardingCompleted,
   )
-  // Fixed size array of volume values to be used for the audio bars, size is 21
   const [volumeHistory, setVolumeHistory] = useState<number[]>([])
   const [lastVolumeUpdate, setLastVolumeUpdate] = useState(0)
+  const [appTarget, setAppTarget] = useState<AppTarget | null>(null)
 
   useEffect(() => {
-    // Listen for recording state changes from the main process
     const unsubRecording = window.api.on(
       'recording-state-update',
       (state: RecordingStatePayload) => {
-        // Update recording state - this is for global hotkey triggered recording
         setIsRecording(state.isRecording)
-        setRecordingMode(state.mode ?? recordingMode)
 
-        // Only track general recording analytics if it's not a manual recording
         if (!isManualRecordingRef.current) {
           const analyticsEvent = state.isRecording
             ? ANALYTICS_EVENTS.RECORDING_STARTED
@@ -111,17 +102,14 @@ const Pill = () => {
           })
         }
 
-        // If global recording stops, also stop manual recording
         if (!state.isRecording) {
           setIsManualRecording(false)
           isManualRecordingRef.current = false
-          // Only clear volume history when recording stops
           setVolumeHistory([])
         }
       },
     )
 
-    // Listen for processing state changes from the main process
     const unsubProcessing = window.api.on(
       'processing-state-update',
       (state: ProcessingStatePayload) => {
@@ -129,9 +117,7 @@ const Pill = () => {
       },
     )
 
-    // Listen for volume updates from the main process
     const unsubVolume = window.api.on('volume-update', (vol: number) => {
-      // throttle the volume updates to 80ms
       const now = Date.now()
       if (now - lastVolumeUpdate < BAR_UPDATE_INTERVAL) {
         return
@@ -144,13 +130,10 @@ const Pill = () => {
       setLastVolumeUpdate(now)
     })
 
-    // Listen for settings updates from the main process
     const unsubSettings = window.api.on('settings-update', (settings: any) => {
-      // Update local state with the new setting
       setShowItoBarAlways(settings.showItoBarAlways)
     })
 
-    // Listen for onboarding updates from the main process
     const unsubOnboarding = window.api.on(
       'onboarding-update',
       (onboarding: any) => {
@@ -159,7 +142,6 @@ const Pill = () => {
       },
     )
 
-    // Listen for user auth updates from the main process
     const unsubUserAuth = window.api.on('user-auth-update', (authUser: any) => {
       if (authUser) {
         analytics.identifyUser(
@@ -173,12 +155,10 @@ const Pill = () => {
           authUser.provider,
         )
       } else {
-        // User logged out
         analytics.resetUser()
       }
     })
 
-    // Cleanup listeners when the component unmounts
     return () => {
       unsubRecording()
       unsubProcessing()
@@ -187,220 +167,258 @@ const Pill = () => {
       unsubOnboarding()
       unsubUserAuth()
     }
-  }, [volumeHistory, lastVolumeUpdate, recordingMode])
+  }, [volumeHistory, lastVolumeUpdate])
 
-  // Define dimensions for different states
-  const idleWidth = 36
-  const idleHeight = 8
-  const hoveredWidth = 84
-  const hoveredHeight = 32
-  const recordingWidth = 84
-  const recordingHeight = 32
-  const manualRecordingWidth = 112
-  const manualRecordingHeight = 32
-  const processingWidth = 84
-  const processingHeight = 32
+  useEffect(() => {
+    if (isRecording || isManualRecording) {
+      window.api.appTargets
+        .getCurrent()
+        .then(setAppTarget)
+        .catch(() => setAppTarget(null))
+    }
+  }, [isRecording, isManualRecording])
 
-  // Determine current state
+  useEffect(() => {
+    if (!isRecording && !isManualRecording && !isProcessing) {
+      setAppTarget(null)
+    }
+  }, [isRecording, isManualRecording, isProcessing])
+
   const anyRecording = isRecording || isManualRecording
   const shouldShow =
     (onboardingCategory === ONBOARDING_CATEGORIES.TRY_IT ||
       onboardingCompleted) &&
     (anyRecording || isProcessing || showItoBarAlways || isHovered)
 
-  // Calculate dimensions based on state
-  let currentWidth = idleWidth
-  let currentHeight = idleHeight
-  let backgroundColor = 'rgba(128, 128, 128, 0.65)'
+  const notchState: 'idle' | 'listening' | 'thinking' = anyRecording
+    ? 'listening'
+    : isProcessing
+      ? 'thinking'
+      : 'idle'
 
-  if (isManualRecording) {
-    currentWidth = manualRecordingWidth
-    currentHeight = manualRecordingHeight
-    backgroundColor = '#000000'
-  } else if (anyRecording) {
-    currentWidth = recordingWidth
-    currentHeight = recordingHeight
-    backgroundColor = '#000000'
-  } else if (isProcessing) {
-    currentWidth = processingWidth
-    currentHeight = processingHeight
-    backgroundColor = '#000000'
-  } else if (isHovered) {
-    currentWidth = hoveredWidth
-    currentHeight = hoveredHeight
-    backgroundColor = '#404040'
-  }
+  const { width, height, borderBottomRadius } = getDimensions(notchState)
 
-  // A single, unified style for the pill. Its properties will be
-  // smoothly transitioned by CSS.
-  const pillStyle: React.CSSProperties = {
-    // Flex properties to center the content inside
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-
-    // Dynamic styles that change based on the state
-    width: `${currentWidth}px`,
-    height: `${currentHeight}px`,
-    backgroundColor,
-    border: '1px solid #A9A9A9',
-
-    // Show/hide animation using opacity and scale instead of display none/flex
-    opacity: shouldShow ? 1 : 0,
-    transform: shouldShow ? 'scale(1)' : 'scale(0.8)',
-    transformOrigin: 'bottom center',
-    visibility: shouldShow ? 'visible' : 'hidden',
-
-    // Static styles
-    borderRadius: '21px',
-    boxSizing: 'border-box',
-    overflow: 'hidden',
-
-    // Enable pointer events for this element
-    pointerEvents: 'auto',
-    cursor: isHovered && !anyRecording ? 'pointer' : 'default',
-
-    // The transition property makes the magic happen!
-    // We animate width, height, color, opacity, and scale changes over 0.3 seconds.
-    transition:
-      'width 0.3s ease, height 0.3s ease, background-color 0.3s ease, opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease',
-  }
-
-  // Handle mouse enter - enable mouse events for the pill window and set hover state
   const handleMouseEnter = () => {
     setIsHovered(true)
     if (window.api?.setPillMouseEvents) {
-      window.api.setPillMouseEvents(false) // Enable mouse events
+      window.api.setPillMouseEvents(false)
     }
   }
 
-  // Handle mouse leave - disable mouse events (with forwarding) for the pill window and clear hover state
   const handleMouseLeave = () => {
     setIsHovered(false)
     if (window.api?.setPillMouseEvents) {
-      window.api.setPillMouseEvents(true, { forward: true }) // Disable mouse events but keep forwarding
+      window.api.setPillMouseEvents(true, { forward: true })
     }
   }
 
-  // Handle click to start manual recording
   const handleClick = () => {
-    if (isHovered && !anyRecording) {
+    if (isHovered && !anyRecording && !isProcessing) {
       setIsManualRecording(true)
       isManualRecordingRef.current = true
-      // Trigger recording start via IPC
       startRecording()
-
       analytics.track(ANALYTICS_EVENTS.MANUAL_RECORDING_STARTED, {
         is_recording: true,
       })
     }
   }
 
-  // Handle cancel recording
   const handleCancel = (e: React.MouseEvent) => {
     e.stopPropagation()
     setIsManualRecording(false)
     stopRecording()
-
     analytics.track(ANALYTICS_EVENTS.MANUAL_RECORDING_ABANDONED, {
       is_recording: false,
     })
   }
 
-  // Handle stop recording
   const handleStop = (e: React.MouseEvent) => {
     e.stopPropagation()
     setIsManualRecording(false)
     stopRecording()
-
     analytics.track(ANALYTICS_EVENTS.MANUAL_RECORDING_COMPLETED, {
       is_recording: false,
     })
   }
 
-  const renderContent = () => {
+  const renderIcon = () => {
+    if (appTarget?.iconBase64) {
+      return (
+        <motion.img
+          key="app-icon"
+          src={`data:image/png;base64,${appTarget.iconBase64}`}
+          className="w-6 h-6 rounded"
+          initial={{ scale: 0, rotate: -90 }}
+          animate={{ scale: 1, rotate: 0 }}
+          exit={{ scale: 0, rotate: 90 }}
+          transition={springTransition}
+        />
+      )
+    }
+    return (
+      <motion.div
+        key="ito-icon"
+        initial={{ scale: 0, rotate: -90 }}
+        animate={{ scale: 1, rotate: 0 }}
+        exit={{ scale: 0, rotate: 90 }}
+        transition={springTransition}
+      >
+        <ItoIcon width={24} height={24} className="text-white" />
+      </motion.div>
+    )
+  }
+
+  const renderRightContent = () => {
     if (isManualRecording) {
       return (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            width: '100%',
-            justifyContent: 'space-between',
-            padding: '0 8px',
-          }}
+        <motion.div
+          key="manual-recording"
+          className="absolute inset-0 w-full h-full flex items-center justify-between px-5"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.15 }}
         >
-          <TooltipButton
+          <button
             onClick={handleCancel}
-            icon={<X width={14} height={14} color="white" />}
-            tooltip="Cancel"
-          />
-
-          <AudioBars
-            volumeHistory={volumeHistory}
-            barColor={getAudioBarColor(recordingMode)}
-          />
-
-          <TooltipButton
+            className="flex items-center justify-center opacity-60 hover:opacity-100 transition-opacity"
+          >
+            <X width={16} height={16} color="white" />
+          </button>
+          <div className="h-full flex items-center flex-1 justify-center">
+            <AudioBars volumeHistory={volumeHistory} barColor="#007AFF" />
+          </div>
+          <button
             onClick={handleStop}
-            icon={<StopSquare width={14} height={14} color="#ef4444" />}
-            tooltip="Stop and paste"
-          />
-        </div>
+            className="flex items-center justify-center opacity-80 hover:opacity-100 transition-opacity"
+          >
+            <Square className="w-4 h-4 text-[#007AFF]" fill="currentColor" />
+          </button>
+        </motion.div>
       )
     }
 
     if (anyRecording) {
       return (
-        <AudioBars
-          volumeHistory={volumeHistory}
-          barColor={getAudioBarColor(recordingMode)}
-        />
+        <motion.div
+          key="recording"
+          className="h-full flex items-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.15 }}
+        >
+          <AudioBars volumeHistory={volumeHistory} barColor="#007AFF" />
+        </motion.div>
       )
     }
 
     if (isProcessing) {
-      return <LoadingAnimation color={getAudioBarColor(recordingMode)} />
-    }
-
-    if (isHovered) {
-      return <PreviewAudioBars />
+      return (
+        <motion.div
+          key="thinking"
+          className="flex items-center gap-2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.15 }}
+        >
+          <motion.div
+            animate={{ rotate: 360, scale: [1, 1.1, 1] }}
+            transition={{
+              rotate: { repeat: Infinity, duration: 3, ease: 'linear' },
+              scale: { repeat: Infinity, duration: 2 },
+            }}
+          >
+            <Sparkles
+              className="w-4 h-4 text-[#007AFF]"
+              fill="currentColor"
+            />
+          </motion.div>
+          <span className="text-[14px] font-medium text-[#007AFF]">
+            Thinking
+          </span>
+        </motion.div>
+      )
     }
 
     return null
   }
 
+  const isIdle = notchState === 'idle'
+
   return (
     <>
       <style>{globalStyles}</style>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div
-            style={pillStyle}
-            onClick={handleClick}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-          >
-            {renderContent()}
-          </div>
-        </TooltipTrigger>
-        {isHovered && !anyRecording && (
-          <TooltipContent
-            side="top"
-            style={{
-              backgroundColor: 'rgba(0, 0, 0, 0.8)',
-              color: 'white',
-              padding: '6px 8px',
-              fontSize: '14px',
-              marginBottom: '6px',
-              borderRadius: '8px',
-            }}
-            className="border-none rounded-md"
-          >
-            Click and start speaking
-          </TooltipContent>
-        )}
-      </Tooltip>
+      <div className="fixed top-0 left-0 w-full flex justify-center z-50 pointer-events-none">
+        <AnimatePresence>
+          {shouldShow && (
+            <motion.div
+              initial={{ opacity: 0, scaleX: 0.7, scaleY: 0.5 }}
+              animate={{
+                opacity: 1,
+                scaleX: 1,
+                scaleY: 1,
+                width,
+                height,
+                borderBottomLeftRadius: borderBottomRadius,
+                borderBottomRightRadius: borderBottomRadius,
+              }}
+              exit={{ opacity: 0, scaleX: 0.7, scaleY: 0.5 }}
+              transition={springTransition}
+              style={{ transformOrigin: 'top center' }}
+              className={[
+                'relative flex flex-col items-center pointer-events-auto',
+                'backdrop-blur-[40px] saturate-150 overflow-hidden',
+                'rounded-t-none border-t-0',
+                'bg-gradient-to-b from-black to-[#141414]',
+                'shadow-[0_10px_30px_rgba(0,0,0,0.8),inset_0_-1px_0_rgba(255,255,255,0.15),inset_0_-8px_12px_rgba(255,255,255,0.02)]',
+                'border-x border-b border-white/5 ring-1 ring-white/5',
+                isIdle && !anyRecording && !isProcessing
+                  ? 'cursor-pointer'
+                  : 'cursor-default',
+              ].join(' ')}
+              whileHover={
+                isIdle && !anyRecording && !isProcessing
+                  ? {
+                      scale: 1.02,
+                      boxShadow:
+                        '0 10px 40px rgba(0,122,255,0.15), inset 0 -1px 0 rgba(255,255,255,0.15), inset 0 -8px 12px rgba(255,255,255,0.02)',
+                    }
+                  : undefined
+              }
+              onClick={handleClick}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+            >
+              {!isManualRecording && (
+                <motion.div
+                  className="absolute inset-0 w-full h-full flex items-center justify-between px-5"
+                  layout
+                  transition={springTransition}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <AnimatePresence mode="wait">
+                      {renderIcon()}
+                    </AnimatePresence>
+                    <span className="text-[14px] font-semibold tracking-wide text-white">
+                      {appTarget?.name || 'Ito'}
+                    </span>
+                  </div>
+                  <AnimatePresence mode="wait">
+                    {renderRightContent()}
+                  </AnimatePresence>
+                </motion.div>
+              )}
+              {isManualRecording && (
+                <AnimatePresence mode="wait">
+                  {renderRightContent()}
+                </AnimatePresence>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </>
   )
 }
