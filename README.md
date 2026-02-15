@@ -1,6 +1,6 @@
-# [DEPRECATED] - This project is no longer maintained 
+# [DEPRECATED] - This project is no longer maintained
 
-# Ito
+# Ito — Speech-to-Text Desktop App
 
 <div align="center">
   <img src="resources/build/icon.png" width="128" height="128" alt="Ito Logo" />

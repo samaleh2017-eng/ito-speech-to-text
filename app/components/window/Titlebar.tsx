@@ -103,10 +103,10 @@ export const Titlebar = () => {
           }}
         >
           <div
-            className={`h-full border-r border-neutral-200 transition-all duration-100 ease-in-out ${navExpanded ? 'w-48' : 'w-20'}`}
+            className={`h-full border-r border-transparent transition-all duration-200 ease-in-out ${navExpanded ? 'w-56' : 'w-[72px]'}`}
           ></div>
           <div
-            className="titlebar-action-btn hover:bg-slate-200 border-l border-neutral-200 ml-2"
+            className="titlebar-action-btn hover:bg-warm-200 ml-2"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -166,7 +166,7 @@ export const Titlebar = () => {
           )}
           <div className="relative">
             <div
-              className="titlebar-action-btn hover:bg-slate-200"
+              className="titlebar-action-btn hover:bg-warm-200"
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -188,17 +188,17 @@ export const Titlebar = () => {
 
             {/* User Dropdown Menu */}
             {showUserDropdown && (
-              <div className="absolute top-full right-0 mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
+              <div className="absolute top-full right-0 mt-1 w-48 bg-white dark:bg-[var(--card)] border border-warm-200 dark:border-warm-800 rounded-lg shadow-lg z-20">
                 <button
                   onClick={handleSettingsClick}
-                  className="w-full px-2 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 rounded-t-lg cursor-pointer"
+                  className="w-full px-2 py-2 text-left text-sm text-warm-700 hover:bg-warm-50 flex items-center gap-2 rounded-t-lg cursor-pointer"
                 >
                   <CogFour className="w-4 h-4" />
                   Settings
                 </button>
                 <button
                   onClick={handleSignOutClick}
-                  className="w-full px-2 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 rounded-b-lg cursor-pointer"
+                  className="w-full px-2 py-2 text-left text-sm text-warm-700 hover:bg-warm-50 flex items-center gap-2 rounded-b-lg cursor-pointer"
                 >
                   <Logout className="w-4 h-4" />
                   Sign Out

@@ -73,12 +73,12 @@ export function RegisterAppDialog({ open, onOpenChange, context }: Props) {
             className={`w-full flex items-start gap-3 p-4 rounded-lg border-2 transition-all text-left ${
               selectedType === 'app'
                 ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-200 hover:border-gray-300'
+                : 'border-warm-200 hover:border-warm-300'
             }`}
           >
             <div
               className={`mt-0.5 p-2 rounded-lg ${
-                selectedType === 'app' ? 'bg-blue-500 text-white' : 'bg-gray-100'
+                selectedType === 'app' ? 'bg-blue-500 text-white' : 'bg-warm-100'
               }`}
             >
               <AppWindow className="h-5 w-5" />
@@ -90,10 +90,10 @@ export function RegisterAppDialog({ open, onOpenChange, context }: Props) {
                   <Check className="h-4 w-4 text-blue-500" />
                 )}
               </div>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-warm-600 mt-1">
                 Match any window from this app
               </p>
-              <p className="text-sm font-medium text-gray-900 mt-2 truncate">
+              <p className="text-sm font-medium text-foreground mt-2 truncate">
                 {context.appName}
               </p>
             </div>
@@ -105,17 +105,17 @@ export function RegisterAppDialog({ open, onOpenChange, context }: Props) {
             disabled={!hasDomain}
             className={`w-full flex items-start gap-3 p-4 rounded-lg border-2 transition-all text-left ${
               !hasDomain
-                ? 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed'
+                ? 'border-warm-100 bg-warm-50 opacity-50 cursor-not-allowed'
                 : selectedType === 'domain'
                   ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 hover:border-gray-300'
+                  : 'border-warm-200 hover:border-warm-300'
             }`}
           >
             <div
               className={`mt-0.5 p-2 rounded-lg ${
                 selectedType === 'domain' && hasDomain
                   ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100'
+                  : 'bg-warm-100'
               }`}
             >
               <Globe className="h-5 w-5" />
@@ -127,13 +127,13 @@ export function RegisterAppDialog({ open, onOpenChange, context }: Props) {
                   <Check className="h-4 w-4 text-blue-500" />
                 )}
               </div>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-warm-600 mt-1">
                 {hasDomain
                   ? 'Match when browsing this website'
                   : 'Not available - no browser URL detected'}
               </p>
               {hasDomain && (
-                <p className="text-sm font-medium text-gray-900 mt-2 truncate">
+                <p className="text-sm font-medium text-foreground mt-2 truncate">
                   {context.browserDomain}
                 </p>
               )}

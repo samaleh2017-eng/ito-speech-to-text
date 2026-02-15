@@ -315,7 +315,7 @@ export default function NotesContent() {
   return (
     <div
       ref={containerRef}
-      className="w-full max-w-6xl mx-auto px-4 h-200 overflow-y-auto relative px-24"
+      className="w-full h-full flex flex-col px-12 overflow-y-auto relative"
       style={{
         height: '640px',
         msOverflowStyle: 'none' /* Internet Explorer 10+ */,
@@ -324,27 +324,27 @@ export default function NotesContent() {
     >
       {/* Header */}
       {showSearch ? (
-        <div className="flex items-center gap-4 mb-8 px-4 py-2 bg-white border border-gray-200 rounded-lg">
-          <Search className="w-5 h-5 text-gray-400 flex-shrink-0" />
+        <div className="flex items-center gap-4 mb-8 px-4 py-2 bg-warm-50 border border-warm-200 rounded-xl">
+          <Search className="w-5 h-5 text-warm-500 flex-shrink-0" />
           <input
             ref={searchInputRef}
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search your notes"
-            className="flex-1 text-sm outline-none placeholder-gray-400"
+            className="flex-1 text-sm outline-none placeholder-warm-400"
           />
           <button
             onClick={closeSearch}
-            className="p-1 hover:bg-gray-100 rounded transition-colors flex-shrink-0"
+            className="p-1 hover:bg-warm-100 rounded transition-colors flex-shrink-0"
             title="Close search"
           >
-            <X className="w-5 h-5 text-gray-400" />
+            <X className="w-5 h-5 text-warm-500" />
           </button>
         </div>
       ) : (
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-xl font-medium text-gray-900 w-full text-center">
+          <h1 className="text-2xl font-serif font-normal tracking-tight w-full text-center">
             What's on your mind today?
           </h1>
         </div>
@@ -353,11 +353,11 @@ export default function NotesContent() {
       {/* Text Input Area - Only show when not searching */}
       {!showSearch && (
         <div
-          className="shadow-lg rounded-2xl mb-8 border border-gray-200 w-3/5 mx-auto transition-all duration-200 ease-in-out relative"
+          className="shadow-lg rounded-2xl mb-8 border border-warm-200 w-3/5 mx-auto transition-all duration-200 ease-in-out relative"
           style={{ height: `${containerHeight}px` }}
         >
           {!creatingNote && (
-            <div className="absolute top-6 left-6 flex items-center gap-1 text-gray-500 pointer-events-none">
+            <div className="absolute top-6 left-6 flex items-center gap-1 text-warm-600 pointer-events-none">
               <AudioIcon />
               <span>Take a quick note with your voice</span>
             </div>
@@ -375,7 +375,7 @@ export default function NotesContent() {
             <div className="absolute bottom-3 right-3">
               <button
                 onClick={handleAddNote}
-                className="bg-neutral-200 px-4 py-2 rounded-md font-semibold hover:bg-neutral-300 cursor-pointer"
+                className="bg-warm-100 px-4 py-2 rounded-lg font-semibold hover:bg-warm-200 cursor-pointer"
               >
                 Add note
               </button>
@@ -387,36 +387,36 @@ export default function NotesContent() {
         className={`${viewMode === 'grid' || showSearch ? '' : 'm-auto w-3/5'}`}
       >
         <div className="flex items-center justify-between mb-1">
-          <div className="text-xs text-gray-500 font-medium uppercase tracking-wide">
+          <div className="text-xs text-warm-600 font-medium uppercase tracking-wide">
             {showSearch
               ? `Search Results (${filteredNotes.length})`
               : `Notes (${notes.length})`}
           </div>
           <div className="flex items-center gap-1">
             <button
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+              className="p-2 hover:bg-warm-100 rounded-lg transition-colors cursor-pointer"
               title="Search"
               onClick={openSearch}
             >
-              <Search className="w-5 h-5 text-neutral-400" />
+              <Search className="w-5 h-5 text-warm-500" />
             </button>
             <button
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+              className="p-2 hover:bg-warm-100 rounded-lg transition-colors cursor-pointer"
               title="List view"
               onClick={toggleViewMode}
             >
               {viewMode === 'grid' ? (
-                <Rows className="w-5 h-5 text-neutral-400" />
+                <Rows className="w-5 h-5 text-warm-500" />
               ) : (
-                <Grid className="w-5 h-5 text-neutral-400" />
+                <Grid className="w-5 h-5 text-warm-500" />
               )}
             </button>
           </div>
         </div>
-        <div className="w-full h-[1px] bg-slate-200 mb-4"></div>
+        <div className="w-full h-[1px] bg-warm-200 mb-4"></div>
         {/* Notes Masonry Layout */}
         {(showSearch ? filteredNotes.length === 0 : notes.length === 0) ? (
-          <div className="py-4 text-gray-500">
+          <div className="py-4 text-warm-600">
             {showSearch ? (
               <>
                 <p className="text-sm">No notes found</p>
@@ -510,7 +510,7 @@ export default function NotesContent() {
           </div>
           <DialogFooter className="p-4">
             <Button
-              className="bg-neutral-200 hover:bg-neutral-300 text-black cursor-pointer"
+              className="bg-warm-100 hover:bg-warm-200 text-warm-700 cursor-pointer"
               onClick={handleCancelEdit}
             >
               Cancel

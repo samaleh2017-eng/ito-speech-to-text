@@ -11,13 +11,13 @@
   --window-titlebar-font-weight: 500;
   --window-c-popup-font-weight: 500;
 
-  --window-c-background: #fff;
-  --window-c-titlebar-background: #fff;
-  --window-c-titlebar-border: #8080801a;
-  --window-c-text: #000000c8;
-  --window-c-hover: #ececec;
-  --window-c-popup-background: #f6f6f6;
-  --window-c-popup-border: #dcdcdc;
+  --window-c-background: var(--background, #F5F0EB);
+  --window-c-titlebar-background: var(--background, #F5F0EB);
+  --window-c-titlebar-border: transparent;
+  --window-c-text: var(--foreground, #1A1A1A);
+  --window-c-hover: #E0DAD4;
+  --window-c-popup-background: #FFFFFF;
+  --window-c-popup-border: #E0DAD4;
   --window-c-popup-shadow: hsla(0, 0%, 0%, 0.1);
   --window-c-separator: #80808033;
   --window-c-control-hover: #0000001a;
@@ -40,13 +40,13 @@
   --window-background-transition-duration: 0.3s;
   --window-c-popup-font-weight: normal;
 
-  --window-c-background: #1c1c1c;
-  --window-c-titlebar-background: #282828;
+  --window-c-background: var(--background, #1C1917);
+  --window-c-titlebar-background: var(--background, #1C1917);
   --window-c-titlebar-border: transparent;
-  --window-c-text: #ffffffc8;
-  --window-c-hover: #3c3c3c;
-  --window-c-popup-background: #282828;
-  --window-c-popup-border: #3c3c3c;
+  --window-c-text: var(--foreground, #F5F0EB);
+  --window-c-hover: #44403C;
+  --window-c-popup-background: #292524;
+  --window-c-popup-border: #44403C;
   --window-c-popup-shadow: #00000080;
   --window-c-separator: #80808033;
   --window-c-control-hover: #0000003d;

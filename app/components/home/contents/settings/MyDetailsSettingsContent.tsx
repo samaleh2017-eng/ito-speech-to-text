@@ -53,12 +53,12 @@ export default function MyDetailsSettingsContent() {
   }
 
   const inputClass =
-    'w-80 bg-white border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+    'w-80 bg-white border border-warm-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent'
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <span className="text-sm text-gray-500">Loading...</span>
+        <span className="text-sm text-warm-600">Loading...</span>
       </div>
     )
   }
@@ -68,12 +68,12 @@ export default function MyDetailsSettingsContent() {
       <div className="space-y-8 pb-8">
         {/* Section 1: Personal Information */}
         <div className="space-y-4">
-          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+          <h3 className="text-sm font-semibold text-warm-600 uppercase tracking-wider">
             Personal Information
           </h3>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-gray-900">
+              <label className="text-sm font-medium text-foreground">
                 Full Name *
               </label>
               <div className="flex flex-col">
@@ -96,7 +96,7 @@ export default function MyDetailsSettingsContent() {
               </div>
             </div>
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-gray-900">
+              <label className="text-sm font-medium text-foreground">
                 Occupation / Title *
               </label>
               <div className="flex flex-col">
@@ -119,7 +119,7 @@ export default function MyDetailsSettingsContent() {
               </div>
             </div>
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-gray-900">
+              <label className="text-sm font-medium text-foreground">
                 Company
               </label>
               <input
@@ -131,7 +131,7 @@ export default function MyDetailsSettingsContent() {
               />
             </div>
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-gray-900">Role</label>
+              <label className="text-sm font-medium text-foreground">Role</label>
               <input
                 type="text"
                 className={inputClass}
@@ -141,7 +141,7 @@ export default function MyDetailsSettingsContent() {
               />
             </div>
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-gray-900">Email</label>
+              <label className="text-sm font-medium text-foreground">Email</label>
               <input
                 type="email"
                 className={inputClass}
@@ -151,7 +151,7 @@ export default function MyDetailsSettingsContent() {
               />
             </div>
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-gray-900">Phone</label>
+              <label className="text-sm font-medium text-foreground">Phone</label>
               <input
                 type="tel"
                 className={inputClass}
@@ -163,16 +163,16 @@ export default function MyDetailsSettingsContent() {
           </div>
         </div>
 
-        <div className="border-t border-gray-200" />
+        <div className="border-t border-warm-200" />
 
         {/* Section 2: Contact Information */}
         <div className="space-y-4">
-          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+          <h3 className="text-sm font-semibold text-warm-600 uppercase tracking-wider">
             Contact Information
           </h3>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-gray-900">
+              <label className="text-sm font-medium text-foreground">
                 Business Address
               </label>
               <input
@@ -184,7 +184,7 @@ export default function MyDetailsSettingsContent() {
               />
             </div>
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-gray-900">
+              <label className="text-sm font-medium text-foreground">
                 Website
               </label>
               <input
@@ -196,7 +196,7 @@ export default function MyDetailsSettingsContent() {
               />
             </div>
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-gray-900">
+              <label className="text-sm font-medium text-foreground">
                 LinkedIn
               </label>
               <input
@@ -210,15 +210,15 @@ export default function MyDetailsSettingsContent() {
           </div>
         </div>
 
-        <div className="border-t border-gray-200" />
+        <div className="border-t border-warm-200" />
 
         {/* Section 3: Additional Information */}
         <div className="space-y-4">
-          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+          <h3 className="text-sm font-semibold text-warm-600 uppercase tracking-wider">
             Additional Information
           </h3>
           {additionalInfo.length === 0 ? (
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-warm-500">
               Add custom information that will help personalize your experience
             </p>
           ) : (
@@ -227,7 +227,7 @@ export default function MyDetailsSettingsContent() {
                 <div key={index} className="flex items-center gap-2">
                   <input
                     type="text"
-                    className="flex-1 bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="flex-1 bg-white border border-warm-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent"
                     value={row.key}
                     onChange={e =>
                       updateAdditionalInfoRow(index, 'key', e.target.value)
@@ -236,7 +236,7 @@ export default function MyDetailsSettingsContent() {
                   />
                   <input
                     type="text"
-                    className="flex-1 bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="flex-1 bg-white border border-warm-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent"
                     value={row.value}
                     onChange={e =>
                       updateAdditionalInfoRow(index, 'value', e.target.value)
@@ -245,7 +245,7 @@ export default function MyDetailsSettingsContent() {
                   />
                   <button
                     onClick={() => removeAdditionalInfoRow(index)}
-                    className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                    className="p-2 text-warm-500 hover:text-red-500 transition-colors"
                   >
                     🗑
                   </button>
@@ -261,7 +261,7 @@ export default function MyDetailsSettingsContent() {
           </button>
         </div>
 
-        <div className="border-t border-gray-200" />
+        <div className="border-t border-warm-200" />
 
         {/* Save button */}
         <div className="flex items-center gap-3">
