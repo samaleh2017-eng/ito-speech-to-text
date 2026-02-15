@@ -180,20 +180,20 @@ export default function HomeKit() {
   }
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-full bg-[var(--background)]">
       {/* Sidebar */}
       <div
-        className={`${navExpanded ? 'w-48' : 'w-20'} flex flex-col justify-between py-4 px-4 transition-all duration-100 ease-in-out border-r border-neutral-200`}
+        className={`${navExpanded ? 'w-56' : 'w-[72px]'} flex flex-col justify-between py-4 px-3 transition-all duration-200 ease-in-out flex-shrink-0`}
       >
         <div>
           {/* Logo and Plan */}
           <div className="flex items-center mb-10 px-3">
             <ItoIcon
-              className="w-6 text-gray-900 flex-shrink-0"
+              className="w-6 text-foreground flex-shrink-0"
               style={{ height: '32px' }}
             />
             <span
-              className={`text-2xl font-bold transition-opacity duration-100 ${showText ? 'opacity-100' : 'opacity-0'} ${showText ? 'ml-2' : 'w-0 overflow-hidden'}`}
+              className={`text-2xl font-bold font-serif transition-opacity duration-100 ${showText ? 'opacity-100' : 'opacity-0'} ${showText ? 'ml-2' : 'w-0 overflow-hidden'}`}
             >
               ito
             </span>
@@ -253,9 +253,11 @@ export default function HomeKit() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex flex-col flex-1 items-center bg-white rounded-lg m-2 ml-0 mt-0 pt-12">
-        {renderContent()}
+      {/* Main Content - White card with "page in page" effect */}
+      <div className="flex-1 bg-white dark:bg-[var(--card)] rounded-2xl my-2 mr-2 shadow-sm overflow-hidden flex flex-col">
+        <div className="flex-1 overflow-y-auto pt-10">
+          {renderContent()}
+        </div>
       </div>
     </div>
   )

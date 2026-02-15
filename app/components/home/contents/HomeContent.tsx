@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import {
-  ChartNoAxesColumn,
   InfoCircle,
   Play,
   Stop,
@@ -13,17 +12,6 @@ import { useSettingsStore } from '../../../store/useSettingsStore'
 import { Tooltip, TooltipTrigger, TooltipContent } from '../../ui/tooltip'
 import { useAuthStore } from '@/app/store/useAuthStore'
 import { Interaction } from '@/lib/main/sqlite/models'
-import { TotalWordsIcon } from '../../icons/TotalWordsIcon'
-import { SpeedIcon } from '../../icons/SpeedIcon'
-import {
-  STREAK_MESSAGES,
-  SPEED_MESSAGES,
-  TOTAL_WORDS_MESSAGES,
-  getStreakLevel,
-  getSpeedLevel,
-  getTotalWordsLevel,
-  getActivityMessage,
-} from './activityMessages'
 import { ItoMode } from '@/app/generated/ito_pb'
 import { getKeyDisplay } from '@/app/utils/keyboard'
 import { createStereo48kWavFromMonoPCM } from '@/app/utils/audioUtils'
@@ -39,7 +27,7 @@ interface InteractionStats {
   averageWPM: number
 }
 
-const StatCard = ({
+const _StatCard = ({
   title,
   value,
   description,
@@ -51,7 +39,7 @@ const StatCard = ({
   icon: React.ReactNode
 }) => {
   return (
-    <div className="flex flex-col p-4 w-1/3 border-2 border-neutral-100 rounded-xl gap-4">
+    <div className="flex flex-col p-4 w-1/3 border-2 border-warm-200 rounded-xl gap-4">
       <div className="flex flex-row items-center">
         <div className="flex flex-col gap-1">
           <div>{title}</div>
@@ -59,7 +47,7 @@ const StatCard = ({
         </div>
         <div className="flex flex-col items-end flex-1">{icon}</div>
       </div>
-      <div className="w-full text-neutral-400">{description}</div>
+      <div className="w-full text-warm-500">{description}</div>
     </div>
   )
 }
@@ -589,72 +577,40 @@ export default function HomeContent({
   return (
     <div className="w-full h-full flex flex-col">
       {/* Fixed Header Content */}
-      <div className="flex-shrink-0 px-24">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-medium">
-              Welcome back{firstName ? `, ${firstName}!` : '!'}
-            </h1>
-          </div>
-        </div>
-        <div className="flex gap-4 w-full mb-6">
-          <div className="flex w-full items-center text-sm text-gray-700 gap-2">
-            <StatCard
-              title="Weekly Streak"
-              value={formatStreakText(stats.streakDays)}
-              description={getActivityMessage(
-                STREAK_MESSAGES,
-                getStreakLevel(stats.streakDays),
-              )}
-              icon={
-                <div className="p-2 bg-blue-50 rounded-md">
-                  <ChartNoAxesColumn
-                    className="w-6 h-6 text-blue-400 border-2 p-1 rounded-full"
-                    strokeWidth={4}
-                  />
-                </div>
-              }
-            />
-            <StatCard
-              title="Average Speed"
-              value={`${stats.averageWPM} words / minute`}
-              description={getActivityMessage(
-                SPEED_MESSAGES,
-                getSpeedLevel(stats.averageWPM),
-              )}
-              icon={
-                <div className="p-2 bg-green-50 rounded-md">
-                  <SpeedIcon />
-                </div>
-              }
-            />
-            <StatCard
-              title="Total Words"
-              value={`${stats.totalWords} ${stats.totalWords === 1 ? 'word' : 'words'}`}
-              description={getActivityMessage(
-                TOTAL_WORDS_MESSAGES,
-                getTotalWordsLevel(stats.totalWords),
-              )}
-              icon={
-                <div className="p-2 bg-orange-50 rounded-md">
-                  <TotalWordsIcon />
-                </div>
-              }
-            />
+      <div className="flex-shrink-0 px-12 max-w-4xl mx-auto w-full">
+        <div className="flex items-center justify-between mb-10">
+          <h1 className="text-3xl font-serif font-normal tracking-tight">
+            Welcome back{firstName ? `, ${firstName}` : ''}
+          </h1>
+          <div className="flex items-center gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <span>🔥</span>
+              <span className="font-medium">{formatStreakText(stats.streakDays)}</span>
+            </div>
+            <div className="h-4 w-px bg-warm-300" />
+            <div className="flex items-center gap-2">
+              <span>🚀</span>
+              <span className="font-medium">{stats.totalWords.toLocaleString()} words</span>
+            </div>
+            <div className="h-4 w-px bg-warm-300" />
+            <div className="flex items-center gap-2">
+              <span>🏆</span>
+              <span className="font-medium">{stats.averageWPM} WPM</span>
+            </div>
           </div>
         </div>
 
         {/* Dictation Info Box */}
-        <div className="bg-slate-100 rounded-xl p-6 flex items-center justify-between mb-10">
+        <div className="bg-[var(--accent)] rounded-2xl p-8 flex items-center justify-between mb-10">
           <div>
-            <div className="text-base font-medium mb-1">
+            <div className="text-lg font-serif font-medium mb-1">
               Voice dictation in any app
             </div>
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-warm-600">
               <span key="hold-down">Hold down the trigger key </span>
               {keyboardShortcut.map((key, index) => (
                 <React.Fragment key={index}>
-                  <span className="bg-slate-50 px-1 py-0.5 rounded text-xs font-mono shadow-sm">
+                  <span className="bg-white/60 px-1.5 py-0.5 rounded text-xs font-mono shadow-sm">
                     {getKeyDisplay(key as KeyName, platform, {
                       showDirectionalText: false,
                       format: 'label',
@@ -667,7 +623,7 @@ export default function HomeContent({
             </div>
           </div>
           <button
-            className="bg-gray-900 text-white px-6 py-3 rounded-full font-semibold hover:bg-gray-800 cursor-pointer"
+            className="bg-[var(--primary)] text-[var(--primary-foreground)] px-6 py-3 rounded-full font-semibold hover:opacity-90 cursor-pointer transition-opacity"
             onClick={() =>
               window.api?.invoke('web-open-url', EXTERNAL_LINKS.WEBSITE)
             }
@@ -677,19 +633,19 @@ export default function HomeContent({
         </div>
 
         {/* Recent Activity Header */}
-        <div className="text-sm text-muted-foreground mb-6">
+        <div className="text-sm text-warm-500 mb-6">
           Recent activity
         </div>
       </div>
 
       {/* Scrollable Recent Activity Section */}
-      <div className="flex-1 px-24 overflow-y-auto scrollbar-hide">
+      <div className="flex-1 px-12 max-w-4xl mx-auto w-full overflow-y-auto scrollbar-hide">
         {loading ? (
-          <div className="bg-white rounded-lg border border-slate-200 p-8 text-center text-gray-500">
+          <div className="bg-white dark:bg-[var(--card)] rounded-xl border border-warm-200 dark:border-warm-800 p-8 text-center text-warm-500">
             Loading recent activity...
           </div>
         ) : interactions.length === 0 ? (
-          <div className="bg-white rounded-lg border border-slate-200 p-8 text-center text-gray-500">
+          <div className="bg-white dark:bg-[var(--card)] rounded-xl border border-warm-200 dark:border-warm-800 p-8 text-center text-warm-500">
             <p className="text-sm">No interactions yet</p>
             <p className="text-xs mt-1">
               Try using voice dictation by pressing{' '}
@@ -700,28 +656,28 @@ export default function HomeContent({
           Object.entries(groupedInteractions).map(
             ([dateLabel, dateInteractions]) => (
               <div key={dateLabel} className="mb-6">
-                <div className="text-xs text-gray-500 mb-4">{dateLabel}</div>
-                <div className="bg-white rounded-lg border border-slate-200 divide-y divide-slate-200">
+                <div className="text-xs text-warm-500 mb-4">{dateLabel}</div>
+                <div className="bg-white dark:bg-[var(--card)] rounded-xl border border-warm-200 dark:border-warm-800 divide-y divide-warm-100 dark:divide-warm-800">
                   {dateInteractions.map(interaction => {
                     const displayInfo = getDisplayText(interaction)
 
                     return (
                       <div
                         key={interaction.id}
-                        className="flex items-center justify-between px-4 py-4 gap-10 hover:bg-gray-50 transition-colors duration-200 group"
+                        className="flex items-center justify-between px-4 py-4 gap-10 hover:bg-warm-50 transition-colors duration-200 group"
                       >
                         <div className="flex items-center gap-10">
-                          <div className="text-gray-600 min-w-[60px]">
+                          <div className="text-warm-500 min-w-[60px]">
                             {formatTime(interaction.created_at)}
                           </div>
                           <div
-                            className={`${displayInfo.isError ? 'text-gray-600' : 'text-gray-900'} flex items-center gap-1`}
+                            className={`${displayInfo.isError ? 'text-warm-600' : 'text-foreground'} flex items-center gap-1`}
                           >
                             {displayInfo.text}
                             {displayInfo.tooltip && (
                               <Tooltip>
                                 <TooltipTrigger>
-                                  <InfoCircle className="w-4 h-4 text-gray-400" />
+                                  <InfoCircle className="w-4 h-4 text-warm-400" />
                                 </TooltipTrigger>
                                 <TooltipContent>
                                   {displayInfo.tooltip}
@@ -758,10 +714,10 @@ export default function HomeContent({
                             >
                               <TooltipTrigger asChild>
                                 <button
-                                  className={`p-1.5 hover:bg-gray-200 rounded transition-colors cursor-pointer ${
+                                  className={`p-1.5 hover:bg-warm-200 rounded transition-colors cursor-pointer ${
                                     copiedItems.has(interaction.id)
                                       ? 'text-green-600'
-                                      : 'text-gray-600'
+                                      : 'text-warm-600'
                                   }`}
                                   onClick={() =>
                                     copyToClipboard(
@@ -799,7 +755,7 @@ export default function HomeContent({
                             >
                               <TooltipTrigger asChild>
                                 <button
-                                  className="p-1.5 hover:bg-gray-200 rounded transition-colors cursor-pointer text-gray-600"
+                                  className="p-1.5 hover:bg-warm-200 rounded transition-colors cursor-pointer text-warm-600"
                                   onClick={() =>
                                     handleAudioDownload(interaction)
                                   }
@@ -824,10 +780,10 @@ export default function HomeContent({
                           >
                             <TooltipTrigger asChild>
                               <button
-                                className={`p-1.5 hover:bg-gray-200 rounded transition-colors cursor-pointer ${
+                                className={`p-1.5 hover:bg-warm-200 rounded transition-colors cursor-pointer ${
                                   playingAudio === interaction.id
                                     ? 'bg-blue-50 text-blue-600'
-                                    : 'text-gray-600'
+                                    : 'text-warm-600'
                                 }`}
                                 onClick={() => handleAudioPlayStop(interaction)}
                                 disabled={!interaction.raw_audio}

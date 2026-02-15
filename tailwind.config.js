@@ -6,6 +6,22 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
+        serif: ['Playfair Display', 'Georgia', 'serif'],
+      },
+      colors: {
+        warm: {
+          50: '#FAF8F5',
+          100: '#F5F0EB',
+          200: '#EDE8E3',
+          300: '#E0DAD4',
+          400: '#C4BCB4',
+          500: '#A8A29E',
+          600: '#78716C',
+          700: '#57534E',
+          800: '#44403C',
+          900: '#292524',
+          950: '#1C1917',
+        },
       },
       keyframes: {
         'slide-up': {
