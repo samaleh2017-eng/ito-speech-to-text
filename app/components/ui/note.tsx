@@ -65,7 +65,7 @@ export function Note({
   return (
     <div
       key={note.id}
-      className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm hover:shadow-md group relative"
+      className="bg-warm-50 rounded-xl border border-warm-200 p-4 hover:shadow-md group relative transition-shadow duration-200"
     >
       {/* Hover Icons */}
       <div className="absolute top-2 right-2 opacity-0 group-hover:shadow-sm group-hover:opacity-100 transition-opacity duration-200 flex items-center rounded-md">
@@ -74,27 +74,27 @@ export function Note({
             e.stopPropagation()
             onEdit(note.id)
           }}
-          className="p-1.5 hover:bg-gray-100 transition-colors border-r border-neutral-200 rounded-l-md cursor-pointer "
+          className="p-1.5 hover:bg-warm-100 transition-colors border-r border-warm-200 rounded-l-md cursor-pointer "
         >
           <Pencil className="w-4 h-4 text-neutral-500" />
         </button>
         <div className="relative">
           <button
             onClick={e => onToggleDropdown(index, e)}
-            className="p-1.5 hover:bg-gray-100 transition-colors rounded-r-md cursor-pointer"
+            className="p-1.5 hover:bg-warm-100 transition-colors rounded-r-md cursor-pointer"
           >
             <Dots className="w-4 h-4 text-neutral-800" />
           </button>
 
           {/* Dropdown Menu */}
           {showDropdown === index && (
-            <div className="absolute top-full right-0 mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+            <div className="absolute top-full right-0 mt-1 w-48 bg-white border border-warm-200 rounded-xl shadow-lg z-10">
               <button
                 onClick={e => {
                   e.stopPropagation()
                   onCopyToClipboard(note.content)
                 }}
-                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 rounded-t-lg cursor-pointer"
+                className="w-full px-4 py-2 text-left text-sm text-warm-700 hover:bg-warm-50 flex items-center gap-2 rounded-t-xl cursor-pointer"
               >
                 <Copy className="w-4 h-4" />
                 Copy to clipboard
@@ -104,7 +104,7 @@ export function Note({
                   e.stopPropagation()
                   onDeleteNote(note.id)
                 }}
-                className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 rounded-b-lg cursor-pointer"
+                className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 rounded-b-xl cursor-pointer"
               >
                 <Trash className="w-4 h-4" />
                 Delete note
@@ -116,13 +116,13 @@ export function Note({
 
       <div className="flex flex-col">
         <div className="mb-4 pr-16">
-          <div className="text-gray-900 font-normal text-sm leading-relaxed break-words">
+          <div className="text-foreground font-normal text-sm leading-relaxed break-words">
             {searchQuery
               ? highlightText(displayContent, searchQuery)
               : displayContent}
           </div>
         </div>
-        <div className="flex items-center justify-between text-gray-400 text-xs mt-auto">
+        <div className="flex items-center justify-between text-warm-500 text-xs mt-auto">
           <span>{formatDate(new Date(note.created_at))}</span>
           <span>{formatTime(new Date(note.created_at))}</span>
         </div>

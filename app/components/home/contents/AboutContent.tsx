@@ -22,15 +22,15 @@ function AboutCard({
   onClick,
 }: AboutCardProps) {
   return (
-    <div className="w-1/3 bg-white rounded-lg border border-gray-200 p-4 flex flex-col items-start text-left">
-      <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center mb-3">
+    <div className="w-1/3 bg-warm-50 rounded-xl border border-warm-200 p-6 flex flex-col items-start text-left hover:shadow-md transition-shadow duration-200">
+      <div className="w-8 h-8 bg-warm-100 rounded-lg flex items-center justify-center mb-3">
         {icon}
       </div>
       <h2 className="text-lg font-semibold mb-1">{title}</h2>
-      <p className="text-gray-500 mb-6 leading-relaxed">{description}</p>
+      <p className="text-warm-600 mb-6 leading-relaxed">{description}</p>
       <Button
         onClick={onClick}
-        className="w-fit bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-full cursor-pointer"
+        className="w-fit bg-white text-foreground border border-warm-300 hover:bg-warm-50 rounded-full cursor-pointer"
         style={{
           padding: '20px 28px',
         }}
@@ -63,9 +63,9 @@ export default function AboutContent() {
   }
 
   return (
-    <div className="w-full px-24">
+    <div className="w-full px-12">
       <div className="mb-8">
-        <h1 className="text-2xl font-medium">About</h1>
+        <h1 className="text-2xl font-serif font-normal tracking-tight">About</h1>
       </div>
 
       <div className="flex flex-col gap-4">
@@ -114,10 +114,10 @@ export default function AboutContent() {
             onClick={handleWebsiteClick}
           />
 
-          <div className="w-1/3 bg-white rounded-lg border border-gray-200 p-4 flex flex-col items-start text-left">
-            <div className="bg-white rounded-lg flex items-center justify-center mb-4">
+          <div className="w-1/3 bg-warm-50 rounded-xl border border-warm-200 p-6 flex flex-col items-start text-left hover:shadow-md transition-shadow duration-200">
+            <div className="bg-warm-100 rounded-lg flex items-center justify-center mb-4">
               <ItoIcon
-                className="w-6 h-6 text-gray-900"
+                className="w-6 h-6 text-foreground"
                 style={{ height: '24px' }}
               />
               <span className={`text-lg font-bold ml-2`}>ito</span>
@@ -125,7 +125,7 @@ export default function AboutContent() {
             <h2 className="text-lg font-semibold mb-4">
               Version {import.meta.env.VITE_ITO_VERSION}
             </h2>
-            <p className="text-gray-500 mb-6 leading-relaxed">
+            <p className="text-warm-600 mb-6 leading-relaxed">
               Made with 🩷 in San Francisco.
             </p>
           </div>

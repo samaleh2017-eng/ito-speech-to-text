@@ -50,18 +50,18 @@ export default function SettingsContent() {
   }
 
   return (
-    <div className="w-full px-32">
+    <div className="w-full px-12">
       <div className="space-y-6">
         {/* Horizontal Tab/Pill Selector */}
-        <div className="flex gap-1 p-1 bg-slate-100 rounded-lg w-fit mx-auto">
+        <div className="flex gap-1 p-1 bg-warm-100 rounded-xl w-fit mx-auto">
           {settingsMenuItems.map(item => (
             <button
               key={item.id}
               onClick={() => setSettingsPage(item.id as any)}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                 item.active
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                  ? 'bg-white text-foreground shadow-sm'
+                  : 'text-warm-600 hover:text-foreground hover:bg-warm-50'
               }`}
             >
               {item.label}
