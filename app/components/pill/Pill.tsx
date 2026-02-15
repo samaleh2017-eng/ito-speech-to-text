@@ -11,6 +11,7 @@ import { AudioBars } from './contents/AudioBars'
 import { useAudioStore } from '@/app/store/useAudioStore'
 import { analytics, ANALYTICS_EVENTS } from '../analytics'
 import { ItoIcon } from '../icons/ItoIcon'
+import { soundPlayer } from '@/app/utils/soundPlayer'
 import type {
   RecordingStatePayload,
   ProcessingStatePayload,
@@ -60,6 +61,9 @@ const Pill = () => {
   const initialShowItoBarAlways = useSettingsStore(
     state => state.showItoBarAlways,
   )
+  const initialInteractionSounds = useSettingsStore(
+    state => state.interactionSounds,
+  )
   const initialOnboardingCategory = useOnboardingStore(
     state => state.onboardingCategory,
   )
@@ -73,6 +77,10 @@ const Pill = () => {
   const [isProcessing, setIsProcessing] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const isManualRecordingRef = useRef(false)
+  const [interactionSounds, setInteractionSoundsLocal] = useState(
+    initialInteractionSounds,
+  )
+  const interactionSoundsRef = useRef(initialInteractionSounds)
   const [showItoBarAlways, setShowItoBarAlways] = useState(
     initialShowItoBarAlways,
   )
@@ -87,10 +95,24 @@ const Pill = () => {
   const [appTarget, setAppTarget] = useState<AppTarget | null>(null)
 
   useEffect(() => {
+    soundPlayer.init()
+  }, [])
+
+  useEffect(() => {
+    interactionSoundsRef.current = interactionSounds
+  }, [interactionSounds])
+
+  useEffect(() => {
     const unsubRecording = window.api.on(
       'recording-state-update',
       (state: RecordingStatePayload) => {
         setIsRecording(state.isRecording)
+
+        if (interactionSoundsRef.current) {
+          soundPlayer.play(
+            state.isRecording ? 'recording-start' : 'recording-stop',
+          )
+        }
 
         if (!isManualRecordingRef.current) {
           const analyticsEvent = state.isRecording
@@ -132,6 +154,7 @@ const Pill = () => {
 
     const unsubSettings = window.api.on('settings-update', (settings: any) => {
       setShowItoBarAlways(settings.showItoBarAlways)
+      setInteractionSoundsLocal(settings.interactionSounds)
     })
 
     const unsubOnboarding = window.api.on(
