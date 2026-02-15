@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useAppStylingStore } from '@/app/store/useAppStylingStore'
 import { AppStylingRow } from './settings/AppStylingRow'
 import { RegisterAppDialog } from './settings/RegisterAppDialog'
+import { ManualAddDialog } from './settings/ManualAddDialog'
 import { Button } from '@/app/components/ui/button'
 import { Crosshair, Plus, Globe, AppWindow } from 'lucide-react'
 
@@ -20,6 +21,7 @@ export default function AppStylingContent() {
   const [isDetecting, setIsDetecting] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [status, setStatus] = useState<string | null>(null)
+  const [manualDialogOpen, setManualDialogOpen] = useState(false)
 
   useEffect(() => {
     loadAppTargets()
@@ -96,24 +98,35 @@ export default function AppStylingContent() {
           </div>
         )}
 
-        <Button
-          onClick={handleDetectApp}
-          disabled={isDetecting}
-          className="w-full h-12 gap-2 text-sm font-medium"
-          variant={isDetecting ? 'secondary' : 'default'}
-        >
-          {isDetecting ? (
-            <>
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              <span>Click on your target app now...</span>
-            </>
-          ) : (
-            <>
-              <Plus className="w-4 h-4" />
-              <span>Detect & Add App</span>
-            </>
-          )}
-        </Button>
+        <div className="flex gap-3">
+          <Button
+            onClick={handleDetectApp}
+            disabled={isDetecting}
+            className="flex-1 h-12 gap-2 text-sm font-medium"
+            variant={isDetecting ? 'secondary' : 'default'}
+          >
+            {isDetecting ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span>Click on your target app now...</span>
+              </>
+            ) : (
+              <>
+                <Crosshair className="w-4 h-4" />
+                <span>Detect App</span>
+              </>
+            )}
+          </Button>
+
+          <Button
+            onClick={() => setManualDialogOpen(true)}
+            className="flex-1 h-12 gap-2 text-sm font-medium"
+            variant="outline"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add Manually</span>
+          </Button>
+        </div>
 
         {sortedApps.length > 0 && (
           <div className="flex items-center gap-4 text-xs text-warm-500">
@@ -157,7 +170,7 @@ export default function AppStylingContent() {
                     2
                   </span>
                   <span>
-                    Click <strong>Detect & Add App</strong> above
+                    Click <strong>Detect App</strong> to auto-detect, or <strong>Add Manually</strong> to type it in
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
@@ -195,6 +208,7 @@ export default function AppStylingContent() {
         onOpenChange={handleDialogClose}
         context={detectedContext}
       />
+      <ManualAddDialog open={manualDialogOpen} onOpenChange={setManualDialogOpen} />
     </div>
   )
 }
