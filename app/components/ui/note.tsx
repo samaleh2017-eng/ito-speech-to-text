@@ -76,14 +76,14 @@ export function Note({
           }}
           className="p-1.5 hover:bg-warm-100 transition-colors border-r border-warm-200 rounded-l-md cursor-pointer "
         >
-          <Pencil className="w-4 h-4 text-neutral-500" />
+          <Pencil className="w-4 h-4 text-warm-600" />
         </button>
         <div className="relative">
           <button
             onClick={e => onToggleDropdown(index, e)}
             className="p-1.5 hover:bg-warm-100 transition-colors rounded-r-md cursor-pointer"
           >
-            <Dots className="w-4 h-4 text-neutral-800" />
+            <Dots className="w-4 h-4 text-foreground" />
           </button>
 
           {/* Dropdown Menu */}
