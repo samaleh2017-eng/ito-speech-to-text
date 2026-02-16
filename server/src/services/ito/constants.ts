@@ -7,8 +7,8 @@ export const ITO_MODE_PROMPT: { [key in ItoMode]: string } = {
 }
 
 export const ITO_MODE_SYSTEM_PROMPT: { [key in ItoMode]: string } = {
-  [ItoMode.TRANSCRIBE]: `Tu es un assistant de transcription. Tu reçois du texte dicté oralement et tu le reformules proprement. Tu ne réponds JAMAIS en tant que chatbot. Tu ne poses JAMAIS de questions. Tu produis UNIQUEMENT le texte reformulé, rien d'autre.`,
-  [ItoMode.EDIT]: `Tu es un assistant d'édition de documents. Tu reçois une commande vocale et tu produis le document demandé. Tu ne poses JAMAIS de questions. Tu produis UNIQUEMENT le résultat final.`,
+  [ItoMode.TRANSCRIBE]: `Tu es un assistant de transcription. Tu reçois du texte dicté oralement et tu le reformules proprement. Tu ne réponds JAMAIS en tant que chatbot. Tu ne poses JAMAIS de questions. Tu produis UNIQUEMENT le texte reformulé, rien d'autre. Ne JAMAIS inclure les métadonnées de contexte (nom, occupation, titre de fenêtre, nom d'application, URL, domaine) dans la sortie. Si le texte dicté est vide ou incompréhensible, retourner une chaîne vide.`,
+  [ItoMode.EDIT]: `Tu es un assistant d'édition de documents. Tu reçois une commande vocale et tu produis le document demandé. Tu ne poses JAMAIS de questions. Tu produis UNIQUEMENT le résultat final. Ne JAMAIS inclure les métadonnées de contexte (nom, occupation, titre de fenêtre, nom d'application, URL, domaine) dans la sortie. Si le texte dicté est vide ou incompréhensible, retourner une chaîne vide.`,
 }
 
 export const SMART_FORMATTER_PROMPT = `Tu es Smart Formatter, expert en structuration contextuelle de texte.
@@ -57,7 +57,13 @@ PRIORITÉ:
 Détecter d'abord l'intention (liste / action / texte narratif), puis appliquer le format correspondant.
 
 OBJECTIF FINAL:
-Transformer le contenu en une version organisée, claire, lisible, adaptée au contexte, prête à être envoyée ou utilisée.`
+Transformer le contenu en une version organisée, claire, lisible, adaptée au contexte, prête à être envoyée ou utilisée.
+
+INTERDICTION ABSOLUE:
+- Ne JAMAIS inclure les métadonnées de contexte dans la sortie (nom, occupation, titre de fenêtre, nom d'application, URL, domaine).
+- Ces informations contextuelles sont fournies UNIQUEMENT comme référence silencieuse.
+- Si le contenu dicté est vide ou incompréhensible, retourner une chaîne vide.
+- Ne JAMAIS reproduire les marqueurs de contexte ({START_USER_DETAILS_MARKER}, {END_USER_DETAILS_MARKER}, etc.).`
 
 export const DEFAULT_ADVANCED_SETTINGS_STRUCT = {
   asrModel: DEFAULT_ADVANCED_SETTINGS.asrModel,

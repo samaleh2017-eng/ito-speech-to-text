@@ -109,6 +109,23 @@ export class TranscribeStreamV2Handler {
         interactionId,
       )
 
+      const trimmedTranscript = transcript.trim()
+      if (!trimmedTranscript || trimmedTranscript.length < 2) {
+        console.log(
+          `⏭️ [${new Date().toISOString()}] Transcript too short or empty ("${transcript}"), skipping LLM adjustment`,
+        )
+        const duration = Date.now() - startTime
+        serverTimingCollector.endTiming(
+          ServerTimingEventName.TOTAL_PROCESSING,
+          interactionId,
+        )
+        serverTimingCollector.finalizeInteraction(interactionId)
+        return create(TranscriptionResponseSchema, {
+          transcript: trimmedTranscript,
+          durationMs: BigInt(duration),
+        })
+      }
+
       const userDetailsContext = this.buildUserDetailsContext(
         mergedConfig.userDetails,
       )
@@ -437,7 +454,59 @@ export class TranscribeStreamV2Handler {
       `📝 [${new Date().toISOString()}] Adjusted transcript: "${adjustedTranscript}"`,
     )
 
-    return adjustedTranscript
+    const filteredTranscript = this.filterLeakedContext(adjustedTranscript, windowContext.userDetailsContext)
+
+    if (filteredTranscript !== adjustedTranscript) {
+      console.log(
+        `🔒 [${new Date().toISOString()}] Filtered leaked context from LLM output`,
+      )
+    }
+
+    return filteredTranscript
+  }
+
+  private filterLeakedContext(text: string, _userDetailsContext: string): string {
+    if (!text || !text.trim()) return ''
+
+    const markers = [
+      '{START_USER_DETAILS_MARKER}', '{END_USER_DETAILS_MARKER}',
+      '{START_WINDOW_TITLE_MARKER}', '{END_WINDOW_TITLE_MARKER}',
+      '{START_APP_NAME_MARKER}', '{END_APP_NAME_MARKER}',
+      '{START_BROWSER_URL_MARKER}', '{END_BROWSER_URL_MARKER}',
+      '{START_BROWSER_DOMAIN_MARKER}', '{END_BROWSER_DOMAIN_MARKER}',
+      '{START_CONTEXT_MARKER}', '{END_CONTEXT_MARKER}',
+      '{START_USER_COMMAND_MARKER}', '{END_USER_COMMAND_MARKER}',
+    ]
+
+    let filtered = text
+    for (const marker of markers) {
+      filtered = filtered.replaceAll(marker, '')
+    }
+
+    const leakedPatterns = [
+      /^Name:\s*.+$/gm,
+      /^Full\s*name:\s*.+$/gim,
+      /^Occupation:\s*.+$/gim,
+      /^Company:\s*.+$/gm,
+      /^Role:\s*.+$/gm,
+      /^Email:\s*.+$/gm,
+      /^Phone:\s*.+$/gm,
+      /^Address:\s*.+$/gm,
+      /^Website:\s*.+$/gm,
+      /^LinkedIn:\s*.+$/gm,
+      /^Window\s*title:\s*.+$/gim,
+      /^App\s*name:\s*.+$/gim,
+      /^URL:\s*.+$/gm,
+      /^Domain:\s*.+$/gm,
+    ]
+
+    for (const pattern of leakedPatterns) {
+      filtered = filtered.replace(pattern, '')
+    }
+
+    filtered = filtered.trim().replace(/\n{3,}/g, '\n\n')
+
+    return filtered
   }
 
   private buildUserDetailsContext(
