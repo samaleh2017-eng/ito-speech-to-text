@@ -6,27 +6,41 @@ import KeyboardSettingsContent from './settings/KeyboardSettingsContent'
 import AdvancedSettingsContent from './settings/AdvancedSettingsContent'
 import PricingBillingSettingsContent from './settings/PricingBillingSettingsContent'
 import MyDetailsSettingsContent from './settings/MyDetailsSettingsContent'
+import {
+  FineTune,
+  Keyboard,
+  Microphone,
+  Code,
+  UserCircle,
+  Users,
+  CreditCard,
+} from '@mynaui/icons-react'
+
+const settingsNavItems = [
+  { id: 'general', label: 'General', icon: FineTune },
+  { id: 'keyboard', label: 'Keyboard', icon: Keyboard },
+  { id: 'audio', label: 'Audio & Mic', icon: Microphone },
+  { id: 'advanced', label: 'Advanced', icon: Code },
+]
+
+const accountNavItems = [
+  { id: 'my-details', label: 'My Details', icon: UserCircle },
+  { id: 'account', label: 'Account', icon: Users },
+  { id: 'pricing-billing', label: 'Pricing & Billing', icon: CreditCard },
+]
+
+const pageTitles: Record<string, string> = {
+  general: 'General',
+  keyboard: 'Keyboard',
+  audio: 'Audio & Mic',
+  advanced: 'Advanced',
+  'my-details': 'My Details',
+  account: 'Account',
+  'pricing-billing': 'Pricing & Billing',
+}
 
 export default function SettingsContent() {
   const { settingsPage, setSettingsPage } = useMainStore()
-
-  const settingsMenuItems = [
-    { id: 'general', label: 'General', active: settingsPage === 'general' },
-    { id: 'keyboard', label: 'Keyboard', active: settingsPage === 'keyboard' },
-    { id: 'audio', label: 'Audio & Mic', active: settingsPage === 'audio' },
-    {
-      id: 'pricing-billing',
-      label: 'Pricing & Billing',
-      active: settingsPage === 'pricing-billing',
-    },
-    {
-      id: 'my-details',
-      label: 'My Details',
-      active: settingsPage === 'my-details',
-    },
-    { id: 'account', label: 'Account', active: settingsPage === 'account' },
-    { id: 'advanced', label: 'Advanced', active: settingsPage === 'advanced' },
-  ]
 
   const renderSettingsContent = () => {
     switch (settingsPage) {
@@ -50,27 +64,56 @@ export default function SettingsContent() {
   }
 
   return (
-    <div className="w-full px-12">
-      <div className="space-y-6">
-        {/* Horizontal Tab/Pill Selector */}
-        <div className="flex gap-1 p-1 bg-warm-100 rounded-xl w-fit mx-auto">
-          {settingsMenuItems.map(item => (
+    <div className="flex h-full pl-6">
+      <div className="w-[220px] flex-shrink-0 flex flex-col justify-between pr-6 border-r border-warm-200">
+        <div>
+          <div className="text-xs font-semibold tracking-wider text-warm-500 uppercase mb-2 px-3">
+            Settings
+          </div>
+          {settingsNavItems.map(item => (
             <button
               key={item.id}
               onClick={() => setSettingsPage(item.id as any)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                item.active
-                  ? 'bg-white text-foreground shadow-sm'
-                  : 'text-warm-600 hover:text-foreground hover:bg-warm-50'
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+                settingsPage === item.id
+                  ? 'bg-warm-200 font-medium text-foreground'
+                  : 'text-warm-600 hover:bg-warm-100'
               }`}
             >
+              <item.icon className="w-5 h-5" />
+              {item.label}
+            </button>
+          ))}
+
+          <div className="text-xs font-semibold tracking-wider text-warm-500 uppercase mb-2 mt-6 px-3">
+            Account
+          </div>
+          {accountNavItems.map(item => (
+            <button
+              key={item.id}
+              onClick={() => setSettingsPage(item.id as any)}
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+                settingsPage === item.id
+                  ? 'bg-warm-200 font-medium text-foreground'
+                  : 'text-warm-600 hover:bg-warm-100'
+              }`}
+            >
+              <item.icon className="w-5 h-5" />
               {item.label}
             </button>
           ))}
         </div>
 
-        {/* Content Area */}
-        <div className="w-full pt-8">{renderSettingsContent()}</div>
+        <div className="text-xs text-warm-400 px-3 pb-2">Ito v0.2.3</div>
+      </div>
+
+      <div className="flex-1 pl-8 pr-8 pb-8 overflow-y-auto">
+        <h1 className="font-serif text-3xl font-normal mb-6">
+          {pageTitles[settingsPage] ?? 'General'}
+        </h1>
+        <div className="bg-warm-50 rounded-2xl p-6">
+          {renderSettingsContent()}
+        </div>
       </div>
     </div>
   )
