@@ -123,13 +123,16 @@ export class InteractionsTable {
   }
 
   static async findAll(user_id?: string): Promise<Interaction[]> {
+    const columns = `id, user_id, title, asr_output, llm_output, raw_audio_id, duration_ms, sample_rate, created_at, updated_at, deleted_at, (raw_audio IS NOT NULL) as has_raw_audio`
     const query = user_id
-      ? 'SELECT * FROM interactions WHERE user_id = ? AND deleted_at IS NULL ORDER BY created_at DESC'
-      : 'SELECT * FROM interactions WHERE user_id IS NULL AND deleted_at IS NULL ORDER BY created_at DESC'
+      ? `SELECT ${columns} FROM interactions WHERE user_id = ? AND deleted_at IS NULL ORDER BY created_at DESC`
+      : `SELECT ${columns} FROM interactions WHERE user_id IS NULL AND deleted_at IS NULL ORDER BY created_at DESC`
     const params = user_id ? [user_id] : []
     const rows = await all<Interaction>(query, params)
-
-    return rows.map(parseInteractionJsonFields)
+    return rows.map(row => {
+      row.has_raw_audio = !!row.has_raw_audio
+      return parseInteractionJsonFields(row)
+    })
   }
 
   static async softDelete(id: string): Promise<void> {

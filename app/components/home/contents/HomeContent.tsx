@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   InfoCircle,
   Play,
@@ -457,7 +457,7 @@ export default function HomeContent({
         }
       }
 
-      if (!interaction.raw_audio) {
+      if (!interaction.has_raw_audio) {
         console.warn('No audio data available for this interaction')
         return
       }
@@ -469,7 +469,13 @@ export default function HomeContent({
       let audio = audioInstances.get(interaction.id)
 
       if (!audio) {
-        const pcmData = new Uint8Array(interaction.raw_audio)
+        const fullInteraction = await window.api.interactions.getById(interaction.id)
+        if (!fullInteraction?.raw_audio) {
+          console.warn('Failed to load audio data')
+          setPlayingAudio(null)
+          return
+        }
+        const pcmData = new Uint8Array(fullInteraction.raw_audio)
         try {
           // Convert raw PCM (mono, typically 16 kHz) to 48 kHz stereo WAV for smoother playback
           const wavBuffer = createStereo48kWavFromMonoPCM(
@@ -515,7 +521,10 @@ export default function HomeContent({
     }
   }
 
-  const groupedInteractions = groupInteractionsByDate(interactions)
+  const groupedInteractions = useMemo(
+    () => groupInteractionsByDate(interactions),
+    [interactions],
+  )
 
   const copyToClipboard = async (text: string, interactionId: string) => {
     try {
@@ -542,12 +551,18 @@ export default function HomeContent({
 
   const handleAudioDownload = async (interaction: Interaction) => {
     try {
-      if (!interaction.raw_audio) {
+      if (!interaction.has_raw_audio) {
         console.warn('No audio data available for download')
         return
       }
 
-      const pcmData = new Uint8Array(interaction.raw_audio)
+      const fullInteraction = await window.api.interactions.getById(interaction.id)
+      if (!fullInteraction?.raw_audio) {
+        console.warn('Failed to load audio data for download')
+        return
+      }
+
+      const pcmData = new Uint8Array(fullInteraction.raw_audio)
       // Convert raw PCM to WAV format
       const wavBuffer = createStereo48kWavFromMonoPCM(
         pcmData,
@@ -752,7 +767,7 @@ export default function HomeContent({
                           )}
 
                           {/* Download button */}
-                          {interaction.raw_audio && (
+                          {interaction.has_raw_audio && (
                             <Tooltip
                               open={
                                 openTooltipKey === `download:${interaction.id}`
@@ -796,7 +811,7 @@ export default function HomeContent({
                                     : 'text-[var(--color-subtext)]'
                                 }`}
                                 onClick={() => handleAudioPlayStop(interaction)}
-                                disabled={!interaction.raw_audio}
+                                disabled={!interaction.has_raw_audio}
                               >
                                 {playingAudio === interaction.id ? (
                                   <Stop className="w-4 h-4" />
@@ -806,7 +821,7 @@ export default function HomeContent({
                               </button>
                             </TooltipTrigger>
                             <TooltipContent side="top" sideOffset={5}>
-                              {!interaction.raw_audio
+                              {!interaction.has_raw_audio
                                 ? 'No audio available'
                                 : playingAudio === interaction.id
                                   ? 'Stop'

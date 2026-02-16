@@ -1,3 +1,5 @@
+import React from 'react'
+
 interface AudioBarsBaseProps {
   heights: number[]
   barColor: string
@@ -5,7 +7,7 @@ interface AudioBarsBaseProps {
 
 export const BAR_COUNT = 21
 
-export const AudioBarsBase = ({ heights, barColor }: AudioBarsBaseProps) => {
+export const AudioBarsBase = React.memo(({ heights, barColor }: AudioBarsBaseProps) => {
   const barStyle = (height: number): React.CSSProperties => {
     return {
       width: '2px',
@@ -30,4 +32,4 @@ export const AudioBarsBase = ({ heights, barColor }: AudioBarsBaseProps) => {
       ))}
     </div>
   )
-}
+})
