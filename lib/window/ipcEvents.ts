@@ -1,4 +1,4 @@
-import { BrowserWindow, ipcMain, shell, app, dialog } from 'electron'
+import { BrowserWindow, ipcMain, shell, app, dialog, net } from 'electron'
 import log from 'electron-log'
 import os from 'os'
 import { exec } from 'child_process'
@@ -29,7 +29,7 @@ import {
   InteractionsTable,
   UserMetadataTable,
 } from '../main/sqlite/repo'
-import { AppTargetTable, ToneTable } from '../main/sqlite/appTargetRepo'
+import { AppTargetTable, ToneTable, type MatchType } from '../main/sqlite/appTargetRepo'
 import {
   UserDetailsTable,
   UserAdditionalInfoTable,
@@ -50,6 +50,130 @@ import { IPC_EVENTS } from '../types/ipc'
 import { itoHttpClient } from '../clients/itoHttpClient'
 
 const execAsync = promisify(exec)
+
+/**
+ * Fetch a website favicon via Google's favicon service and return as base64.
+ */
+async function fetchFavicon(domain: string): Promise<string | null> {
+  try {
+    const url = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`
+    const response = await net.fetch(url)
+    if (!response.ok) return null
+    const buffer = Buffer.from(await response.arrayBuffer())
+    return buffer.toString('base64')
+  } catch (error) {
+    console.warn('[fetchFavicon] Failed to fetch favicon for', domain, error)
+    return null
+  }
+}
+
+/**
+ * Extract a native macOS application icon via Spotlight + sips.
+ * Returns base64-encoded PNG or null.
+ */
+async function fetchMacAppIcon(appName: string): Promise<string | null> {
+  try {
+    const safeName = appName.replace(/"/g, '').replace(/\\/g, '')
+
+    const { stdout: appPath } = await execAsync(
+      `mdfind "kMDItemKind == 'Application'" -name "${safeName}" | head -1`,
+      { timeout: 3000 }
+    )
+    const trimmedPath = appPath.trim()
+    if (!trimmedPath || !trimmedPath.endsWith('.app')) return null
+
+    const { stdout: iconName } = await execAsync(
+      `defaults read "${trimmedPath}/Contents/Info" CFBundleIconFile 2>/dev/null || echo ""`,
+      { timeout: 2000 }
+    )
+    let iconFile = iconName.trim()
+    if (!iconFile) return null
+    if (!iconFile.endsWith('.icns')) iconFile += '.icns'
+
+    const icnsPath = `${trimmedPath}/Contents/Resources/${iconFile}`
+
+    const tmpPng = path.join(os.tmpdir(), `ito-icon-${Date.now()}.png`)
+    await execAsync(
+      `sips -s format png -z 64 64 "${icnsPath}" --out "${tmpPng}"`,
+      { timeout: 3000 }
+    )
+    const pngBuffer = await fs.readFile(tmpPng)
+    await fs.unlink(tmpPng).catch(() => {})
+    return pngBuffer.toString('base64')
+  } catch (error) {
+    console.warn('[fetchMacAppIcon] Failed to extract icon for', appName, error)
+    return null
+  }
+}
+
+/**
+ * Extract a native Windows application icon using:
+ * - `reg query` (native CMD command, ~2MB, instant) to find the exe path from registry
+ * - `app.getFileIcon()` (Electron built-in API, zero external processes) to extract the icon
+ *
+ * NO PowerShell is used — PowerShell spawns a heavy runtime (~100MB RAM).
+ * `reg query` is a lightweight native Windows command that runs and exits instantly.
+ */
+async function fetchWindowsAppIcon(appName: string): Promise<string | null> {
+  try {
+    const safeName = appName.replace(/"/g, '')
+    let exePath: string | null = null
+
+    const registryPaths = [
+      'HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall',
+      'HKLM\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall',
+      'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall',
+    ]
+
+    for (const regPath of registryPaths) {
+      if (exePath) break
+      try {
+        const { stdout } = await execAsync(
+          `reg query "${regPath}" /s /v DisplayName /f "${safeName}" /t REG_SZ 2>nul`,
+          { timeout: 3000 }
+        )
+        const keyMatch = stdout.match(/^(HKEY_[^\r\n]+)/m)
+        if (!keyMatch) continue
+
+        const { stdout: iconOut } = await execAsync(
+          `reg query "${keyMatch[1]}" /v DisplayIcon 2>nul`,
+          { timeout: 2000 }
+        )
+        const iconMatch = iconOut.match(/DisplayIcon\s+REG_SZ\s+(.+)/i)
+        if (iconMatch) {
+          const p = iconMatch[1].trim().split(',')[0].replace(/"/g, '')
+          if (await fs.stat(p).catch(() => null)) {
+            exePath = p
+          }
+        }
+      } catch {
+        // This registry path didn't match, try next
+      }
+    }
+
+    if (!exePath) return null
+
+    const nativeIcon = await app.getFileIcon(exePath, { size: 'normal' })
+    const pngBuffer = nativeIcon.toPNG()
+    if (!pngBuffer || pngBuffer.length === 0) return null
+    return pngBuffer.toString('base64')
+  } catch (error) {
+    console.warn('[fetchWindowsAppIcon] Failed to extract icon for', appName, error)
+    return null
+  }
+}
+
+/**
+ * Extract a native application icon. Dispatches to platform-specific implementation.
+ */
+async function fetchAppIcon(appName: string): Promise<string | null> {
+  if (process.platform === 'darwin') {
+    return fetchMacAppIcon(appName)
+  } else if (process.platform === 'win32') {
+    return fetchWindowsAppIcon(appName)
+  }
+  return null
+}
 
 const handleIPC = (channel: string, handler: (...args: any[]) => any) => {
   ipcMain.handle(channel, handler)
@@ -923,7 +1047,22 @@ ipcMain.handle(
     },
   ) => {
     const userId = getCurrentUserId() || DEFAULT_LOCAL_USER_ID
-    return AppTargetTable.upsert({ ...data, userId })
+
+    let normalizedId = data.id
+    if (data.matchType !== 'domain') {
+      normalizedId = normalizeAppTargetId(data.name)
+    }
+
+    let iconBase64 = data.iconBase64 ?? null
+    if (!iconBase64) {
+      if (data.domain && data.matchType === 'domain') {
+        iconBase64 = await fetchFavicon(data.domain)
+      } else {
+        iconBase64 = await fetchAppIcon(data.name)
+      }
+    }
+
+    return AppTargetTable.upsert({ ...data, id: normalizedId, iconBase64, userId })
   },
 )
 
@@ -994,6 +1133,12 @@ ipcMain.handle('app-targets:get-current', async () => {
 
   const window = await getActiveWindow()
   if (!window) return null
+
+  const browserInfo = await getBrowserUrl(window)
+  if (browserInfo.domain) {
+    const domainTarget = await AppTargetTable.findByDomain(browserInfo.domain, userId)
+    if (domainTarget) return domainTarget
+  }
 
   const id = normalizeAppTargetId(window.appName)
   return AppTargetTable.findById(id, userId)
