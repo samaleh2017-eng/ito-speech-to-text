@@ -39,7 +39,7 @@ const _StatCard = ({
   icon: React.ReactNode
 }) => {
   return (
-    <div className="flex flex-col p-4 w-1/3 border-2 border-warm-200 rounded-xl gap-4">
+    <div className="flex flex-col p-4 w-1/3 border border-warm-100 rounded-xl gap-4">
       <div className="flex flex-row items-center">
         <div className="flex flex-col gap-1">
           <div>{title}</div>
@@ -641,11 +641,11 @@ export default function HomeContent({
       {/* Scrollable Recent Activity Section */}
       <div className="flex-1 px-12 max-w-4xl mx-auto w-full overflow-y-auto scrollbar-hide">
         {loading ? (
-          <div className="bg-white dark:bg-[var(--card)] rounded-xl border border-warm-200 dark:border-warm-800 p-8 text-center text-warm-500">
+          <div className="bg-white dark:bg-[var(--card)] rounded-xl border border-warm-100 dark:border-warm-800 p-8 text-center text-warm-500">
             Loading recent activity...
           </div>
         ) : interactions.length === 0 ? (
-          <div className="bg-white dark:bg-[var(--card)] rounded-xl border border-warm-200 dark:border-warm-800 p-8 text-center text-warm-500">
+          <div className="bg-white dark:bg-[var(--card)] rounded-xl border border-warm-100 dark:border-warm-800 p-8 text-center text-warm-500">
             <p className="text-sm">No interactions yet</p>
             <p className="text-xs mt-1">
               Try using voice dictation by pressing{' '}
@@ -657,7 +657,7 @@ export default function HomeContent({
             ([dateLabel, dateInteractions]) => (
               <div key={dateLabel} className="mb-6">
                 <div className="text-xs text-warm-500 mb-4">{dateLabel}</div>
-                <div className="bg-white dark:bg-[var(--card)] rounded-xl border border-warm-200 dark:border-warm-800 divide-y divide-warm-100 dark:divide-warm-800">
+                <div className="bg-white dark:bg-[var(--card)] rounded-xl border border-warm-100 dark:border-warm-800 divide-y divide-warm-100 dark:divide-warm-800">
                   {dateInteractions.map(interaction => {
                     const displayInfo = getDisplayText(interaction)
 

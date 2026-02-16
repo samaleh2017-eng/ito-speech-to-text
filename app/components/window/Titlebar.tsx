@@ -142,7 +142,7 @@ export const Titlebar = () => {
             </div>
 
             {showUserDropdown && (
-              <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-[var(--card)] border border-warm-200 dark:border-warm-800 rounded-lg shadow-lg z-20">
+              <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-[var(--card)] border border-warm-100 dark:border-warm-800 rounded-lg shadow-lg z-20">
                 <button
                   onClick={handleSettingsClick}
                   className="w-full px-2 py-2 text-left text-sm text-warm-700 hover:bg-warm-50 flex items-center gap-2 rounded-t-lg cursor-pointer"

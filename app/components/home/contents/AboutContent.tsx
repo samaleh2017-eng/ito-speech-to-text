@@ -22,7 +22,7 @@ function AboutCard({
   onClick,
 }: AboutCardProps) {
   return (
-    <div className="w-1/3 bg-warm-50 rounded-xl border border-warm-200 p-6 flex flex-col items-start text-left hover:shadow-md transition-shadow duration-200">
+    <div className="w-1/3 bg-warm-50 rounded-xl border border-warm-100 p-6 flex flex-col items-start text-left hover:shadow-md transition-shadow duration-200">
       <div className="w-8 h-8 bg-warm-100 rounded-lg flex items-center justify-center mb-3">
         {icon}
       </div>
@@ -30,7 +30,7 @@ function AboutCard({
       <p className="text-warm-600 mb-6 leading-relaxed">{description}</p>
       <Button
         onClick={onClick}
-        className="w-fit bg-white text-foreground border border-warm-300 hover:bg-warm-50 rounded-full cursor-pointer"
+        className="w-fit bg-white text-foreground border border-warm-200 hover:bg-warm-50 rounded-full cursor-pointer"
         style={{
           padding: '20px 28px',
         }}
@@ -114,7 +114,7 @@ export default function AboutContent() {
             onClick={handleWebsiteClick}
           />
 
-          <div className="w-1/3 bg-warm-50 rounded-xl border border-warm-200 p-6 flex flex-col items-start text-left hover:shadow-md transition-shadow duration-200">
+          <div className="w-1/3 bg-warm-50 rounded-xl border border-warm-100 p-6 flex flex-col items-start text-left hover:shadow-md transition-shadow duration-200">
             <div className="bg-warm-100 rounded-lg flex items-center justify-center mb-4">
               <ItoIcon
                 className="w-6 h-6 text-foreground"

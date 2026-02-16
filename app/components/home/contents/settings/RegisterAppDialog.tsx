@@ -73,7 +73,7 @@ export function RegisterAppDialog({ open, onOpenChange, context }: Props) {
             className={`w-full flex items-start gap-3 p-4 rounded-lg border-2 transition-all text-left ${
               selectedType === 'app'
                 ? 'border-blue-500 bg-blue-50'
-                : 'border-warm-200 hover:border-warm-300'
+                : 'border-warm-100 hover:border-warm-200'
             }`}
           >
             <div
@@ -108,7 +108,7 @@ export function RegisterAppDialog({ open, onOpenChange, context }: Props) {
                 ? 'border-warm-100 bg-warm-50 opacity-50 cursor-not-allowed'
                 : selectedType === 'domain'
                   ? 'border-blue-500 bg-blue-50'
-                  : 'border-warm-200 hover:border-warm-300'
+                  : 'border-warm-100 hover:border-warm-200'
             }`}
           >
             <div

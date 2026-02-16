@@ -347,7 +347,7 @@ export default function DictionaryContent() {
             placeholder="Search dictionary..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-2.5 border border-warm-100 rounded-xl text-sm focus:outline-none focus:border-warm-300 bg-transparent placeholder-warm-400"
+            className="w-full px-4 py-2.5 border border-warm-100 rounded-xl text-sm focus:outline-none focus:border-warm-200 bg-transparent placeholder-warm-400"
             autoFocus
           />
         </div>
@@ -367,7 +367,7 @@ export default function DictionaryContent() {
         </div>
       )}
       {!noEntries && filteredEntries.length > 0 && (
-        <div className="rounded-xl border border-warm-200 divide-y divide-warm-200">
+        <div className="rounded-xl border border-warm-100 divide-y divide-warm-100">
           {filteredEntries.map((entry, index) => (
             <div
               key={entry.id}
@@ -473,7 +473,7 @@ export default function DictionaryContent() {
                 value={editContent}
                 onChange={e => setEditContent(e.target.value)}
                 onKeyDown={handleEditKeyDown}
-                className="w-full p-4 rounded-md resize-none focus:outline-none border border-warm-200"
+                className="w-full p-4 rounded-xl resize-none focus:outline-none border border-warm-100"
                 placeholder="Enter dictionary entry..."
               />
             ) : (
@@ -485,7 +485,7 @@ export default function DictionaryContent() {
                     value={editFrom}
                     onChange={e => setEditFrom(e.target.value)}
                     onKeyDown={handleEditKeyDown}
-                    className="flex-1 p-4 rounded-md resize-none focus:outline-none border border-warm-200"
+                    className="flex-1 p-4 rounded-xl resize-none focus:outline-none border border-warm-100"
                     placeholder="Misspelling"
                   />
                   <span className="text-warm-600">→</span>
@@ -494,7 +494,7 @@ export default function DictionaryContent() {
                     value={editTo}
                     onChange={e => setEditTo(e.target.value)}
                     onKeyDown={handleEditKeyDown}
-                    className="flex-1 p-4 rounded-md resize-none focus:outline-none border border-warm-200"
+                    className="flex-1 p-4 rounded-xl resize-none focus:outline-none border border-warm-100"
                     placeholder="Correct spelling"
                   />
                 </div>
@@ -553,7 +553,7 @@ export default function DictionaryContent() {
                 value={newEntryContent}
                 onChange={e => setNewEntryContent(e.target.value)}
                 onKeyDown={handleAddKeyDown}
-                className="w-full p-4 rounded-md resize-none focus:outline-none border border-warm-200"
+                className="w-full p-4 rounded-xl resize-none focus:outline-none border border-warm-100"
                 placeholder="Enter dictionary entry..."
               />
             ) : (
@@ -565,7 +565,7 @@ export default function DictionaryContent() {
                     value={newFrom}
                     onChange={e => setNewFrom(e.target.value)}
                     onKeyDown={handleAddKeyDown}
-                    className="flex-1 p-4 rounded-md resize-none focus:outline-none border border-warm-200"
+                    className="flex-1 p-4 rounded-xl resize-none focus:outline-none border border-warm-100"
                     placeholder="Misspelling"
                   />
                   <span className="text-warm-600">→</span>
@@ -574,7 +574,7 @@ export default function DictionaryContent() {
                     value={newTo}
                     onChange={e => setNewTo(e.target.value)}
                     onKeyDown={handleAddKeyDown}
-                    className="flex-1 p-4 rounded-md resize-none focus:outline-none border border-warm-200"
+                    className="flex-1 p-4 rounded-xl resize-none focus:outline-none border border-warm-100"
                     placeholder="Correct spelling"
                   />
                 </div>

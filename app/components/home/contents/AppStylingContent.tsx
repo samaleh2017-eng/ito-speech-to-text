@@ -146,7 +146,7 @@ export default function AppStylingContent() {
         )}
 
         {sortedApps.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-warm-200 bg-warm-50/50 p-10">
+          <div className="rounded-xl border border-dashed border-warm-100 bg-warm-50/50 p-10">
             <div className="flex flex-col items-center text-center">
               <div className="w-12 h-12 rounded-full bg-warm-100 flex items-center justify-center mb-4">
                 <Crosshair className="w-6 h-6 text-warm-500" />
@@ -195,7 +195,7 @@ export default function AppStylingContent() {
             </div>
           </div>
         ) : (
-          <div className="rounded-xl border border-warm-200 bg-white overflow-hidden divide-y divide-warm-100">
+          <div className="rounded-xl border border-warm-100 bg-white overflow-hidden divide-y divide-warm-100">
             {sortedApps.map(app => (
               <AppStylingRow key={app.id} app={app} tones={toneOptions} />
             ))}

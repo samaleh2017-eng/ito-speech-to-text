@@ -65,7 +65,7 @@ export default function SettingsContent() {
 
   return (
     <div className="flex h-full pl-6">
-      <div className="w-[220px] flex-shrink-0 flex flex-col justify-between pr-6 border-r border-warm-200">
+      <div className="w-[220px] flex-shrink-0 flex flex-col justify-between pr-6 border-r border-warm-100">
         <div>
           <div className="text-xs font-semibold tracking-wider text-warm-500 uppercase mb-2 px-3">
             Settings

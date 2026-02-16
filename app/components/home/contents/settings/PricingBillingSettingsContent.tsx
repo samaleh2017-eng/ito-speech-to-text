@@ -263,7 +263,7 @@ export default function PricingBillingSettingsContent() {
             <Button
               variant="outline"
               size="lg"
-              className="w-full rounded-xl border-warm-200"
+              className="w-full rounded-xl border-warm-100"
               onClick={handleContactUs}
             >
               Contact Us
@@ -297,7 +297,7 @@ function PricingCard({
       className={`rounded-xl border-2 p-6 flex flex-col ${
         isHighlighted
           ? 'border-purple-500 bg-gradient-to-br from-purple-50/30 to-pink-50/30'
-          : 'border-warm-200 bg-warm-50'
+          : 'border-warm-100 bg-warm-50'
       }`}
     >
       {/* Title */}

@@ -87,7 +87,7 @@ export default function AccountSettingsContent() {
             type="text"
             value={user?.name}
             onChange={e => setName(e.target.value)}
-            className="w-80 bg-white border border-warm-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent"
+            className="w-80 bg-white border border-warm-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent"
           />
         </div>
 

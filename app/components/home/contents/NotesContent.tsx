@@ -323,7 +323,7 @@ export default function NotesContent() {
     >
       {/* Header */}
       {showSearch ? (
-        <div className="flex items-center gap-4 mb-8 px-4 py-2 bg-warm-50 border border-warm-200 rounded-xl">
+        <div className="flex items-center gap-4 mb-8 px-4 py-2 bg-warm-50 border border-warm-100 rounded-xl">
           <Search className="w-5 h-5 text-warm-500 flex-shrink-0" />
           <input
             ref={searchInputRef}
@@ -366,7 +366,7 @@ export default function NotesContent() {
       )}
       {!showSearch && creatingNote && (
         <div
-          className="shadow-lg rounded-2xl mb-8 border border-warm-200 w-3/5 mx-auto transition-all duration-200 ease-in-out relative"
+          className="shadow-lg rounded-2xl mb-8 border border-warm-100 w-3/5 mx-auto transition-all duration-200 ease-in-out relative"
           style={{ height: `${containerHeight}px` }}
         >
           <textarea

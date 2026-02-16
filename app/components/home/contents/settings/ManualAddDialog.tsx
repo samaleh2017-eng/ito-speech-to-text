@@ -113,7 +113,7 @@ export function ManualAddDialog({ open, onOpenChange }: Props) {
               className={`flex-1 flex items-center gap-3 p-3 rounded-lg border-2 transition-all text-left ${
                 selectedType === 'app'
                   ? 'border-blue-500 bg-blue-50'
-                  : 'border-warm-200 hover:border-warm-300'
+                  : 'border-warm-100 hover:border-warm-200'
               }`}
             >
               <div className={`p-2 rounded-lg ${selectedType === 'app' ? 'bg-blue-500 text-white' : 'bg-warm-100'}`}>
@@ -134,7 +134,7 @@ export function ManualAddDialog({ open, onOpenChange }: Props) {
               className={`flex-1 flex items-center gap-3 p-3 rounded-lg border-2 transition-all text-left ${
                 selectedType === 'domain'
                   ? 'border-blue-500 bg-blue-50'
-                  : 'border-warm-200 hover:border-warm-300'
+                  : 'border-warm-100 hover:border-warm-200'
               }`}
             >
               <div className={`p-2 rounded-lg ${selectedType === 'domain' ? 'bg-blue-500 text-white' : 'bg-warm-100'}`}>
@@ -156,7 +156,7 @@ export function ManualAddDialog({ open, onOpenChange }: Props) {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-warm-400" />
                 <input
                   type="text"
-                  className="w-full bg-white border border-warm-300 rounded-lg pl-9 pr-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent"
+                  className="w-full bg-white border border-warm-200 rounded-lg pl-9 pr-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent"
                   placeholder="Filter apps..."
                   value={appFilter}
                   onChange={e => setAppFilter(e.target.value)}
@@ -171,7 +171,7 @@ export function ManualAddDialog({ open, onOpenChange }: Props) {
                 </button>
               </div>
 
-              <div className="max-h-48 overflow-y-auto rounded-lg border border-warm-200 divide-y divide-warm-100">
+              <div className="max-h-48 overflow-y-auto rounded-lg border border-warm-100 divide-y divide-warm-100">
                 {isLoadingApps ? (
                   <div className="flex items-center justify-center gap-2 py-6 text-warm-500">
                     <div className="w-4 h-4 border-2 border-warm-300 border-t-warm-600 rounded-full animate-spin" />
@@ -204,7 +204,7 @@ export function ManualAddDialog({ open, onOpenChange }: Props) {
             <div className="space-y-1.5">
               <input
                 type="text"
-                className="w-full bg-white border border-warm-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent"
+                className="w-full bg-white border border-warm-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent"
                 placeholder="e.g. docs.google.com or paste a full URL"
                 value={domainInput}
                 onChange={e => setDomainInput(e.target.value)}

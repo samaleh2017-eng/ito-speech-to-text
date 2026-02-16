@@ -53,7 +53,7 @@ export default function MyDetailsSettingsContent() {
   }
 
   const inputClass =
-    'w-80 bg-white border border-warm-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent'
+    'w-80 bg-white border border-warm-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent'
 
   if (isLoading) {
     return (
@@ -163,7 +163,7 @@ export default function MyDetailsSettingsContent() {
           </div>
         </div>
 
-        <div className="border-t border-warm-200" />
+        <div className="border-t border-warm-100" />
 
         {/* Section 2: Contact Information */}
         <div className="space-y-4">
@@ -210,7 +210,7 @@ export default function MyDetailsSettingsContent() {
           </div>
         </div>
 
-        <div className="border-t border-warm-200" />
+        <div className="border-t border-warm-100" />
 
         {/* Section 3: Additional Information */}
         <div className="space-y-4">
@@ -227,7 +227,7 @@ export default function MyDetailsSettingsContent() {
                 <div key={index} className="flex items-center gap-2">
                   <input
                     type="text"
-                    className="flex-1 bg-white border border-warm-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent"
+                    className="flex-1 bg-white border border-warm-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent"
                     value={row.key}
                     onChange={e =>
                       updateAdditionalInfoRow(index, 'key', e.target.value)
@@ -236,7 +236,7 @@ export default function MyDetailsSettingsContent() {
                   />
                   <input
                     type="text"
-                    className="flex-1 bg-white border border-warm-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent"
+                    className="flex-1 bg-white border border-warm-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent"
                     value={row.value}
                     onChange={e =>
                       updateAdditionalInfoRow(index, 'value', e.target.value)
@@ -261,7 +261,7 @@ export default function MyDetailsSettingsContent() {
           </button>
         </div>
 
-        <div className="border-t border-warm-200" />
+        <div className="border-t border-warm-100" />
 
         {/* Save button */}
         <div className="flex items-center gap-3">

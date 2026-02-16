@@ -65,7 +65,7 @@ export function Note({
   return (
     <div
       key={note.id}
-      className="bg-warm-50 rounded-xl border border-warm-200 p-4 hover:shadow-md group relative transition-shadow duration-200"
+      className="bg-warm-50 rounded-xl border border-warm-100 p-4 hover:shadow-md group relative transition-shadow duration-200"
     >
       {/* Hover Icons */}
       <div className="absolute top-2 right-2 opacity-0 group-hover:shadow-sm group-hover:opacity-100 transition-opacity duration-200 flex items-center rounded-md">
@@ -74,7 +74,7 @@ export function Note({
             e.stopPropagation()
             onEdit(note.id)
           }}
-          className="p-1.5 hover:bg-warm-100 transition-colors border-r border-warm-200 rounded-l-md cursor-pointer "
+          className="p-1.5 hover:bg-warm-100 transition-colors border-r border-warm-100 rounded-l-md cursor-pointer "
         >
           <Pencil className="w-4 h-4 text-warm-600" />
         </button>
@@ -88,7 +88,7 @@ export function Note({
 
           {/* Dropdown Menu */}
           {showDropdown === index && (
-            <div className="absolute top-full right-0 mt-1 w-48 bg-white border border-warm-200 rounded-xl shadow-lg z-10">
+            <div className="absolute top-full right-0 mt-1 w-48 bg-white border border-warm-100 rounded-xl shadow-lg z-10">
               <button
                 onClick={e => {
                   e.stopPropagation()

@@ -171,7 +171,7 @@ const SettingInput = memo(function SettingInput({
           id={config.name}
           value={value ?? ''}
           onChange={handleChange}
-          className="w-3/4 ml-1 px-3 py-2 border border-warm-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent"
+          className="w-3/4 ml-1 px-3 py-2 border border-warm-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent"
           disabled={config.readOnly}
         >
           {config.options?.map(option => (
@@ -187,7 +187,7 @@ const SettingInput = memo(function SettingInput({
           onChange={handleChange}
           onFocus={handleFocus}
           onBlur={handleBlur}
-          className="w-3/4 ml-1 px-3 py-2 border border-warm-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent"
+          className="w-3/4 ml-1 px-3 py-2 border border-warm-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent"
           placeholder={config.placeholder}
           maxLength={config.maxLength}
           readOnly={config.readOnly}
@@ -360,7 +360,7 @@ export default function AdvancedSettingsContent() {
             <h3 className="text-md font-serif font-normal text-foreground">LLM Settings</h3>
             <button
               onClick={handleRestoreDefaults}
-              className="px-3 py-1 text-sm text-warm-600 hover:text-foreground border border-warm-300 rounded-md hover:bg-warm-50 transition-colors"
+              className="px-3 py-1 text-sm text-warm-600 hover:text-foreground border border-warm-200 rounded-md hover:bg-warm-50 transition-colors"
             >
               Restore Defaults
             </button>
@@ -386,7 +386,7 @@ export default function AdvancedSettingsContent() {
               type="checkbox"
               checked={grammarServiceEnabled}
               onChange={handleGrammarServiceToggle}
-              className="mt-1 h-4 w-4 rounded border-warm-300 text-blue-600 focus:ring-blue-500"
+              className="mt-1 h-4 w-4 rounded border-warm-200 text-blue-600 focus:ring-blue-500"
             />
             <span>
               <span className="block text-sm font-medium text-warm-700">
@@ -409,7 +409,7 @@ export default function AdvancedSettingsContent() {
                 type="checkbox"
                 checked={macosAccessibilityContextEnabled}
                 onChange={handleMacosAccessibilityContextToggle}
-                className="mt-1 h-4 w-4 rounded border-warm-300 text-blue-600 focus:ring-blue-500"
+                className="mt-1 h-4 w-4 rounded border-warm-200 text-blue-600 focus:ring-blue-500"
               />
               <span>
                 <span className="block text-sm font-medium text-warm-700">
