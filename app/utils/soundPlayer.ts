@@ -37,6 +37,14 @@ class SoundPlayer {
     source.connect(this.audioContext.destination)
     source.start(0)
   }
+
+  dispose() {
+    if (this.audioContext) {
+      this.audioContext.close().catch(() => {})
+      this.audioContext = null
+    }
+    this.buffers.clear()
+  }
 }
 
 export const soundPlayer = new SoundPlayer()

@@ -98,6 +98,9 @@ const Pill = () => {
 
   useEffect(() => {
     soundPlayer.init()
+    return () => {
+      soundPlayer.dispose()
+    }
   }, [])
 
   useEffect(() => {
