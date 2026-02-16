@@ -2,8 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNotesStore } from '../../../store/useNotesStore'
 import { useSettingsStore } from '../../../store/useSettingsStore'
 import Masonry from '@mui/lab/Masonry'
-import { AudioIcon } from '../../icons/AudioIcon'
-import { ArrowUp, Grid, Rows, Search, X } from '@mynaui/icons-react'
+import { ArrowUp, Grid, Rows, Search, X, Microphone, Refresh } from '@mynaui/icons-react'
 import { Note } from '../../ui/note'
 import { StatusIndicator } from '../../ui/status-indicator'
 import {
@@ -344,32 +343,40 @@ export default function NotesContent() {
         </div>
       ) : (
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-serif font-normal tracking-tight w-full text-center">
-            What's on your mind today?
-          </h1>
+          <h1 className="font-bold text-lg text-center w-full">For quick thoughts you want to come back to</h1>
         </div>
       )}
 
-      {/* Text Input Area - Only show when not searching */}
-      {!showSearch && (
+      {/* Voice Input / Text Input Area - Only show when not searching */}
+      {!showSearch && !creatingNote && (
+        <div
+          className="w-full max-w-2xl mx-auto mt-6 mb-8 cursor-pointer"
+          onClick={() => {
+            setContainerHeight(128)
+            setCreatingNote(true)
+          }}
+        >
+          <div className="flex items-center justify-between p-5 rounded-2xl bg-white shadow-sm hover:shadow-md transition-shadow border border-warm-100">
+            <span className="text-warm-500 text-sm">Take a quick note with your voice</span>
+            <div className="w-10 h-10 rounded-full bg-foreground flex items-center justify-center flex-shrink-0">
+              <Microphone className="w-5 h-5 text-white" />
+            </div>
+          </div>
+        </div>
+      )}
+      {!showSearch && creatingNote && (
         <div
           className="shadow-lg rounded-2xl mb-8 border border-warm-200 w-3/5 mx-auto transition-all duration-200 ease-in-out relative"
           style={{ height: `${containerHeight}px` }}
         >
-          {!creatingNote && (
-            <div className="absolute top-6 left-6 flex items-center gap-1 text-warm-600 pointer-events-none">
-              <AudioIcon />
-              <span>Take a quick note with your voice</span>
-            </div>
-          )}
           <textarea
             ref={textareaRef}
-            className={`w-full pt-6 px-6 focus:outline-none resize-none overflow-hidden ${creatingNote ? 'cursor-text' : 'cursor-pointer'}`}
+            className="w-full pt-6 px-6 focus:outline-none resize-none overflow-hidden cursor-text"
             value={noteContent}
             onChange={e => updateNoteContent(e.target.value)}
-            onClick={() => setCreatingNote(true)}
             onBlur={handleBlur}
-            placeholder={`${creatingNote ? `Press and hold ${keyboardShortcut.map(k => getKeyDisplayInfo(k, platform).label).join(' + ')} and start speaking` : ''}`}
+            placeholder={`Press and hold ${keyboardShortcut.map(k => getKeyDisplayInfo(k, platform).label).join(' + ')} and start speaking`}
+            autoFocus
           />
           {showAddNoteButton && (
             <div className="absolute bottom-3 right-3">
@@ -387,11 +394,11 @@ export default function NotesContent() {
         className={`${viewMode === 'grid' || showSearch ? '' : 'm-auto w-3/5'}`}
       >
         <div className="flex items-center justify-between mb-1">
-          <div className="text-xs text-warm-600 font-medium uppercase tracking-wide">
+          <h2 className="text-xs font-semibold tracking-wider text-warm-500 uppercase">
             {showSearch
               ? `Search Results (${filteredNotes.length})`
-              : `Notes (${notes.length})`}
-          </div>
+              : 'Recents'}
+          </h2>
           <div className="flex items-center gap-1">
             <button
               className="p-2 hover:bg-warm-100 rounded-lg transition-colors cursor-pointer"
@@ -410,6 +417,13 @@ export default function NotesContent() {
               ) : (
                 <Grid className="w-5 h-5 text-warm-500" />
               )}
+            </button>
+            <button
+              className="p-2 hover:bg-warm-100 rounded-lg transition-colors cursor-pointer"
+              title="Refresh"
+              onClick={loadNotes}
+            >
+              <Refresh className="w-5 h-5 text-warm-500" />
             </button>
           </div>
         </div>
