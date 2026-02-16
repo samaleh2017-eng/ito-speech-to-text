@@ -82,6 +82,7 @@
   position: relative;
   height: var(--window-titlebar-height);
   align-items: center;
+  justify-content: space-between;
   -webkit-app-region: drag;
   background-color: var(--window-c-titlebar-background);
   color: var(--window-c-text);
@@ -127,9 +128,7 @@
 
 .window-titlebar-controls {
   display: flex;
-  position: absolute;
-  left: 0;
-  top: 0;
+  position: relative;
   -webkit-app-region: no-drag;
   z-index: 20;
 }
