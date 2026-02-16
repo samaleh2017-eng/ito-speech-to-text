@@ -183,7 +183,7 @@ export default function HomeKit() {
     <div className="flex h-full bg-[var(--background)]">
       {/* Sidebar */}
       <div
-        className={`${navExpanded ? 'w-56' : 'w-[72px]'} flex flex-col justify-between py-4 px-3 transition-all duration-200 ease-in-out flex-shrink-0`}
+        className={`${navExpanded ? 'w-56' : 'w-[72px]'} flex flex-col justify-between py-5 px-3 transition-all duration-200 ease-in-out flex-shrink-0`}
       >
         <div>
           {/* Logo and Plan */}
@@ -193,7 +193,7 @@ export default function HomeKit() {
               style={{ height: '32px' }}
             />
             <span
-              className={`text-2xl font-bold font-serif transition-opacity duration-100 ${showText ? 'opacity-100' : 'opacity-0'} ${showText ? 'ml-2' : 'w-0 overflow-hidden'}`}
+              className={`text-2xl font-bold font-sans transition-opacity duration-100 ${showText ? 'opacity-100' : 'opacity-0'} ${showText ? 'ml-2' : 'w-0 overflow-hidden'}`}
             >
               ito
             </span>
@@ -254,7 +254,7 @@ export default function HomeKit() {
       </div>
 
       {/* Main Content - White card with "page in page" effect */}
-      <div className="flex-1 bg-white dark:bg-[var(--card)] rounded-2xl my-2 mr-2 shadow-sm overflow-hidden flex flex-col">
+      <div className="flex-1 bg-[var(--color-surface)] rounded-[var(--radius-lg)] my-2 mr-2 shadow-[var(--shadow-soft)] overflow-hidden flex flex-col border border-[var(--border)]">
         <div className="flex-1 overflow-y-auto pt-10">
           {renderContent()}
         </div>

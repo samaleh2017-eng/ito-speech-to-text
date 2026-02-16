@@ -18,10 +18,10 @@ export function NavItem({
 }: NavItemProps) {
   const navContent = (
     <div
-      className={`flex items-center px-3 py-2.5 rounded-lg cursor-pointer transition-colors duration-150 ${
+      className={`flex items-center px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-180 ${
         isActive
-          ? 'bg-[var(--sidebar-active)] text-[var(--sidebar-active-text)] font-medium'
-          : 'text-[var(--foreground)] hover:bg-[var(--sidebar-background)]'
+          ? 'bg-[var(--sidebar-active)] text-[var(--sidebar-active-text)] font-medium shadow-sm'
+          : 'text-[var(--foreground)] hover:bg-[var(--muted)]'
       }`}
       onClick={onClick}
     >

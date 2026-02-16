@@ -45,7 +45,7 @@ const _StatCard = ({
   icon: React.ReactNode
 }) => {
   return (
-    <div className="flex flex-col p-4 w-1/3 border border-warm-100 rounded-xl gap-4">
+    <div className="flex flex-col p-4 w-1/3 border border-[var(--border)] rounded-[var(--radius-lg)] gap-4">
       <div className="flex flex-row items-center">
         <div className="flex flex-col gap-1">
           <div>{title}</div>
@@ -53,7 +53,7 @@ const _StatCard = ({
         </div>
         <div className="flex flex-col items-end flex-1">{icon}</div>
       </div>
-      <div className="w-full text-warm-500">{description}</div>
+      <div className="w-full text-[var(--color-subtext)]">{description}</div>
     </div>
   )
 }
@@ -586,41 +586,41 @@ export default function HomeContent({
       {/* Fixed Header Content */}
       <div className="flex-shrink-0 px-12 max-w-4xl mx-auto w-full">
         <div className="flex items-center justify-between mb-10">
-          <h1 className="text-3xl font-serif font-normal tracking-tight">
+          <h1 className="text-[30px] font-semibold tracking-tight font-sans">
             Welcome back{firstName ? `, ${firstName}` : ''}
           </h1>
           <div
-            className="flex items-center gap-5 text-[13px] bg-warm-100 border border-warm-200 rounded-xl px-6 py-3 shadow-sm cursor-pointer hover:bg-warm-200 transition-colors"
+            className="flex items-center gap-5 text-[13px] bg-[var(--color-surface)] border border-[var(--border)] rounded-[var(--radius-lg)] px-6 py-3 shadow-card cursor-pointer hover:shadow-soft hover:-translate-y-0.5 transition-all duration-180"
             onClick={() => setShowStatsDialog(true)}
           >
             <div className="flex items-center gap-2">
               <span>🔥</span>
-              <span className="font-medium text-warm-700">{formatStreakText(stats.streakDays)}</span>
+              <span className="font-medium text-[var(--color-text)]">{formatStreakText(stats.streakDays)}</span>
             </div>
-            <div className="h-5 w-px bg-warm-300" />
+            <div className="h-5 w-px bg-warm-200" />
             <div className="flex items-center gap-2">
               <span>🚀</span>
-              <span className="font-medium text-warm-700">{stats.totalWords.toLocaleString()} words</span>
+              <span className="font-medium text-[var(--color-text)]">{stats.totalWords.toLocaleString()} words</span>
             </div>
-            <div className="h-5 w-px bg-warm-300" />
+            <div className="h-5 w-px bg-warm-200" />
             <div className="flex items-center gap-2">
               <span>🏆</span>
-              <span className="font-medium text-warm-700">{stats.averageWPM} WPM</span>
+              <span className="font-medium text-[var(--color-text)]">{stats.averageWPM} WPM</span>
             </div>
           </div>
         </div>
 
         {/* Dictation Info Box */}
-        <div className="bg-[var(--accent)] rounded-2xl p-8 flex items-center justify-between mb-10">
+        <div className="bg-[var(--color-surface)] border border-[var(--border)] rounded-[var(--radius-lg)] p-7 flex items-center justify-between mb-10 shadow-[var(--shadow-soft)]">
           <div>
-            <div className="text-lg font-serif font-medium mb-1">
+            <div className="text-lg font-sans font-medium mb-1">
               Voice dictation in any app
             </div>
-            <div className="text-sm text-warm-600">
+            <div className="text-sm text-[var(--color-subtext)]">
               <span key="hold-down">Hold down the trigger key </span>
               {keyboardShortcut.map((key, index) => (
                 <React.Fragment key={index}>
-                  <span className="bg-white/60 px-1.5 py-0.5 rounded text-xs font-mono shadow-sm">
+                  <span className="bg-white border border-[var(--border)] px-1.5 py-0.5 rounded text-xs font-mono shadow-sm">
                     {getKeyDisplay(key as KeyName, platform, {
                       showDirectionalText: false,
                       format: 'label',
@@ -633,7 +633,7 @@ export default function HomeContent({
             </div>
           </div>
           <button
-            className="bg-[var(--primary)] text-[var(--primary-foreground)] px-6 py-3 rounded-full font-semibold hover:opacity-90 cursor-pointer transition-opacity"
+            className="bg-[var(--primary)] text-[var(--primary-foreground)] px-6 py-3 rounded-[var(--radius-lg)] font-semibold hover:opacity-90 cursor-pointer transition-opacity"
             onClick={() =>
               window.api?.invoke('web-open-url', EXTERNAL_LINKS.WEBSITE)
             }
@@ -643,7 +643,7 @@ export default function HomeContent({
         </div>
 
         {/* Recent Activity Header */}
-        <div className="text-sm text-warm-500 mb-6">
+        <div className="text-xs font-semibold tracking-[1px] uppercase text-[var(--color-subtext)] mb-6">
           Recent activity
         </div>
       </div>
@@ -651,11 +651,11 @@ export default function HomeContent({
       {/* Scrollable Recent Activity Section */}
       <div className="flex-1 px-12 max-w-4xl mx-auto w-full overflow-y-auto scrollbar-hide">
         {loading ? (
-          <div className="bg-white dark:bg-[var(--card)] rounded-xl border border-warm-100 dark:border-warm-800 p-8 text-center text-warm-500">
+          <div className="bg-white dark:bg-[var(--card)] rounded-[var(--radius-lg)] border border-[var(--border)] p-8 text-center text-[var(--color-subtext)]">
             Loading recent activity...
           </div>
         ) : interactions.length === 0 ? (
-          <div className="bg-white dark:bg-[var(--card)] rounded-xl border border-warm-100 dark:border-warm-800 p-8 text-center text-warm-500">
+          <div className="bg-white dark:bg-[var(--card)] rounded-[var(--radius-lg)] border border-[var(--border)] p-8 text-center text-[var(--color-subtext)]">
             <p className="text-sm">No interactions yet</p>
             <p className="text-xs mt-1">
               Try using voice dictation by pressing{' '}
@@ -666,18 +666,18 @@ export default function HomeContent({
           Object.entries(groupedInteractions).map(
             ([dateLabel, dateInteractions]) => (
               <div key={dateLabel} className="mb-6">
-                <div className="text-xs text-warm-500 mb-4">{dateLabel}</div>
-                <div className="bg-white dark:bg-[var(--card)] rounded-xl border border-warm-100 dark:border-warm-800 divide-y divide-warm-100 dark:divide-warm-800">
+                <div className="text-xs font-semibold tracking-[1px] uppercase text-[var(--color-subtext)] mb-4">{dateLabel}</div>
+                <div className="bg-white dark:bg-[var(--card)] rounded-[var(--radius-lg)] border border-[var(--border)] shadow-[var(--shadow-card)] divide-y divide-[var(--border)]">
                   {dateInteractions.map(interaction => {
                     const displayInfo = getDisplayText(interaction)
 
                     return (
                       <div
                         key={interaction.id}
-                        className="flex items-center justify-between px-4 py-4 gap-10 hover:bg-warm-50 transition-colors duration-200 group"
+                        className="flex items-center justify-between px-4 py-4 gap-10 hover:bg-[var(--color-muted-bg)] transition-colors duration-200 group"
                       >
                         <div className="flex items-center gap-10">
-                          <div className="text-warm-500 min-w-[60px]">
+                          <div className="text-[var(--color-subtext)] text-[13px] min-w-[60px]">
                             {formatTime(interaction.created_at)}
                           </div>
                           <div
@@ -837,19 +837,19 @@ export default function HomeContent({
             <h2 className="text-xl font-bold text-center mb-1">
               You've been Flowing. Hard.
             </h2>
-            <p className="text-sm text-warm-500 text-center mb-8">
+            <p className="text-sm text-[var(--color-subtext)] text-center mb-8">
               Here's a personal snapshot of your productivity with Ito.
             </p>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-warm-50 rounded-xl p-5">
-                <div className="text-xs font-semibold tracking-wider text-warm-500 uppercase mb-3">
+              <div className="bg-[var(--color-surface)] rounded-[var(--radius-lg)] p-5">
+                <div className="text-xs font-semibold tracking-wider text-[var(--color-subtext)] uppercase mb-3">
                   Daily Streak
                 </div>
                 <div className="text-2xl font-bold mb-1">
                   {stats.streakDays} {stats.streakDays === 1 ? 'day' : 'days'} 🔥
                 </div>
-                <div className="text-sm text-warm-500">
+                <div className="text-sm text-[var(--color-subtext)]">
                   {stats.streakDays === 0
                     ? 'Start your streak today!'
                     : stats.streakDays === 1
@@ -860,26 +860,26 @@ export default function HomeContent({
                 </div>
               </div>
 
-              <div className="bg-warm-50 rounded-xl p-5">
-                <div className="text-xs font-semibold tracking-wider text-warm-500 uppercase mb-3">
+              <div className="bg-[var(--color-surface)] rounded-[var(--radius-lg)] p-5">
+                <div className="text-xs font-semibold tracking-wider text-[var(--color-subtext)] uppercase mb-3">
                   Average Speed
                 </div>
                 <div className="text-2xl font-bold mb-1">
                   {stats.averageWPM} WPM 🏆
                 </div>
-                <div className="text-sm text-warm-500">
+                <div className="text-sm text-[var(--color-subtext)]">
                   Top performer!
                 </div>
               </div>
 
-              <div className="bg-warm-50 rounded-xl p-5">
-                <div className="text-xs font-semibold tracking-wider text-warm-500 uppercase mb-3">
+              <div className="bg-[var(--color-surface)] rounded-[var(--radius-lg)] p-5">
+                <div className="text-xs font-semibold tracking-wider text-[var(--color-subtext)] uppercase mb-3">
                   Total Words Dictated
                 </div>
                 <div className="text-2xl font-bold mb-1">
                   {stats.totalWords.toLocaleString()} 🚀
                 </div>
-                <div className="text-sm text-warm-500">
+                <div className="text-sm text-[var(--color-subtext)]">
                   {stats.totalWords < 1000
                     ? 'Getting warmed up!'
                     : stats.totalWords < 5000
@@ -888,14 +888,14 @@ export default function HomeContent({
                 </div>
               </div>
 
-              <div className="bg-warm-50 rounded-xl p-5">
-                <div className="text-xs font-semibold tracking-wider text-warm-500 uppercase mb-3">
+              <div className="bg-[var(--color-surface)] rounded-[var(--radius-lg)] p-5">
+                <div className="text-xs font-semibold tracking-wider text-[var(--color-subtext)] uppercase mb-3">
                   Total Interactions
                 </div>
                 <div className="text-2xl font-bold mb-1">
                   {interactions.length} ⭐
                 </div>
-                <div className="text-sm text-warm-500">
+                <div className="text-sm text-[var(--color-subtext)]">
                   {interactions.length < 10
                     ? 'Keep using Ito!'
                     : 'You are almost at flow mastery!'}
