@@ -590,22 +590,22 @@ export default function HomeContent({
             Welcome back{firstName ? `, ${firstName}` : ''}
           </h1>
           <div
-            className="flex items-center gap-4 text-sm bg-warm-50 rounded-full px-5 py-2.5 cursor-pointer hover:bg-warm-100 transition-colors"
+            className="flex items-center gap-5 text-[13px] bg-warm-100 border border-warm-200 rounded-xl px-6 py-3 shadow-sm cursor-pointer hover:bg-warm-200 transition-colors"
             onClick={() => setShowStatsDialog(true)}
           >
             <div className="flex items-center gap-2">
               <span>🔥</span>
-              <span className="font-medium">{formatStreakText(stats.streakDays)}</span>
+              <span className="font-medium text-warm-700">{formatStreakText(stats.streakDays)}</span>
             </div>
-            <div className="h-4 w-px bg-warm-200" />
+            <div className="h-5 w-px bg-warm-300" />
             <div className="flex items-center gap-2">
               <span>🚀</span>
-              <span className="font-medium">{stats.totalWords.toLocaleString()} words</span>
+              <span className="font-medium text-warm-700">{stats.totalWords.toLocaleString()} words</span>
             </div>
-            <div className="h-4 w-px bg-warm-200" />
+            <div className="h-5 w-px bg-warm-300" />
             <div className="flex items-center gap-2">
               <span>🏆</span>
-              <span className="font-medium">{stats.averageWPM} WPM</span>
+              <span className="font-medium text-warm-700">{stats.averageWPM} WPM</span>
             </div>
           </div>
         </div>
