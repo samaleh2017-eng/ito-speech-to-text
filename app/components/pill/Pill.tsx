@@ -23,6 +23,7 @@ const globalStyles = `
     height: 100%;
     margin: 0;
     overflow: hidden;
+    background: transparent !important;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     display: flex;
@@ -90,8 +91,9 @@ const Pill = () => {
   const [onboardingCompleted, setOnboardingCompleted] = useState(
     initialOnboardingCompleted,
   )
+  const volumeHistoryRef = useRef<number[]>([])
+  const lastVolumeUpdateRef = useRef(0)
   const [volumeHistory, setVolumeHistory] = useState<number[]>([])
-  const [lastVolumeUpdate, setLastVolumeUpdate] = useState(0)
   const [appTarget, setAppTarget] = useState<AppTarget | null>(null)
 
   useEffect(() => {
@@ -127,6 +129,7 @@ const Pill = () => {
         if (!state.isRecording) {
           setIsManualRecording(false)
           isManualRecordingRef.current = false
+          volumeHistoryRef.current = []
           setVolumeHistory([])
         }
       },
@@ -141,15 +144,16 @@ const Pill = () => {
 
     const unsubVolume = window.api.on('volume-update', (vol: number) => {
       const now = Date.now()
-      if (now - lastVolumeUpdate < BAR_UPDATE_INTERVAL) {
+      if (now - lastVolumeUpdateRef.current < BAR_UPDATE_INTERVAL) {
         return
       }
-      const newVolumeHistory = [...volumeHistory, vol]
-      if (newVolumeHistory.length > 42) {
-        newVolumeHistory.shift()
+      const newHistory = [...volumeHistoryRef.current, vol]
+      if (newHistory.length > 42) {
+        newHistory.shift()
       }
-      setVolumeHistory(newVolumeHistory)
-      setLastVolumeUpdate(now)
+      volumeHistoryRef.current = newHistory
+      lastVolumeUpdateRef.current = now
+      setVolumeHistory(newHistory)
     })
 
     const unsubSettings = window.api.on('settings-update', (settings: any) => {
@@ -190,7 +194,7 @@ const Pill = () => {
       unsubOnboarding()
       unsubUserAuth()
     }
-  }, [volumeHistory, lastVolumeUpdate])
+  }, [])
 
   useEffect(() => {
     if (isRecording || isManualRecording) {
@@ -392,22 +396,18 @@ const Pill = () => {
               style={{ transformOrigin: 'top center' }}
               className={[
                 'relative flex flex-col items-center pointer-events-auto',
-                'backdrop-blur-[40px] saturate-150 overflow-hidden',
+                'overflow-hidden',
                 'rounded-t-none border-t-0',
-                'bg-gradient-to-b from-black to-[#141414]',
-                'shadow-[0_10px_30px_rgba(0,0,0,0.8),inset_0_-1px_0_rgba(255,255,255,0.15),inset_0_-8px_12px_rgba(255,255,255,0.02)]',
-                'border-x border-b border-white/5 ring-1 ring-white/5',
+                'bg-[rgba(10,10,10,0.88)] backdrop-blur-[12px]',
+                'shadow-[0_8px_24px_rgba(0,0,0,0.6)]',
+                'border-x border-b border-white/[0.06]',
                 isIdle && !anyRecording && !isProcessing
                   ? 'cursor-pointer'
                   : 'cursor-default',
               ].join(' ')}
               whileHover={
                 isIdle && !anyRecording && !isProcessing
-                  ? {
-                      scale: 1.02,
-                      boxShadow:
-                        '0 10px 40px rgba(0,122,255,0.15), inset 0 -1px 0 rgba(255,255,255,0.15), inset 0 -8px 12px rgba(255,255,255,0.02)',
-                    }
+                  ? { scale: 1.02 }
                   : undefined
               }
               onClick={handleClick}

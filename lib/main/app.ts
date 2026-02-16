@@ -153,17 +153,14 @@ export function createPillWindow(): void {
 }
 
 export function startPillPositioner() {
-  // Listen for display changes to handle dock visibility changes
   screen.on('display-metrics-changed', () => {
     updatePillPosition()
   })
 
-  // Initial position on start
-  updatePillPosition()
+  screen.on('display-added', () => updatePillPosition())
+  screen.on('display-removed', () => updatePillPosition())
 
-  // Throttle updates (Windows needs less frequent updates to avoid jitter)
-  const intervalMs = process.platform === 'win32' ? 750 : 250
-  setInterval(updatePillPosition, intervalMs)
+  updatePillPosition()
 }
 
 function updatePillPosition() {
