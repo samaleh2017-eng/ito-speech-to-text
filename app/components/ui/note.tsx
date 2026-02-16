@@ -76,7 +76,7 @@ export function Note({
           }}
           className="p-1.5 hover:bg-[var(--color-muted-bg)] transition-colors border-r border-[var(--border)] rounded-l-md cursor-pointer "
         >
-          <Pencil className="w-4 h-4 text-warm-600" />
+          <Pencil className="w-4 h-4 text-[var(--color-subtext)]" />
         </button>
         <div className="relative">
           <button

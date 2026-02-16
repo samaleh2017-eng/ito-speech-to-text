@@ -302,20 +302,21 @@ export default function DictionaryContent() {
       }}
     >
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-serif font-normal tracking-tight">Dictionary</h1>
+        <h1 className="text-[30px] font-semibold tracking-tight font-sans">Dictionary</h1>
         <button
           onClick={handleAddNew}
-          className="bg-foreground text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-warm-800 transition-colors cursor-pointer"
+          className="bg-foreground text-white px-5 py-2.5 rounded-[var(--radius-lg)] text-sm font-medium hover:bg-warm-800 transition-colors cursor-pointer"
         >
           Add new
         </button>
       </div>
 
-      <div className="flex items-center justify-end mt-6 mb-4 border-b border-warm-100 pb-3">
+      <div className="flex items-center justify-end mt-6 mb-4 border-b border-[var(--border)] pb-3">
         <div className="flex items-center gap-3">
           <button
-            className="text-warm-400 hover:text-warm-600 transition-colors cursor-pointer"
+            className="text-[var(--color-subtext)] hover:text-[var(--color-text)] transition-colors cursor-pointer"
             title="Search"
+            aria-label="Search dictionary"
             onClick={() => {
               if (showSearch) setSearchQuery('')
               setShowSearch(!showSearch)
@@ -324,15 +325,17 @@ export default function DictionaryContent() {
             <Search className="w-4 h-4" />
           </button>
           <button
-            className="text-warm-400 hover:text-warm-600 transition-colors cursor-pointer"
+            className="text-[var(--color-subtext)] hover:text-[var(--color-text)] transition-colors cursor-pointer"
             title="Sort"
+            aria-label="Sort entries"
             onClick={toggleSort}
           >
             <Sort className="w-4 h-4" />
           </button>
           <button
-            className="text-warm-400 hover:text-warm-600 transition-colors cursor-pointer"
+            className="text-[var(--color-subtext)] hover:text-[var(--color-text)] transition-colors cursor-pointer"
             title="Refresh"
+            aria-label="Refresh entries"
             onClick={refreshEntries}
           >
             <Refresh className="w-4 h-4" />
@@ -347,14 +350,14 @@ export default function DictionaryContent() {
             placeholder="Search dictionary..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-2.5 border border-warm-100 rounded-xl text-sm focus:outline-none focus:border-warm-200 bg-transparent placeholder-warm-400"
+            className="w-full px-4 py-2.5 border border-[var(--border)] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)] bg-transparent placeholder-warm-400"
             autoFocus
           />
         </div>
       )}
 
       {noEntries && (
-        <div className="text-warm-600">
+        <div className="text-[var(--color-subtext)]">
           <p className="text-sm">No entries yet</p>
           <p className="text-xs mt-1">
             Dictionary entries make the transcription more accurate
@@ -362,16 +365,16 @@ export default function DictionaryContent() {
         </div>
       )}
       {!noEntries && filteredEntries.length === 0 && (
-        <div className="text-warm-600">
+        <div className="text-[var(--color-subtext)]">
           <p className="text-sm">No matching entries</p>
         </div>
       )}
       {!noEntries && filteredEntries.length > 0 && (
-        <div className="rounded-xl border border-warm-100 divide-y divide-warm-100">
+        <div className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-white overflow-hidden divide-y divide-[var(--border)] shadow-[var(--shadow-card)]">
           {filteredEntries.map((entry, index) => (
             <div
               key={entry.id}
-              className="flex items-center justify-between px-4 py-4 gap-10 hover:bg-warm-50 transition-colors duration-200 group"
+              className="flex items-center justify-between px-4 py-4 gap-10 hover:bg-[var(--color-muted-bg)] transition-colors duration-200 group"
               onMouseEnter={() => setHoveredRow(index)}
               onMouseLeave={() => setHoveredRow(null)}
             >
@@ -389,10 +392,10 @@ export default function DictionaryContent() {
                   <TooltipTrigger asChild>
                     <button
                       onClick={() => handleEdit(entry.id)}
-                      className="p-1.5 hover:bg-warm-100 rounded transition-colors cursor-pointer"
+                      className="p-1.5 hover:bg-[var(--color-muted-bg)] rounded transition-colors cursor-pointer"
                       aria-label="Edit entry"
                     >
-                      <Pencil className="w-4 h-4 text-warm-700" />
+                      <Pencil className="w-4 h-4 text-[var(--color-text)]" />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="top" sideOffset={5}>
@@ -407,7 +410,7 @@ export default function DictionaryContent() {
                       className="p-1.5 hover:bg-red-100 rounded transition-colors cursor-pointer"
                       aria-label="Delete entry"
                     >
-                      <Trash className="w-4 h-4 text-warm-700 hover:text-red-600" />
+                      <Trash className="w-4 h-4 text-[var(--color-text)] hover:text-red-600" />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="top" sideOffset={5}>
@@ -473,7 +476,7 @@ export default function DictionaryContent() {
                 value={editContent}
                 onChange={e => setEditContent(e.target.value)}
                 onKeyDown={handleEditKeyDown}
-                className="w-full p-4 rounded-xl resize-none focus:outline-none border border-warm-100"
+                className="w-full p-4 rounded-xl resize-none focus:outline-none border border-[var(--border)] focus:ring-2 focus:ring-[var(--ring)]"
                 placeholder="Enter dictionary entry..."
               />
             ) : (
@@ -485,16 +488,16 @@ export default function DictionaryContent() {
                     value={editFrom}
                     onChange={e => setEditFrom(e.target.value)}
                     onKeyDown={handleEditKeyDown}
-                    className="flex-1 p-4 rounded-xl resize-none focus:outline-none border border-warm-100"
+                    className="flex-1 p-4 rounded-xl resize-none focus:outline-none border border-[var(--border)] focus:ring-2 focus:ring-[var(--ring)]"
                     placeholder="Misspelling"
                   />
-                  <span className="text-warm-600">→</span>
+                  <span className="text-[var(--color-subtext)]">→</span>
                   <input
                     type="text"
                     value={editTo}
                     onChange={e => setEditTo(e.target.value)}
                     onKeyDown={handleEditKeyDown}
-                    className="flex-1 p-4 rounded-xl resize-none focus:outline-none border border-warm-100"
+                    className="flex-1 p-4 rounded-xl resize-none focus:outline-none border border-[var(--border)] focus:ring-2 focus:ring-[var(--ring)]"
                     placeholder="Correct spelling"
                   />
                 </div>
@@ -503,7 +506,7 @@ export default function DictionaryContent() {
           </div>
           <DialogFooter className="p-4">
             <Button
-              className="bg-warm-100 hover:bg-warm-200 text-warm-700 cursor-pointer"
+              className="bg-[var(--color-muted-bg)] hover:bg-warm-200 text-[var(--color-text)] cursor-pointer"
               onClick={handleCancelEdit}
             >
               Cancel
@@ -553,7 +556,7 @@ export default function DictionaryContent() {
                 value={newEntryContent}
                 onChange={e => setNewEntryContent(e.target.value)}
                 onKeyDown={handleAddKeyDown}
-                className="w-full p-4 rounded-xl resize-none focus:outline-none border border-warm-100"
+                className="w-full p-4 rounded-xl resize-none focus:outline-none border border-[var(--border)] focus:ring-2 focus:ring-[var(--ring)]"
                 placeholder="Enter dictionary entry..."
               />
             ) : (
@@ -565,16 +568,16 @@ export default function DictionaryContent() {
                     value={newFrom}
                     onChange={e => setNewFrom(e.target.value)}
                     onKeyDown={handleAddKeyDown}
-                    className="flex-1 p-4 rounded-xl resize-none focus:outline-none border border-warm-100"
+                    className="flex-1 p-4 rounded-xl resize-none focus:outline-none border border-[var(--border)] focus:ring-2 focus:ring-[var(--ring)]"
                     placeholder="Misspelling"
                   />
-                  <span className="text-warm-600">→</span>
+                  <span className="text-[var(--color-subtext)]">→</span>
                   <input
                     type="text"
                     value={newTo}
                     onChange={e => setNewTo(e.target.value)}
                     onKeyDown={handleAddKeyDown}
-                    className="flex-1 p-4 rounded-xl resize-none focus:outline-none border border-warm-100"
+                    className="flex-1 p-4 rounded-xl resize-none focus:outline-none border border-[var(--border)] focus:ring-2 focus:ring-[var(--ring)]"
                     placeholder="Correct spelling"
                   />
                 </div>
@@ -583,7 +586,7 @@ export default function DictionaryContent() {
           </div>
           <DialogFooter className="p-4">
             <Button
-              className="bg-warm-100 hover:bg-warm-200 text-warm-700 cursor-pointer"
+              className="bg-[var(--color-muted-bg)] hover:bg-warm-200 text-[var(--color-text)] cursor-pointer"
               onClick={handleCancelNew}
             >
               Cancel

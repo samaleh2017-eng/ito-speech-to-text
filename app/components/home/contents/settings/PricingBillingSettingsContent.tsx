@@ -263,7 +263,7 @@ export default function PricingBillingSettingsContent() {
             <Button
               variant="outline"
               size="lg"
-              className="w-full rounded-xl border-warm-100"
+              className="w-full rounded-xl border-[var(--border)]"
               onClick={handleContactUs}
             >
               Contact Us
@@ -294,14 +294,14 @@ function PricingCard({
 }: PricingCardProps) {
   return (
     <div
-      className={`rounded-xl border-2 p-6 flex flex-col ${
+      className={`rounded-[var(--radius-lg)] border-2 p-6 flex flex-col ${
         isHighlighted
           ? 'border-purple-500 bg-gradient-to-br from-purple-50/30 to-pink-50/30'
-          : 'border-warm-100 bg-warm-50'
+          : 'border-[var(--border)] bg-[var(--color-surface)]'
       }`}
     >
       {/* Title */}
-      <div className="text-sm font-medium text-warm-700 mb-2">{title}</div>
+      <div className="text-sm font-medium text-[var(--color-text)] mb-2">{title}</div>
 
       {/* Price */}
       <div className="mb-6">
@@ -315,7 +315,7 @@ function PricingCard({
           {price}
         </span>
         {priceSubtext && (
-          <span className="text-warm-600 ml-1">{priceSubtext}</span>
+          <span className="text-[var(--color-subtext)] ml-1">{priceSubtext}</span>
         )}
       </div>
 

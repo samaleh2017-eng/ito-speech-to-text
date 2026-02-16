@@ -53,12 +53,12 @@ export default function MyDetailsSettingsContent() {
   }
 
   const inputClass =
-    'w-80 bg-white border border-warm-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent'
+    'w-80 bg-white border border-[var(--border)] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent'
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <span className="text-sm text-warm-600">Loading...</span>
+        <span className="text-sm text-[var(--color-subtext)]">Loading...</span>
       </div>
     )
   }
@@ -68,7 +68,7 @@ export default function MyDetailsSettingsContent() {
       <div className="space-y-8 pb-8">
         {/* Section 1: Personal Information */}
         <div className="space-y-4">
-          <h3 className="text-sm font-semibold text-warm-600 uppercase tracking-wider">
+          <h3 className="text-sm font-semibold text-[var(--color-subtext)] uppercase tracking-wider">
             Personal Information
           </h3>
           <div className="space-y-4">
@@ -163,11 +163,11 @@ export default function MyDetailsSettingsContent() {
           </div>
         </div>
 
-        <div className="border-t border-warm-100" />
+        <div className="border-t border-[var(--border)]" />
 
         {/* Section 2: Contact Information */}
         <div className="space-y-4">
-          <h3 className="text-sm font-semibold text-warm-600 uppercase tracking-wider">
+          <h3 className="text-sm font-semibold text-[var(--color-subtext)] uppercase tracking-wider">
             Contact Information
           </h3>
           <div className="space-y-4">
@@ -210,15 +210,15 @@ export default function MyDetailsSettingsContent() {
           </div>
         </div>
 
-        <div className="border-t border-warm-100" />
+        <div className="border-t border-[var(--border)]" />
 
         {/* Section 3: Additional Information */}
         <div className="space-y-4">
-          <h3 className="text-sm font-semibold text-warm-600 uppercase tracking-wider">
+          <h3 className="text-sm font-semibold text-[var(--color-subtext)] uppercase tracking-wider">
             Additional Information
           </h3>
           {additionalInfo.length === 0 ? (
-            <p className="text-sm text-warm-500">
+            <p className="text-sm text-[var(--color-subtext)]">
               Add custom information that will help personalize your experience
             </p>
           ) : (
@@ -227,7 +227,7 @@ export default function MyDetailsSettingsContent() {
                 <div key={index} className="flex items-center gap-2">
                   <input
                     type="text"
-                    className="flex-1 bg-white border border-warm-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent"
+                    className="flex-1 bg-white border border-[var(--border)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
                     value={row.key}
                     onChange={e =>
                       updateAdditionalInfoRow(index, 'key', e.target.value)
@@ -236,7 +236,7 @@ export default function MyDetailsSettingsContent() {
                   />
                   <input
                     type="text"
-                    className="flex-1 bg-white border border-warm-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent"
+                    className="flex-1 bg-white border border-[var(--border)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
                     value={row.value}
                     onChange={e =>
                       updateAdditionalInfoRow(index, 'value', e.target.value)
@@ -245,7 +245,7 @@ export default function MyDetailsSettingsContent() {
                   />
                   <button
                     onClick={() => removeAdditionalInfoRow(index)}
-                    className="p-2 text-warm-500 hover:text-red-500 transition-colors"
+                    className="p-2 text-[var(--color-subtext)] hover:text-red-500 transition-colors"
                   >
                     🗑
                   </button>
@@ -261,7 +261,7 @@ export default function MyDetailsSettingsContent() {
           </button>
         </div>
 
-        <div className="border-t border-warm-100" />
+        <div className="border-t border-[var(--border)]" />
 
         {/* Save button */}
         <div className="flex items-center gap-3">

@@ -73,7 +73,7 @@ export default function AppStylingContent() {
   if (isLoading) {
     return (
       <div className="w-full max-w-2xl mx-auto px-6 py-12">
-        <div className="flex items-center justify-center gap-2 text-warm-500">
+        <div className="flex items-center justify-center gap-2 text-[var(--color-subtext)]">
           <div className="w-4 h-4 border-2 border-warm-300 border-t-warm-600 rounded-full animate-spin" />
           <span className="text-sm">Loading app targets...</span>
         </div>
@@ -85,8 +85,8 @@ export default function AppStylingContent() {
     <div className="w-full max-w-2xl mx-auto px-6">
       <div className="space-y-8">
         <div>
-          <h1 className="text-xl font-serif font-normal tracking-tight text-foreground">App Styling</h1>
-          <p className="text-sm text-warm-600 mt-1">
+          <h1 className="text-[30px] font-semibold tracking-tight font-sans text-foreground">App Styling</h1>
+          <p className="text-sm text-[var(--color-subtext)] mt-1">
             Assign a writing tone per app or website. Ito automatically adapts
             your transcription style based on where you're working.
           </p>
@@ -129,7 +129,7 @@ export default function AppStylingContent() {
         </div>
 
         {sortedApps.length > 0 && (
-          <div className="flex items-center gap-4 text-xs text-warm-500">
+          <div className="flex items-center gap-4 text-xs text-[var(--color-subtext)]">
             <div className="flex items-center gap-1.5">
               <AppWindow className="w-3.5 h-3.5" />
               <span>
@@ -146,27 +146,27 @@ export default function AppStylingContent() {
         )}
 
         {sortedApps.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-warm-100 bg-warm-50/50 p-10">
+          <div className="rounded-[var(--radius-lg)] border border-dashed border-[var(--border)] bg-[var(--color-surface)]/50 p-10">
             <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 rounded-full bg-warm-100 flex items-center justify-center mb-4">
-                <Crosshair className="w-6 h-6 text-warm-500" />
+              <div className="w-12 h-12 rounded-full bg-[var(--color-muted-bg)] flex items-center justify-center mb-4">
+                <Crosshair className="w-6 h-6 text-[var(--color-subtext)]" />
               </div>
-              <h3 className="text-sm font-medium text-warm-700 mb-2">
+              <h3 className="text-sm font-medium text-[var(--color-text)] mb-2">
                 No apps registered yet
               </h3>
-              <p className="text-sm text-warm-600 max-w-sm mb-6">
+              <p className="text-sm text-[var(--color-subtext)] max-w-sm mb-6">
                 Register an app or website to automatically apply a writing tone
                 whenever you dictate in that context.
               </p>
-              <ol className="text-sm text-warm-600 text-left space-y-2">
+              <ol className="text-sm text-[var(--color-subtext)] text-left space-y-2">
                 <li className="flex items-start gap-2">
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-warm-200 text-warm-700 text-xs flex items-center justify-center font-medium mt-0.5">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-warm-200 text-[var(--color-text)] text-xs flex items-center justify-center font-medium mt-0.5">
                     1
                   </span>
                   <span>Open the app or website you want to style</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-warm-200 text-warm-700 text-xs flex items-center justify-center font-medium mt-0.5">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-warm-200 text-[var(--color-text)] text-xs flex items-center justify-center font-medium mt-0.5">
                     2
                   </span>
                   <span>
@@ -174,19 +174,19 @@ export default function AppStylingContent() {
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-warm-200 text-warm-700 text-xs flex items-center justify-center font-medium mt-0.5">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-warm-200 text-[var(--color-text)] text-xs flex items-center justify-center font-medium mt-0.5">
                     3
                   </span>
                   <span>Click on your target app when this window minimizes</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-warm-200 text-warm-700 text-xs flex items-center justify-center font-medium mt-0.5">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-warm-200 text-[var(--color-text)] text-xs flex items-center justify-center font-medium mt-0.5">
                     4
                   </span>
                   <span>Choose to match by app name or domain</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-warm-200 text-warm-700 text-xs flex items-center justify-center font-medium mt-0.5">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-warm-200 text-[var(--color-text)] text-xs flex items-center justify-center font-medium mt-0.5">
                     5
                   </span>
                   <span>Select a writing tone for that target</span>
@@ -195,7 +195,7 @@ export default function AppStylingContent() {
             </div>
           </div>
         ) : (
-          <div className="rounded-xl border border-warm-100 bg-white overflow-hidden divide-y divide-warm-100">
+          <div className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-white overflow-hidden divide-y divide-[var(--border)] shadow-[var(--shadow-card)]">
             {sortedApps.map(app => (
               <AppStylingRow key={app.id} app={app} tones={toneOptions} />
             ))}

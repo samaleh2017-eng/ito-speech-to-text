@@ -26,7 +26,7 @@ export const AppStylingRow = ({ app, tones }: Props) => {
 
   return (
     <div className="flex items-center gap-4 p-4">
-      <div className="w-10 h-10 rounded-lg bg-warm-100 flex items-center justify-center overflow-hidden">
+      <div className="w-10 h-10 rounded-lg bg-[var(--color-muted-bg)] flex items-center justify-center overflow-hidden">
         {app.iconBase64 ? (
           <img
             src={`data:image/png;base64,${app.iconBase64}`}
@@ -34,15 +34,15 @@ export const AppStylingRow = ({ app, tones }: Props) => {
             className="w-8 h-8"
           />
         ) : isDomain ? (
-          <Globe className="w-5 h-5 text-warm-600" />
+          <Globe className="w-5 h-5 text-[var(--color-subtext)]" />
         ) : (
-          <AppWindow className="w-5 h-5 text-warm-600" />
+          <AppWindow className="w-5 h-5 text-[var(--color-subtext)]" />
         )}
       </div>
 
       <div className="flex-1 min-w-0">
         <p className="font-medium truncate">{app.name}</p>
-        <p className="text-xs text-warm-600">
+        <p className="text-xs text-[var(--color-subtext)]">
           {isDomain ? 'Domain' : 'Application'}
         </p>
       </div>
@@ -68,7 +68,7 @@ export const AppStylingRow = ({ app, tones }: Props) => {
         size="icon"
         onClick={() => deleteAppTarget(app.id)}
       >
-        <Trash2 className="h-4 w-4 text-warm-500" />
+        <Trash2 className="h-4 w-4 text-[var(--color-subtext)]" />
       </Button>
     </div>
   )

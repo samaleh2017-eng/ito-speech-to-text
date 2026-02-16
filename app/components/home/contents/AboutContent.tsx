@@ -22,15 +22,15 @@ function AboutCard({
   onClick,
 }: AboutCardProps) {
   return (
-    <div className="w-1/3 bg-warm-50 rounded-xl border border-warm-100 p-6 flex flex-col items-start text-left hover:shadow-md transition-shadow duration-200">
-      <div className="w-8 h-8 bg-warm-100 rounded-lg flex items-center justify-center mb-3">
+    <div className="w-full bg-white rounded-[var(--radius-lg)] border border-[rgba(31,31,31,0.03)] p-6 flex flex-col items-start text-left shadow-[var(--shadow-card)] transition-all duration-180 hover:-translate-y-1 hover:shadow-[0_16px_36px_rgba(31,31,31,0.07)]">
+      <div className="w-10 h-10 bg-[var(--color-muted-bg)] rounded-xl flex items-center justify-center mb-3">
         {icon}
       </div>
       <h2 className="text-lg font-semibold mb-1">{title}</h2>
-      <p className="text-warm-600 mb-6 leading-relaxed">{description}</p>
+      <p className="text-[var(--color-subtext)] mb-6 leading-relaxed">{description}</p>
       <Button
         onClick={onClick}
-        className="w-fit bg-white text-foreground border border-warm-200 hover:bg-warm-50 rounded-full cursor-pointer"
+        className="w-fit bg-white text-foreground border border-[var(--border)] hover:bg-[var(--color-surface)] rounded-[var(--radius-lg)] cursor-pointer"
         style={{
           padding: '20px 28px',
         }}
@@ -65,12 +65,10 @@ export default function AboutContent() {
   return (
     <div className="w-full px-12">
       <div className="mb-8">
-        <h1 className="text-2xl font-serif font-normal tracking-tight">About</h1>
+        <h1 className="text-[30px] font-semibold tracking-tight font-sans">About</h1>
       </div>
 
-      <div className="flex flex-col gap-4">
-        {/* First Row: 3 items */}
-        <div className="flex flex-row gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           <AboutCard
             icon={<DiscordIcon width={24} height={24} className="text-black" />}
             title="Discord"
@@ -94,10 +92,7 @@ export default function AboutContent() {
             buttonText="Follow on X"
             onClick={handleXClick}
           />
-        </div>
 
-        {/* Second Row: 2 items */}
-        <div className="flex flex-row gap-4">
           <AboutCard
             icon={<GitHubIcon width={24} height={24} className="text-black" />}
             title="GitHub"
@@ -114,8 +109,8 @@ export default function AboutContent() {
             onClick={handleWebsiteClick}
           />
 
-          <div className="w-1/3 bg-warm-50 rounded-xl border border-warm-100 p-6 flex flex-col items-start text-left hover:shadow-md transition-shadow duration-200">
-            <div className="bg-warm-100 rounded-lg flex items-center justify-center mb-4">
+          <div className="w-full bg-white rounded-[var(--radius-lg)] border border-[rgba(31,31,31,0.03)] p-6 flex flex-col items-start text-left shadow-[var(--shadow-card)] transition-all duration-180 hover:-translate-y-1 hover:shadow-[0_16px_36px_rgba(31,31,31,0.07)]">
+            <div className="bg-[var(--color-muted-bg)] rounded-xl flex items-center justify-center mb-4">
               <ItoIcon
                 className="w-6 h-6 text-foreground"
                 style={{ height: '24px' }}
@@ -125,11 +120,10 @@ export default function AboutContent() {
             <h2 className="text-lg font-semibold mb-4">
               Version {import.meta.env.VITE_ITO_VERSION}
             </h2>
-            <p className="text-warm-600 mb-6 leading-relaxed">
+            <p className="text-[var(--color-subtext)] mb-6 leading-relaxed">
               Made with 🩷 in San Francisco.
             </p>
           </div>
-        </div>
       </div>
     </div>
   )

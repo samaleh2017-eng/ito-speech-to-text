@@ -20,7 +20,7 @@ export default function AudioSettingsContent() {
           <div className="flex items-center justify-between">
             <div>
               <div className="text-sm font-medium">Interaction Sounds</div>
-              <div className="text-xs text-warm-600 mt-1">
+              <div className="text-xs text-[var(--color-subtext)] mt-1">
                 Play a sound when Ito starts and stops recording.
               </div>
             </div>
@@ -35,7 +35,7 @@ export default function AudioSettingsContent() {
               <div className="text-sm font-medium">
                 Mute audio when dictating
               </div>
-              <div className="text-xs text-warm-600 mt-1">
+              <div className="text-xs text-[var(--color-subtext)] mt-1">
                 Automatically silence other active audio during dictation.
               </div>
             </div>
@@ -50,7 +50,7 @@ export default function AudioSettingsContent() {
               <div className="text-sm font-medium mb-2">
                 Select default microphone
               </div>
-              <div className="text-xs text-warm-600 mt-1">
+              <div className="text-xs text-[var(--color-subtext)] mt-1">
                 Select the microphone Ito will use by default for audio input.
               </div>
             </div>

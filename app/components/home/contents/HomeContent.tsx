@@ -681,13 +681,13 @@ export default function HomeContent({
                             {formatTime(interaction.created_at)}
                           </div>
                           <div
-                            className={`${displayInfo.isError ? 'text-warm-600' : 'text-foreground'} flex items-center gap-1`}
+                            className={`${displayInfo.isError ? 'text-[var(--color-subtext)]' : 'text-foreground'} flex items-center gap-1`}
                           >
                             {displayInfo.text}
                             {displayInfo.tooltip && (
                               <Tooltip>
                                 <TooltipTrigger>
-                                  <InfoCircle className="w-4 h-4 text-warm-400" />
+                                  <InfoCircle className="w-4 h-4 text-[var(--color-subtext)]" />
                                 </TooltipTrigger>
                                 <TooltipContent>
                                   {displayInfo.tooltip}
@@ -727,7 +727,7 @@ export default function HomeContent({
                                   className={`p-1.5 hover:bg-warm-200 rounded transition-colors cursor-pointer ${
                                     copiedItems.has(interaction.id)
                                       ? 'text-green-600'
-                                      : 'text-warm-600'
+                                      : 'text-[var(--color-subtext)]'
                                   }`}
                                   onClick={() =>
                                     copyToClipboard(
@@ -765,7 +765,7 @@ export default function HomeContent({
                             >
                               <TooltipTrigger asChild>
                                 <button
-                                  className="p-1.5 hover:bg-warm-200 rounded transition-colors cursor-pointer text-warm-600"
+                                  className="p-1.5 hover:bg-warm-200 rounded transition-colors cursor-pointer text-[var(--color-subtext)]"
                                   onClick={() =>
                                     handleAudioDownload(interaction)
                                   }
@@ -793,7 +793,7 @@ export default function HomeContent({
                                 className={`p-1.5 hover:bg-warm-200 rounded transition-colors cursor-pointer ${
                                   playingAudio === interaction.id
                                     ? 'bg-blue-50 text-blue-600'
-                                    : 'text-warm-600'
+                                    : 'text-[var(--color-subtext)]'
                                 }`}
                                 onClick={() => handleAudioPlayStop(interaction)}
                                 disabled={!interaction.raw_audio}

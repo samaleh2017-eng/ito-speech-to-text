@@ -94,7 +94,7 @@ export function ProUpgradeDialog({
           )}
 
           {/* Features List */}
-          <div className="space-y-3 mb-6 border border-warm-100 rounded-lg p-4">
+          <div className="space-y-3 mb-6 border border-[var(--border)] rounded-[var(--radius-lg)] p-4">
             <FeatureItem text="Unlimited words per week" />
             <FeatureItem text="Ultra fast dictation as fast as 0.3 second" />
             <FeatureItem text="Priority customer support" />
@@ -115,7 +115,7 @@ export function ProUpgradeDialog({
               onClick={handleCheckout}
               variant="outline"
               size="lg"
-              className="rounded-xl border-warm-100"
+              className="rounded-xl border-[var(--border)]"
               disabled={checkoutLoading || billingState.isLoading}
             >
               {checkoutLoading ? 'Loading...' : 'Upgrade Now'}{' '}

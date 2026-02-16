@@ -87,14 +87,14 @@ export default function AccountSettingsContent() {
             type="text"
             value={user?.name}
             onChange={e => setName(e.target.value)}
-            className="w-80 bg-white border border-warm-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent"
+            className="w-80 bg-white border border-[var(--border)] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
           />
         </div>
 
         {/* Email */}
         <div className="flex items-center justify-between py-3 my-1">
           <label className="text-sm font-medium text-foreground">Email</label>
-          <div className="w-80 text-sm text-warm-600 px-4">{user?.email}</div>
+          <div className="w-80 text-sm text-[var(--color-subtext)] px-4">{user?.email}</div>
         </div>
       </div>
 
@@ -104,7 +104,7 @@ export default function AccountSettingsContent() {
           variant="outline"
           size="lg"
           onClick={handleSignOut}
-          className="px-6 py-3 bg-warm-100 text-warm-700 hover:bg-warm-200"
+          className="px-6 py-3 bg-[var(--color-muted-bg)] text-[var(--color-text)] hover:bg-warm-200"
         >
           Sign out
         </Button>
@@ -125,7 +125,7 @@ export default function AccountSettingsContent() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-red-600">Delete Account</DialogTitle>
-            <DialogDescription className="text-warm-600">
+            <DialogDescription className="text-[var(--color-subtext)]">
               Are you absolutely sure you want to delete your account? This
               action cannot be undone and will permanently remove:
               <br />
