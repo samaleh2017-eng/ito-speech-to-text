@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowUp, Pencil, Trash, Plus } from '@mynaui/icons-react'
+import { ArrowUp, Pencil, Trash, Search, Sort, Refresh } from '@mynaui/icons-react'
 import { Tooltip, TooltipTrigger, TooltipContent } from '../../ui/tooltip'
 import { Switch } from '../../ui/switch'
 import { StatusIndicator } from '../../ui/status-indicator'
@@ -23,6 +23,11 @@ export default function DictionaryContent() {
     deleteEntry,
   } = useDictionaryStore()
   const [showScrollToTop, setShowScrollToTop] = useState(false)
+  const [showSearch, setShowSearch] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [sortAsc, setSortAsc] = useState(true)
+  const toggleSort = () => setSortAsc(!sortAsc)
+  const refreshEntries = () => loadEntries()
   const [hoveredRow, setHoveredRow] = useState<number | null>(null)
   const [editingEntry, setEditingEntry] = useState<{
     id: string
@@ -268,6 +273,23 @@ export default function DictionaryContent() {
     }
   }
 
+  const filteredEntries = entries
+    .filter(entry => {
+      if (!searchQuery) return true
+      const q = searchQuery.toLowerCase()
+      if (entry.type === 'replacement') {
+        return entry.from.toLowerCase().includes(q) || entry.to.toLowerCase().includes(q)
+      }
+      return entry.content.toLowerCase().includes(q)
+    })
+    .sort((a, b) => {
+      const textA = a.type === 'replacement' ? a.from : a.content
+      const textB = b.type === 'replacement' ? b.from : b.content
+      return sortAsc
+        ? textA.localeCompare(textB)
+        : textB.localeCompare(textA)
+    })
+
   const noEntries = entries.length === 0
 
   return (
@@ -283,14 +305,54 @@ export default function DictionaryContent() {
         <h1 className="text-2xl font-serif font-normal tracking-tight">Dictionary</h1>
         <button
           onClick={handleAddNew}
-          className="bg-[var(--primary)] text-[var(--primary-foreground)] px-6 py-3 rounded-full font-semibold hover:bg-[var(--primary)]/90 cursor-pointer flex items-center gap-2"
+          className="bg-foreground text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-warm-800 transition-colors cursor-pointer"
         >
-          <Plus className="w-4 h-4" />
           Add new
         </button>
       </div>
 
-      <div className="w-full h-[1px] bg-warm-200 my-10"></div>
+      <div className="flex items-center justify-end mt-6 mb-4 border-b border-warm-100 pb-3">
+        <div className="flex items-center gap-3">
+          <button
+            className="text-warm-400 hover:text-warm-600 transition-colors cursor-pointer"
+            title="Search"
+            onClick={() => {
+              if (showSearch) setSearchQuery('')
+              setShowSearch(!showSearch)
+            }}
+          >
+            <Search className="w-4 h-4" />
+          </button>
+          <button
+            className="text-warm-400 hover:text-warm-600 transition-colors cursor-pointer"
+            title="Sort"
+            onClick={toggleSort}
+          >
+            <Sort className="w-4 h-4" />
+          </button>
+          <button
+            className="text-warm-400 hover:text-warm-600 transition-colors cursor-pointer"
+            title="Refresh"
+            onClick={refreshEntries}
+          >
+            <Refresh className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {showSearch && (
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Search dictionary..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-4 py-2.5 border border-warm-100 rounded-xl text-sm focus:outline-none focus:border-warm-300 bg-transparent placeholder-warm-400"
+            autoFocus
+          />
+        </div>
+      )}
+
       {noEntries && (
         <div className="text-warm-600">
           <p className="text-sm">No entries yet</p>
@@ -299,9 +361,14 @@ export default function DictionaryContent() {
           </p>
         </div>
       )}
-      {!noEntries && (
+      {!noEntries && filteredEntries.length === 0 && (
+        <div className="text-warm-600">
+          <p className="text-sm">No matching entries</p>
+        </div>
+      )}
+      {!noEntries && filteredEntries.length > 0 && (
         <div className="rounded-xl border border-warm-200 divide-y divide-warm-200">
-          {entries.map((entry, index) => (
+          {filteredEntries.map((entry, index) => (
             <div
               key={entry.id}
               className="flex items-center justify-between px-4 py-4 gap-10 hover:bg-warm-50 transition-colors duration-200 group"
