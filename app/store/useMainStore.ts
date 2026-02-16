@@ -12,6 +12,7 @@ type SettingsPageType =
   | 'general'
   | 'keyboard'
   | 'audio'
+  | 'performance'
   | 'my-details'
   | 'account'
   | 'advanced'

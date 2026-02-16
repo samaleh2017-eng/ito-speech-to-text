@@ -174,3 +174,36 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ─── Adaptive Performance Engine ─── */
+:root {
+  --perf-animation-multiplier: 1;
+  --perf-blur: 1;
+  --perf-shadows: 1;
+  --perf-backdrop-blur: 1;
+}
+
+/* Low tier: disable expensive visual effects */
+[data-perf-tier="low"] * {
+  transition-duration: 0.01ms !important;
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+}
+
+[data-perf-tier="low"] [class*="shadow-"],
+[data-perf-tier="low"] .shadow-soft,
+[data-perf-tier="low"] .shadow-card {
+  box-shadow: none !important;
+}
+
+[data-perf-tier="low"] [class*="backdrop-blur"],
+[data-perf-tier="low"] [class*="blur-"] {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+}
+
+/* Balanced: lighter shadows */
+[data-perf-tier="balanced"] .shadow-soft {
+  box-shadow: 0 4px 8px rgba(31,31,31,0.03) !important;
+}

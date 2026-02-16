@@ -11,9 +11,13 @@ import {
 import { useAuth } from '@/app/components/auth/useAuth'
 import { WindowContextProvider } from '@/lib/window'
 import { SupabaseProvider } from '@/app/components/auth/SupabaseProvider'
+import { usePerformanceStore } from '@/app/store/usePerformanceStore'
+import { PerformanceProvider } from '@/app/performance/performance.context'
 import { useDeviceChangeListener } from './hooks/useDeviceChangeListener'
 import { verifyStoredMicrophone } from './media/microphone'
 import { useEffect } from 'react'
+
+usePerformanceStore.getState().initialize()
 
 const MainApp = () => {
   const { onboardingCompleted, onboardingStep } = useOnboardingStore()
@@ -60,33 +64,35 @@ const MainApp = () => {
 export default function App() {
   return (
     <SupabaseProvider>
-      <HashRouter>
-        <Routes>
-          {/* Route for the pill window */}
-          <Route
-            path="/pill"
-            element={
-              <>
-                <Pill />
-              </>
-            }
-          />
+      <PerformanceProvider>
+        <HashRouter>
+          <Routes>
+            {/* Route for the pill window */}
+            <Route
+              path="/pill"
+              element={
+                <>
+                  <Pill />
+                </>
+              }
+            />
 
-          {/* Default route for the main application window */}
-          <Route
-            path="/"
-            element={
-              <>
-                <WindowContextProvider
-                  titlebar={{ title: 'Ito', icon: appIcon }}
-                >
-                  <MainApp />
-                </WindowContextProvider>
-              </>
-            }
-          />
-        </Routes>
-      </HashRouter>
+            {/* Default route for the main application window */}
+            <Route
+              path="/"
+              element={
+                <>
+                  <WindowContextProvider
+                    titlebar={{ title: 'Ito', icon: appIcon }}
+                  >
+                    <MainApp />
+                  </WindowContextProvider>
+                </>
+              }
+            />
+          </Routes>
+        </HashRouter>
+      </PerformanceProvider>
     </SupabaseProvider>
   )
 }
