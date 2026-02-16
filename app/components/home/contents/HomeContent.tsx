@@ -18,6 +18,12 @@ import { createStereo48kWavFromMonoPCM } from '@/app/utils/audioUtils'
 import { KeyName } from '@/lib/types/keyboard'
 import { usePlatform } from '@/app/hooks/usePlatform'
 import { ProUpgradeDialog } from '../ProUpgradeDialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '../../ui/dialog'
 import useBillingState from '@/app/hooks/useBillingState'
 
 // Interface for interaction statistics
@@ -78,6 +84,7 @@ export default function HomeContent({
     averageWPM: 0,
   })
   const [showProDialog, setShowProDialog] = useState(false)
+  const [showStatsDialog, setShowStatsDialog] = useState(false)
   const billingState = useBillingState()
 
   // Persist "has shown trial dialog" flag in electron-store to survive remounts
@@ -582,17 +589,20 @@ export default function HomeContent({
           <h1 className="text-3xl font-serif font-normal tracking-tight">
             Welcome back{firstName ? `, ${firstName}` : ''}
           </h1>
-          <div className="flex items-center gap-4 text-sm">
+          <div
+            className="flex items-center gap-4 text-sm bg-warm-50 rounded-full px-5 py-2.5 cursor-pointer hover:bg-warm-100 transition-colors"
+            onClick={() => setShowStatsDialog(true)}
+          >
             <div className="flex items-center gap-2">
               <span>🔥</span>
               <span className="font-medium">{formatStreakText(stats.streakDays)}</span>
             </div>
-            <div className="h-4 w-px bg-warm-300" />
+            <div className="h-4 w-px bg-warm-200" />
             <div className="flex items-center gap-2">
               <span>🚀</span>
               <span className="font-medium">{stats.totalWords.toLocaleString()} words</span>
             </div>
-            <div className="h-4 w-px bg-warm-300" />
+            <div className="h-4 w-px bg-warm-200" />
             <div className="flex items-center gap-2">
               <span>🏆</span>
               <span className="font-medium">{stats.averageWPM} WPM</span>
@@ -816,6 +826,85 @@ export default function HomeContent({
 
       {/* Pro Upgrade Dialog */}
       <ProUpgradeDialog open={showProDialog} onOpenChange={setShowProDialog} />
+
+      {/* Stats Detail Dialog */}
+      <Dialog open={showStatsDialog} onOpenChange={setShowStatsDialog}>
+        <DialogContent className="!border-0 shadow-xl p-0 max-w-lg rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="sr-only">Your Stats</DialogTitle>
+          </DialogHeader>
+          <div className="p-8">
+            <h2 className="text-xl font-bold text-center mb-1">
+              You've been Flowing. Hard.
+            </h2>
+            <p className="text-sm text-warm-500 text-center mb-8">
+              Here's a personal snapshot of your productivity with Ito.
+            </p>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-warm-50 rounded-xl p-5">
+                <div className="text-xs font-semibold tracking-wider text-warm-500 uppercase mb-3">
+                  Daily Streak
+                </div>
+                <div className="text-2xl font-bold mb-1">
+                  {stats.streakDays} {stats.streakDays === 1 ? 'day' : 'days'} 🔥
+                </div>
+                <div className="text-sm text-warm-500">
+                  {stats.streakDays === 0
+                    ? 'Start your streak today!'
+                    : stats.streakDays === 1
+                      ? 'Just getting started!'
+                      : stats.streakDays < 7
+                        ? `${stats.streakDays} days strong.`
+                        : 'On fire! Keep going!'}
+                </div>
+              </div>
+
+              <div className="bg-warm-50 rounded-xl p-5">
+                <div className="text-xs font-semibold tracking-wider text-warm-500 uppercase mb-3">
+                  Average Speed
+                </div>
+                <div className="text-2xl font-bold mb-1">
+                  {stats.averageWPM} WPM 🏆
+                </div>
+                <div className="text-sm text-warm-500">
+                  Top performer!
+                </div>
+              </div>
+
+              <div className="bg-warm-50 rounded-xl p-5">
+                <div className="text-xs font-semibold tracking-wider text-warm-500 uppercase mb-3">
+                  Total Words Dictated
+                </div>
+                <div className="text-2xl font-bold mb-1">
+                  {stats.totalWords.toLocaleString()} 🚀
+                </div>
+                <div className="text-sm text-warm-500">
+                  {stats.totalWords < 1000
+                    ? 'Getting warmed up!'
+                    : stats.totalWords < 5000
+                      ? `You've written ${Math.floor(stats.totalWords / 280)} tweets!`
+                      : `That's ${Math.floor(stats.totalWords / 250)} pages of text!`}
+                </div>
+              </div>
+
+              <div className="bg-warm-50 rounded-xl p-5">
+                <div className="text-xs font-semibold tracking-wider text-warm-500 uppercase mb-3">
+                  Total Interactions
+                </div>
+                <div className="text-2xl font-bold mb-1">
+                  {interactions.length} ⭐
+                </div>
+                <div className="text-sm text-warm-500">
+                  {interactions.length < 10
+                    ? 'Keep using Ito!'
+                    : 'You are almost at flow mastery!'}
+                </div>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
