@@ -25,6 +25,8 @@ export const AudioBarsBase = React.memo(({ heights, barColor }: AudioBarsBasePro
         alignItems: 'center',
         justifyContent: 'center',
         height: '100%',
+        willChange: 'contents',
+        transform: 'translateZ(0)',
       }}
     >
       {heights.map((height, i) => (

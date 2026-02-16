@@ -184,6 +184,7 @@ export default function HomeKit() {
       {/* Sidebar */}
       <div
         className={`${navExpanded ? 'w-56' : 'w-[72px]'} flex flex-col justify-between py-5 px-3 transition-all duration-200 ease-in-out flex-shrink-0`}
+        style={{ willChange: 'width' }}
       >
         <div>
           {/* Logo and Plan */}

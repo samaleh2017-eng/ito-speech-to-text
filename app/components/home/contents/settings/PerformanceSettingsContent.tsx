@@ -1,5 +1,7 @@
+import { useState, useEffect } from 'react'
 import { usePerformanceStore } from '@/app/store/usePerformanceStore'
 import { PerformanceTier } from '@/app/performance/performance.config'
+import { performanceMonitor, PerformanceMetrics } from '@/app/performance/performance.monitor'
 import { Button } from '@/app/components/ui/button'
 
 const TIER_OPTIONS: { id: PerformanceTier; label: string; description: string }[] = [
@@ -18,6 +20,12 @@ export default function PerformanceSettingsContent() {
     hardwareInfo,
     setTier,
   } = usePerformanceStore()
+
+  const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null)
+  useEffect(() => {
+    const unsub = performanceMonitor.subscribe(setMetrics)
+    return () => { unsub() }
+  }, [])
 
   return (
     <div className="space-y-8">
@@ -87,6 +95,36 @@ export default function PerformanceSettingsContent() {
               </div>
               <span className="text-sm text-[var(--color-subtext)]">{hardwareInfo.gpuScore} / 100</span>
             </div>
+          </div>
+        </div>
+      )}
+
+      {metrics && (
+        <div>
+          <div className="text-lg font-sans font-normal mb-4">Live Metrics</div>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm font-medium">FPS</div>
+                <div className="text-xs text-[var(--color-subtext)] mt-1">Current frames per second.</div>
+              </div>
+              <span className={`text-sm font-semibold ${
+                metrics.fps >= 50 ? 'text-green-500' :
+                metrics.fps >= 30 ? 'text-yellow-500' :
+                'text-red-500'
+              }`}>
+                {metrics.fps}
+              </span>
+            </div>
+            {metrics.memoryUsageMB !== null && (
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-medium">Memory Usage</div>
+                  <div className="text-xs text-[var(--color-subtext)] mt-1">JavaScript heap usage.</div>
+                </div>
+                <span className="text-sm text-[var(--color-subtext)]">{metrics.memoryUsageMB} MB</span>
+              </div>
+            )}
           </div>
         </div>
       )}

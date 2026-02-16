@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { usePerformanceStore } from '../../store/usePerformanceStore'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Sparkles, Square } from 'lucide-react'
 import { X } from '@mynaui/icons-react'
@@ -41,14 +42,25 @@ const globalStyles = `
   }
 `
 
-const BAR_UPDATE_INTERVAL = 64
+function getBarUpdateInterval(): number {
+  const { activeTier } = usePerformanceStore.getState()
+  if (activeTier === 'low') return 200
+  if (activeTier === 'balanced') return 100
+  return 64
+}
 
-const springTransition = {
-  type: 'spring' as const,
-  stiffness: 400,
-  damping: 30,
-  mass: 0.5,
-  restDelta: 0.001,
+function getTransition() {
+  const { config } = usePerformanceStore.getState()
+  if (!config.enableSpringAnimations) {
+    return { type: 'tween' as const, duration: 0.1, ease: 'easeOut' }
+  }
+  return {
+    type: 'spring' as const,
+    stiffness: 400,
+    damping: 30,
+    mass: 0.5,
+    restDelta: 0.001,
+  }
 }
 
 const getDimensions = (state: 'idle' | 'listening' | 'thinking') => {
@@ -147,7 +159,7 @@ const Pill = () => {
 
     const unsubVolume = window.api.on('volume-update', (vol: number) => {
       const now = Date.now()
-      if (now - lastVolumeUpdateRef.current < BAR_UPDATE_INTERVAL) {
+      if (now - lastVolumeUpdateRef.current < getBarUpdateInterval()) {
         return
       }
       const newHistory = [...volumeHistoryRef.current, vol]
@@ -281,7 +293,7 @@ const Pill = () => {
           initial={{ scale: 0, rotate: -90 }}
           animate={{ scale: 1, rotate: 0 }}
           exit={{ scale: 0, rotate: 90 }}
-          transition={springTransition}
+          transition={getTransition()}
         />
       )
     }
@@ -291,7 +303,7 @@ const Pill = () => {
         initial={{ scale: 0, rotate: -90 }}
         animate={{ scale: 1, rotate: 0 }}
         exit={{ scale: 0, rotate: 90 }}
-        transition={springTransition}
+        transition={getTransition()}
       >
         <ItoIcon width={24} height={24} className="text-white" />
       </motion.div>
@@ -395,8 +407,11 @@ const Pill = () => {
                 borderBottomRightRadius: borderBottomRadius,
               }}
               exit={{ opacity: 0, scaleX: 0.7, scaleY: 0.5 }}
-              transition={springTransition}
-              style={{ transformOrigin: 'top center' }}
+              transition={getTransition()}
+              style={{
+                transformOrigin: 'top center',
+                willChange: 'transform, opacity, width',
+              }}
               className={[
                 'relative flex flex-col items-center pointer-events-auto',
                 'overflow-hidden',
@@ -421,7 +436,7 @@ const Pill = () => {
                 <motion.div
                   className="absolute inset-0 w-full h-full flex items-center justify-between px-5"
                   layout
-                  transition={springTransition}
+                  transition={getTransition()}
                 >
                   <div className="flex items-center gap-2.5">
                     <AnimatePresence mode="wait">

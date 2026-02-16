@@ -1,14 +1,15 @@
+import React from 'react'
 import { AudioBarsBase, BAR_COUNT } from './AudioBarsBase'
 
 const BARS = Array(BAR_COUNT).fill(1)
 
-export const AudioBars = ({
+export const AudioBars = React.memo(function AudioBars({
   volumeHistory,
   barColor = 'white',
 }: {
   volumeHistory: number[]
   barColor?: string
-}) => {
+}) {
   const activeBarIndex = volumeHistory.length % BAR_COUNT
 
   const dynamicHeights = BARS.map((baseHeight, index) => {
@@ -20,4 +21,4 @@ export const AudioBars = ({
   })
 
   return <AudioBarsBase heights={dynamicHeights} barColor={barColor} />
-}
+})

@@ -207,3 +207,13 @@
 [data-perf-tier="balanced"] .shadow-soft {
   box-shadow: 0 4px 8px rgba(31,31,31,0.03) !important;
 }
+
+/* Low tier: simplify scrolling */
+[data-perf-tier="low"] * {
+  scroll-behavior: auto !important;
+}
+
+/* Ultra: smooth scrolling */
+[data-perf-tier="ultra"] * {
+  scroll-behavior: smooth;
+}

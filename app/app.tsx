@@ -15,6 +15,7 @@ import { usePerformanceStore } from '@/app/store/usePerformanceStore'
 import { PerformanceProvider } from '@/app/performance/performance.context'
 import { useDeviceChangeListener } from './hooks/useDeviceChangeListener'
 import { verifyStoredMicrophone } from './media/microphone'
+import { performanceAutotuner } from './performance/performance.autotune'
 import { useEffect } from 'react'
 
 usePerformanceStore.getState().initialize()
@@ -32,6 +33,11 @@ const MainApp = () => {
 
   useEffect(() => {
     verifyStoredMicrophone()
+  }, [])
+
+  useEffect(() => {
+    performanceAutotuner.start()
+    return () => performanceAutotuner.stop()
   }, [])
 
   const onboardingSetupCompleted =
