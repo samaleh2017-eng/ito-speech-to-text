@@ -1,7 +1,6 @@
 import { Button } from '@/app/components/ui/button'
 import { useOnboardingStore } from '@/app/store/useOnboardingStore'
-import { CheckCircle } from '@mynaui/icons-react'
-import { ArrowRight } from 'lucide-react'
+import { CheckCircle, ArrowRight } from '@mynaui/icons-react'
 import KeyboardShortcutEditor from '../../ui/keyboard-shortcut-editor'
 import { ItoMode } from '@/app/generated/ito_pb'
 import { Tip } from '../../ui/tip'

@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { usePerformanceStore } from '../../store/usePerformanceStore'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Sparkles, Square } from 'lucide-react'
-import { X } from '@mynaui/icons-react'
+import { Sparkles, Square, X } from '@mynaui/icons-react'
 import { useSettingsStore } from '../../store/useSettingsStore'
 import {
   useOnboardingStore,

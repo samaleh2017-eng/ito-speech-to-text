@@ -11,7 +11,8 @@ import {
   SelectValue,
 } from '@/app/components/ui/select'
 import { Button } from '@/app/components/ui/button'
-import { Trash2, Globe, AppWindow } from 'lucide-react'
+import { Trash, Globe } from '@mynaui/icons-react'
+import AppWindowIcon from '@/app/components/icons/AppWindowIcon'
 
 type Props = {
   app: AppTarget
@@ -36,7 +37,7 @@ export const AppStylingRow = ({ app, tones }: Props) => {
         ) : isDomain ? (
           <Globe className="w-5 h-5 text-[var(--color-subtext)]" />
         ) : (
-          <AppWindow className="w-5 h-5 text-[var(--color-subtext)]" />
+          <AppWindowIcon className="w-5 h-5 text-[var(--color-subtext)]" />
         )}
       </div>
 
@@ -68,7 +69,7 @@ export const AppStylingRow = ({ app, tones }: Props) => {
         size="icon"
         onClick={() => deleteAppTarget(app.id)}
       >
-        <Trash2 className="h-4 w-4 text-[var(--color-subtext)]" />
+        <Trash className="h-4 w-4 text-[var(--color-subtext)]" />
       </Button>
     </div>
   )

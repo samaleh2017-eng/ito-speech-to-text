@@ -4,7 +4,8 @@ import { AppStylingRow } from './settings/AppStylingRow'
 import { RegisterAppDialog } from './settings/RegisterAppDialog'
 import { ManualAddDialog } from './settings/ManualAddDialog'
 import { Button } from '@/app/components/ui/button'
-import { Crosshair, Plus, Globe, AppWindow } from 'lucide-react'
+import { Crosshair, Plus, Globe } from '@mynaui/icons-react'
+import AppWindowIcon from '@/app/components/icons/AppWindowIcon'
 
 export default function AppStylingContent() {
   const {
@@ -131,7 +132,7 @@ export default function AppStylingContent() {
         {sortedApps.length > 0 && (
           <div className="flex items-center gap-4 text-xs text-[var(--color-subtext)]">
             <div className="flex items-center gap-1.5">
-              <AppWindow className="w-3.5 h-3.5" />
+              <AppWindowIcon className="w-3.5 h-3.5" />
               <span>
                 {appCount} app{appCount !== 1 ? 's' : ''}
               </span>
