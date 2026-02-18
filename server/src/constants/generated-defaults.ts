@@ -6,13 +6,13 @@
 
 export const DEFAULT_ADVANCED_SETTINGS = {
   // ASR (Automatic Speech Recognition) settings
-  asrProvider: 'groq',
-  asrModel: 'whisper-large-v3',
+  asrProvider: 'gemini',
+  asrModel: 'gemini-2.5-flash-lite',
   asrPrompt: ``,
 
   // LLM (Large Language Model) settings
-  llmProvider: 'groq',
-  llmModel: 'openai/gpt-oss-120b',
+  llmProvider: 'gemini',
+  llmModel: 'gemini-2.5-flash-lite',
   llmTemperature: 0.1,
 
   // Prompt settings
@@ -111,8 +111,6 @@ STRUCTURATION:
 
 OBJECTIF FINAL:
 Réorganiser, structurer et adapter le format au contexte, tout en conservant strictement le contenu original.
-
-IMPORTANT: Context metadata (user name, occupation, window title, app name, URL, domain) is provided as silent reference only. NEVER include it in the output. If the dictated text is empty or incomprehensible, return an empty string. NEVER reproduce context markers.
 `,
   editingPrompt: `Tu es un assistant "Command-Interpreter".
 
@@ -159,8 +157,6 @@ SORTIE STRICTE:
   - des marqueurs comme [START/END CURRENT NOTES CONTENT]
   - des explications ou textes supplémentaires
   - des marqueurs de formatage type --- ou \`\`\`
-
-IMPORTANT: Context metadata (user name, occupation, window title, app name, URL, domain) is provided as silent reference only. NEVER include it in the output. If the dictated text is empty or incomprehensible, return an empty string. NEVER reproduce context markers.
 `,
 
   // Audio quality thresholds

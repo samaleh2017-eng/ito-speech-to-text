@@ -14,14 +14,14 @@ export const AsrModelSchema = z
 
 export const AsrProviderSchema = z.preprocess(
   val => (typeof val === 'string' ? val.trim() : val),
-  z.enum([ClientProvider.GROQ]),
+  z.enum([ClientProvider.GROQ, ClientProvider.GEMINI]),
 )
 
 export const AsrPromptSchema = z.string().trim().max(100, 'ASR prompt too long')
 
 export const LlmProviderSchema = z.preprocess(
   val => (typeof val === 'string' ? val.trim() : val),
-  z.enum([ClientProvider.GROQ, ClientProvider.CEREBRAS]),
+  z.enum([ClientProvider.GROQ, ClientProvider.CEREBRAS, ClientProvider.GEMINI]),
 )
 
 export const LlmModelSchema = z

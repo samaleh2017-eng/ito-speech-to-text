@@ -33,10 +33,11 @@ const llmSettingsConfig: LlmSettingConfig[] = [
   {
     name: 'asrProvider',
     label: 'ASR Provider',
-    placeholder: 'Enter ASR provider name',
-    description: '',
+    placeholder: 'Select ASR provider',
+    description: 'Speech-to-text provider for audio transcription',
     maxLength: modelProviderLengthLimit,
-    readOnly: true,
+    isSelect: true,
+    options: ['gemini', 'groq'],
   },
   {
     name: 'asrModel',
@@ -61,7 +62,7 @@ const llmSettingsConfig: LlmSettingConfig[] = [
     description: 'LLM provider for text generation tasks',
     maxLength: modelProviderLengthLimit,
     isSelect: true,
-    options: ['groq', 'cerebras'],
+    options: ['gemini', 'groq'],
   },
   {
     name: 'llmModel',

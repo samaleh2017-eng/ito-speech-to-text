@@ -6,13 +6,13 @@
 
 export const DEFAULT_ADVANCED_SETTINGS = {
   // ASR (Automatic Speech Recognition) settings
-  asrProvider: 'groq',
-  asrModel: 'whisper-large-v3',
+  asrProvider: 'gemini',
+  asrModel: 'gemini-2.5-flash-lite',
   asrPrompt: ``,
 
   // LLM (Large Language Model) settings
-  llmProvider: 'groq',
-  llmModel: 'openai/gpt-oss-120b',
+  llmProvider: 'gemini',
+  llmModel: 'gemini-2.5-flash-lite',
   llmTemperature: 0.1,
 
   // Prompt settings
