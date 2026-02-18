@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { STORE_KEYS } from '../../lib/constants/store-keys'
+import { debouncedSyncToStore } from '@/app/utils/debouncedStoreSync'
 import {
   PerformanceTier,
   PerformanceConfig,
@@ -45,12 +46,11 @@ const getInitialState = () => {
 }
 
 const syncToStore = (state: Partial<PerformanceState>) => {
-  const current = window.electron?.store?.get(STORE_KEYS.PERFORMANCE) || {}
-  const serializable: Record<string, any> = {}
+  const update: Record<string, unknown> = {}
   for (const [key, value] of Object.entries(state)) {
-    if (typeof value !== 'function') serializable[key] = value
+    if (typeof value !== 'function') update[key] = value
   }
-  window.electron?.store?.set(STORE_KEYS.PERFORMANCE, { ...current, ...serializable })
+  debouncedSyncToStore(STORE_KEYS.PERFORMANCE, update)
 }
 
 function applyPerformanceResourceLimits(config: PerformanceConfig, _tier: string) {

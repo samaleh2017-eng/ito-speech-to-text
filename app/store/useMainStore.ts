@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { STORE_KEYS } from '../../lib/constants/store-keys'
+import { debouncedSyncToStore } from '@/app/utils/debouncedStoreSync'
 
 type PageType =
   | 'home'
@@ -38,20 +39,11 @@ const getInitialState = () => {
   }
 }
 
-// Sync to electron store
 const syncToStore = (state: Partial<MainStore>) => {
-  const currentStore = window.electron?.store?.get(STORE_KEYS.MAIN) || {}
-  const updates: any = { ...currentStore }
-
-  if ('navExpanded' in state) {
-    updates.navExpanded = state.navExpanded ?? currentStore.navExpanded
-  }
-
-  if ('settingsPage' in state) {
-    updates.settingsPage = state.settingsPage ?? currentStore.settingsPage
-  }
-
-  window.electron?.store?.set(STORE_KEYS.MAIN, updates)
+  const update: Record<string, unknown> = {}
+  if ('navExpanded' in state) update.navExpanded = state.navExpanded
+  if ('settingsPage' in state) update.settingsPage = state.settingsPage
+  debouncedSyncToStore(STORE_KEYS.MAIN, update)
 }
 
 export const useMainStore = create<MainStore>(set => {
