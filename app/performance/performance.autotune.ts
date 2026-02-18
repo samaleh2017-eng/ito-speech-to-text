@@ -14,15 +14,31 @@ class PerformanceAutotuner {
   private fpsHistory: number[] = []
   private unsubscribe: (() => void) | null = null
   private lastChangeTime = 0
+  private visibilityHandler: (() => void) | null = null
 
   start() {
+    this.fpsHistory = []
     this.unsubscribe = performanceMonitor.subscribe(this.onMetrics)
+
+    this.visibilityHandler = () => {
+      if (!document.hidden) {
+        this.fpsHistory = []
+      }
+    }
+    document.addEventListener('visibilitychange', this.visibilityHandler)
+
     performanceMonitor.start()
   }
 
   stop() {
     this.unsubscribe?.()
+    this.unsubscribe = null
+    if (this.visibilityHandler) {
+      document.removeEventListener('visibilitychange', this.visibilityHandler)
+      this.visibilityHandler = null
+    }
     performanceMonitor.stop()
+    this.fpsHistory = []
   }
 
   private onMetrics = (metrics: PerformanceMetrics) => {
