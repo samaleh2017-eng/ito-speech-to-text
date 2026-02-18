@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   InfoCircle,
   Play,
@@ -70,12 +70,12 @@ export default function HomeContent({
   const { user } = useAuthStore()
   const firstName = user?.name?.split(' ')[0]
   const platform = usePlatform()
+  const INTERACTIONS_PAGE_SIZE = 50
   const [interactions, setInteractions] = useState<Interaction[]>([])
   const [loading, setLoading] = useState(true)
   const [playingAudio, setPlayingAudio] = useState<string | null>(null)
-  const [audioInstances, setAudioInstances] = useState<
-    Map<string, HTMLAudioElement>
-  >(new Map())
+  const audioInstancesRef = useRef<Map<string, HTMLAudioElement>>(new Map())
+  const [visibleCount, setVisibleCount] = useState(INTERACTIONS_PAGE_SIZE)
   const [copiedItems, setCopiedItems] = useState<Set<string>>(new Set())
   const [openTooltipKey, setOpenTooltipKey] = useState<string | null>(null)
   const [stats, setStats] = useState<InteractionStats>({
@@ -318,14 +318,18 @@ export default function HomeContent({
     return unsubscribe
   }, [loadInteractions])
 
+  useEffect(() => {
+    setVisibleCount(INTERACTIONS_PAGE_SIZE)
+  }, [interactions.length])
+
   // Cleanup audio instances on unmount
   useEffect(() => {
+    const map = audioInstancesRef.current
     return () => {
-      audioInstances.forEach(audio => {
+      map.forEach(audio => {
         try {
           audio.pause()
           audio.currentTime = 0
-          // Best-effort release of object URL if used
           if (audio.src?.startsWith('blob:')) {
             URL.revokeObjectURL(audio.src)
           }
@@ -333,8 +337,27 @@ export default function HomeContent({
           /* ignore */
         }
       })
+      map.clear()
     }
-  }, [audioInstances])
+  }, [])
+
+  const MAX_AUDIO_CACHE = 5
+
+  const evictOldestAudio = useCallback(() => {
+    const map = audioInstancesRef.current
+    if (map.size <= MAX_AUDIO_CACHE) return
+    const oldestKey = map.keys().next().value
+    if (oldestKey) {
+      const oldAudio = map.get(oldestKey)
+      if (oldAudio) {
+        oldAudio.pause()
+        if (oldAudio.src?.startsWith('blob:')) {
+          URL.revokeObjectURL(oldAudio.src)
+        }
+      }
+      map.delete(oldestKey)
+    }
+  }, [])
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString)
@@ -433,13 +456,10 @@ export default function HomeContent({
     try {
       // If this interaction is currently playing, stop it
       if (playingAudio === interaction.id) {
-        const current = audioInstances.get(interaction.id)
+        const current = audioInstancesRef.current.get(interaction.id)
         if (current) {
           current.pause()
           current.currentTime = 0
-          if (current.src?.startsWith('blob:')) {
-            URL.revokeObjectURL(current.src)
-          }
         }
         setPlayingAudio(null)
         return
@@ -447,13 +467,10 @@ export default function HomeContent({
 
       // Stop any other playing audio
       if (playingAudio) {
-        const other = audioInstances.get(playingAudio)
+        const other = audioInstancesRef.current.get(playingAudio)
         if (other) {
           other.pause()
           other.currentTime = 0
-          if (other.src?.startsWith('blob:')) {
-            URL.revokeObjectURL(other.src)
-          }
         }
       }
 
@@ -466,7 +483,7 @@ export default function HomeContent({
       setPlayingAudio(interaction.id)
 
       // Reuse existing audio instance if available
-      let audio = audioInstances.get(interaction.id)
+      let audio = audioInstancesRef.current.get(interaction.id)
 
       if (!audio) {
         const fullInteraction = await window.api.interactions.getById(interaction.id)
@@ -489,19 +506,14 @@ export default function HomeContent({
           audio = new Audio(audioUrl)
           audio.onended = () => {
             setPlayingAudio(null)
-            if (audio && audio.src?.startsWith('blob:')) {
-              URL.revokeObjectURL(audio.src)
-            }
           }
           audio.onerror = err => {
             console.error('Audio playback error:', err)
             setPlayingAudio(null)
-            if (audio && audio.src?.startsWith('blob:')) {
-              URL.revokeObjectURL(audio.src)
-            }
           }
 
-          setAudioInstances(prev => new Map(prev).set(interaction.id, audio!))
+          audioInstancesRef.current.set(interaction.id, audio!)
+          evictOldestAudio()
         } catch (error) {
           console.error('Failed to create audio instance:', error)
           setPlayingAudio(null)
@@ -521,9 +533,14 @@ export default function HomeContent({
     }
   }
 
+  const visibleInteractions = useMemo(
+    () => interactions.slice(0, visibleCount),
+    [interactions, visibleCount],
+  )
+
   const groupedInteractions = useMemo(
-    () => groupInteractionsByDate(interactions),
-    [interactions],
+    () => groupInteractionsByDate(visibleInteractions),
+    [visibleInteractions],
   )
 
   const copyToClipboard = async (text: string, interactionId: string) => {
@@ -678,164 +695,171 @@ export default function HomeContent({
             </p>
           </div>
         ) : (
-          Object.entries(groupedInteractions).map(
-            ([dateLabel, dateInteractions]) => (
-              <div key={dateLabel} className="mb-6">
-                <div className="text-xs font-semibold tracking-[1px] uppercase text-[var(--color-subtext)] mb-4">{dateLabel}</div>
-                <div className="bg-white dark:bg-[var(--card)] rounded-[var(--radius-lg)] border border-[var(--border)] shadow-[var(--shadow-card)] divide-y divide-[var(--border)]">
-                  {dateInteractions.map(interaction => {
-                    const displayInfo = getDisplayText(interaction)
+          <>
+            {Object.entries(groupedInteractions).map(
+              ([dateLabel, dateInteractions]) => (
+                <div key={dateLabel} className="mb-6">
+                  <div className="text-xs font-semibold tracking-[1px] uppercase text-[var(--color-subtext)] mb-4">{dateLabel}</div>
+                  <div className="bg-white dark:bg-[var(--card)] rounded-[var(--radius-lg)] border border-[var(--border)] shadow-[var(--shadow-card)] divide-y divide-[var(--border)]">
+                    {dateInteractions.map(interaction => {
+                      const displayInfo = getDisplayText(interaction)
 
-                    return (
-                      <div
-                        key={interaction.id}
-                        className="flex items-center justify-between px-4 py-4 gap-10 hover:bg-[var(--color-muted-bg)] transition-colors duration-200 group"
-                      >
-                        <div className="flex items-center gap-10">
-                          <div className="text-[var(--color-subtext)] text-[13px] min-w-[60px]">
-                            {formatTime(interaction.created_at)}
+                      return (
+                        <div
+                          key={interaction.id}
+                          className="flex items-center justify-between px-4 py-4 gap-10 hover:bg-[var(--color-muted-bg)] transition-colors duration-200 group"
+                        >
+                          <div className="flex items-center gap-10">
+                            <div className="text-[var(--color-subtext)] text-[13px] min-w-[60px]">
+                              {formatTime(interaction.created_at)}
+                            </div>
+                            <div
+                              className={`${displayInfo.isError ? 'text-[var(--color-subtext)]' : 'text-foreground'} flex items-center gap-1`}
+                            >
+                              {displayInfo.text}
+                              {displayInfo.tooltip && (
+                                <Tooltip>
+                                  <TooltipTrigger>
+                                    <InfoCircle className="w-4 h-4 text-[var(--color-subtext)]" />
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    {displayInfo.tooltip}
+                                  </TooltipContent>
+                                </Tooltip>
+                              )}
+                            </div>
                           </div>
+
+                          {/* Copy, Download, and Play buttons - only show on hover or when playing */}
                           <div
-                            className={`${displayInfo.isError ? 'text-[var(--color-subtext)]' : 'text-foreground'} flex items-center gap-1`}
+                            className={`flex items-center gap-2 ${playingAudio === interaction.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-200`}
                           >
-                            {displayInfo.text}
-                            {displayInfo.tooltip && (
-                              <Tooltip>
-                                <TooltipTrigger>
-                                  <InfoCircle className="w-4 h-4 text-[var(--color-subtext)]" />
+                            {/* Copy button */}
+                            {!displayInfo.isError && (
+                              <Tooltip
+                                open={openTooltipKey === `copy:${interaction.id}`}
+                                onOpenChange={open => {
+                                  if (open) {
+                                    setOpenTooltipKey(`copy:${interaction.id}`)
+                                  } else {
+                                    if (!copiedItems.has(interaction.id)) {
+                                      setOpenTooltipKey(prev =>
+                                        prev === `copy:${interaction.id}`
+                                          ? null
+                                          : prev,
+                                      )
+                                    }
+                                  }
+                                }}
+                              >
+                                <TooltipTrigger asChild>
+                                  <button
+                                    className={`p-1.5 hover:bg-warm-200 rounded transition-colors cursor-pointer ${
+                                      copiedItems.has(interaction.id)
+                                        ? 'text-green-600'
+                                        : 'text-[var(--color-subtext)]'
+                                    }`}
+                                    onClick={() =>
+                                      copyToClipboard(
+                                        displayInfo.text,
+                                        interaction.id,
+                                      )
+                                    }
+                                  >
+                                    {copiedItems.has(interaction.id) ? (
+                                      <Check className="w-4 h-4" />
+                                    ) : (
+                                      <Copy className="w-4 h-4" />
+                                    )}
+                                  </button>
                                 </TooltipTrigger>
-                                <TooltipContent>
-                                  {displayInfo.tooltip}
+                                <TooltipContent side="top" sideOffset={5}>
+                                  {copiedItems.has(interaction.id)
+                                    ? 'Copied 🎉'
+                                    : 'Copy'}
                                 </TooltipContent>
                               </Tooltip>
                             )}
-                          </div>
-                        </div>
 
-                        {/* Copy, Download, and Play buttons - only show on hover or when playing */}
-                        <div
-                          className={`flex items-center gap-2 ${playingAudio === interaction.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-200`}
-                        >
-                          {/* Copy button */}
-                          {!displayInfo.isError && (
-                            <Tooltip
-                              open={openTooltipKey === `copy:${interaction.id}`}
-                              onOpenChange={open => {
-                                if (open) {
-                                  // Opening: exclusively show this tooltip
-                                  setOpenTooltipKey(`copy:${interaction.id}`)
-                                } else {
-                                  // Closing: if in copied state, keep it open until timer clears,
-                                  // otherwise close normally
-                                  if (!copiedItems.has(interaction.id)) {
-                                    setOpenTooltipKey(prev =>
-                                      prev === `copy:${interaction.id}`
-                                        ? null
-                                        : prev,
-                                    )
-                                  }
+                            {/* Download button */}
+                            {interaction.has_raw_audio && (
+                              <Tooltip
+                                open={
+                                  openTooltipKey === `download:${interaction.id}`
                                 }
-                              }}
-                            >
-                              <TooltipTrigger asChild>
-                                <button
-                                  className={`p-1.5 hover:bg-warm-200 rounded transition-colors cursor-pointer ${
-                                    copiedItems.has(interaction.id)
-                                      ? 'text-green-600'
-                                      : 'text-[var(--color-subtext)]'
-                                  }`}
-                                  onClick={() =>
-                                    copyToClipboard(
-                                      displayInfo.text,
-                                      interaction.id,
-                                    )
-                                  }
-                                >
-                                  {copiedItems.has(interaction.id) ? (
-                                    <Check className="w-4 h-4" />
-                                  ) : (
-                                    <Copy className="w-4 h-4" />
-                                  )}
-                                </button>
-                              </TooltipTrigger>
-                              <TooltipContent side="top" sideOffset={5}>
-                                {copiedItems.has(interaction.id)
-                                  ? 'Copied 🎉'
-                                  : 'Copy'}
-                              </TooltipContent>
-                            </Tooltip>
-                          )}
+                                onOpenChange={open => {
+                                  setOpenTooltipKey(
+                                    open ? `download:${interaction.id}` : null,
+                                  )
+                                }}
+                              >
+                                <TooltipTrigger asChild>
+                                  <button
+                                    className="p-1.5 hover:bg-warm-200 rounded transition-colors cursor-pointer text-[var(--color-subtext)]"
+                                    onClick={() =>
+                                      handleAudioDownload(interaction)
+                                    }
+                                  >
+                                    <Download className="w-4 h-4" />
+                                  </button>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" sideOffset={5}>
+                                  Download audio
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
 
-                          {/* Download button */}
-                          {interaction.has_raw_audio && (
+                            {/* Play/Stop button with tooltip */}
                             <Tooltip
-                              open={
-                                openTooltipKey === `download:${interaction.id}`
-                              }
+                              open={openTooltipKey === `play:${interaction.id}`}
                               onOpenChange={open => {
                                 setOpenTooltipKey(
-                                  open ? `download:${interaction.id}` : null,
+                                  open ? `play:${interaction.id}` : null,
                                 )
                               }}
                             >
                               <TooltipTrigger asChild>
                                 <button
-                                  className="p-1.5 hover:bg-warm-200 rounded transition-colors cursor-pointer text-[var(--color-subtext)]"
-                                  onClick={() =>
-                                    handleAudioDownload(interaction)
-                                  }
+                                  className={`p-1.5 hover:bg-warm-200 rounded transition-colors cursor-pointer ${
+                                    playingAudio === interaction.id
+                                      ? 'bg-blue-50 text-blue-600'
+                                      : 'text-[var(--color-subtext)]'
+                                  }`}
+                                  onClick={() => handleAudioPlayStop(interaction)}
+                                  disabled={!interaction.has_raw_audio}
                                 >
-                                  <Download className="w-4 h-4" />
+                                  {playingAudio === interaction.id ? (
+                                    <Stop className="w-4 h-4" />
+                                  ) : (
+                                    <Play className="w-4 h-4" />
+                                  )}
                                 </button>
                               </TooltipTrigger>
                               <TooltipContent side="top" sideOffset={5}>
-                                Download audio
+                                {!interaction.has_raw_audio
+                                  ? 'No audio available'
+                                  : playingAudio === interaction.id
+                                    ? 'Stop'
+                                    : 'Play'}
                               </TooltipContent>
                             </Tooltip>
-                          )}
-
-                          {/* Play/Stop button with tooltip */}
-                          <Tooltip
-                            open={openTooltipKey === `play:${interaction.id}`}
-                            onOpenChange={open => {
-                              setOpenTooltipKey(
-                                open ? `play:${interaction.id}` : null,
-                              )
-                            }}
-                          >
-                            <TooltipTrigger asChild>
-                              <button
-                                className={`p-1.5 hover:bg-warm-200 rounded transition-colors cursor-pointer ${
-                                  playingAudio === interaction.id
-                                    ? 'bg-blue-50 text-blue-600'
-                                    : 'text-[var(--color-subtext)]'
-                                }`}
-                                onClick={() => handleAudioPlayStop(interaction)}
-                                disabled={!interaction.has_raw_audio}
-                              >
-                                {playingAudio === interaction.id ? (
-                                  <Stop className="w-4 h-4" />
-                                ) : (
-                                  <Play className="w-4 h-4" />
-                                )}
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent side="top" sideOffset={5}>
-                              {!interaction.has_raw_audio
-                                ? 'No audio available'
-                                : playingAudio === interaction.id
-                                  ? 'Stop'
-                                  : 'Play'}
-                            </TooltipContent>
-                          </Tooltip>
+                          </div>
                         </div>
-                      </div>
-                    )
-                  })}
+                      )
+                    })}
+                  </div>
                 </div>
-              </div>
-            ),
-          )
+              ),
+            )}
+            {interactions.length > visibleCount && (
+              <button
+                onClick={() => setVisibleCount(prev => prev + INTERACTIONS_PAGE_SIZE)}
+                className="w-full py-3 text-sm text-[var(--color-subtext)] hover:text-foreground transition-colors duration-200"
+              >
+                Show more ({interactions.length - visibleCount} remaining)
+              </button>
+            )}
+          </>
         )}
       </div>
 
