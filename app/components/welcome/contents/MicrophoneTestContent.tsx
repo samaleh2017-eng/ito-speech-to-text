@@ -59,13 +59,11 @@ export default function MicrophoneTestContent() {
   // It starts recording when a device is selected and stops when the component unmounts.
   useEffect(() => {
     if (microphoneDeviceId) {
-      console.log(`Starting test recording on device: ${microphoneDeviceId}`)
       window.api.send('start-native-recording-test')
     }
 
     // Cleanup function: stop recording when the component unmounts or device changes
     return () => {
-      console.log('Stopping test recording.')
       // Use the test-specific stop handler that only stops audio recording
       window.api.send('stop-native-recording-test')
     }

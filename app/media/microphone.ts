@@ -12,12 +12,10 @@ type MicrophoneToRender = {
 
 async function getAvailableMicrophones(): Promise<Microphone[]> {
   try {
-    console.log('Fetching available native microphones...')
     if (!window.api?.invoke) return []
     const deviceNames: string[] = await window.api.invoke(
       'get-native-audio-devices',
     )
-    console.log('Available native microphones:', deviceNames)
     return deviceNames.map(name => ({
       deviceId: name,
       label: name,
@@ -34,14 +32,10 @@ async function getAvailableMicrophones(): Promise<Microphone[]> {
  */
 export async function verifyStoredMicrophone() {
   try {
-    console.log('[verifyStoredMicrophone] Verifying selected microphone...')
     const { microphoneDeviceId, setMicrophoneDeviceId } =
       useSettingsStore.getState()
 
     if (microphoneDeviceId === 'default') {
-      console.log(
-        '[verifyStoredMicrophone] "Auto-detect" is selected. Verification not needed.',
-      )
       return
     }
 
@@ -53,11 +47,7 @@ export async function verifyStoredMicrophone() {
 
     const isDeviceAvailable = availableDevices.includes(microphoneDeviceId)
 
-    if (isDeviceAvailable) {
-      console.log(
-        `[verifyStoredMicrophone] Stored microphone "${microphoneDeviceId}" is still available.`,
-      )
-    } else {
+    if (!isDeviceAvailable) {
       console.warn(
         `[verifyStoredMicrophone] Stored microphone "${microphoneDeviceId}" is not available. Falling back to "Auto-detect".`,
       )

@@ -35,12 +35,6 @@ const getInitialState = () => {
     | (AuthStore & { isSelfHosted?: boolean })
     | undefined
 
-  console.log('[DEBUG][AuthStore] Initial state from electron-store:', {
-    hasTokens: !!storedAuth?.tokens?.access_token,
-    isSelfHosted: !!storedAuth?.isSelfHosted,
-    userId: storedAuth?.user?.id,
-  })
-
   return {
     isAuthenticated:
       !!storedAuth?.tokens?.access_token || !!storedAuth?.isSelfHosted,

@@ -91,7 +91,6 @@ export default function NotesContent() {
     })
 
     const timestamp = fmt.format(new Date())
-    console.log(`${timestamp}: Pasted content: ${content}`)
     if (content.trim() !== '') {
       setShowAddNoteButton(true)
     } else {

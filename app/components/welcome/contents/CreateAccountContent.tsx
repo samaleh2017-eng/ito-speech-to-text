@@ -49,7 +49,6 @@ export default function CreateAccountContent() {
 
   useEffect(() => {
     if (userName && !isDictInitialized.current) {
-      console.log('Adding user name to dictionary:', userName)
       addEntry(userName)
       isDictInitialized.current = true
     }

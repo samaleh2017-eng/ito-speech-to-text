@@ -24,9 +24,7 @@ export default function GeneralSettingsContent() {
     setIsDownloading(true)
     try {
       const result = await window.api.logs.download()
-      if (result.success) {
-        console.log('Logs downloaded successfully to:', result.path)
-      } else {
+      if (!result.success) {
         if (result.error !== 'Download cancelled') {
           console.error('Failed to download logs:', result.error)
           alert(`Failed to download logs: ${result.error}`)
@@ -50,7 +48,6 @@ export default function GeneralSettingsContent() {
     try {
       const result = await window.api.logs.clear()
       if (result.success) {
-        console.log('Logs cleared successfully')
         alert('Logs cleared successfully')
       } else {
         console.error('Failed to clear logs:', result.error)

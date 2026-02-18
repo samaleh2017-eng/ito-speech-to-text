@@ -45,7 +45,6 @@ class PerformanceAutotuner {
       && currentIdx > 0
     ) {
       const newTier = TIER_ORDER[currentIdx - 1]
-      console.log(`[PerfAutoTune] Downgrading: ${store.activeTier} → ${newTier} (FPS: ${avgFps.toFixed(0)}, Mem: ${metrics.memoryUsageMB}MB)`)
       store._autoAdjustTier(newTier)
       this.fpsHistory = []
       this.lastChangeTime = now
@@ -55,7 +54,6 @@ class PerformanceAutotuner {
     const maxIdx = TIER_ORDER.indexOf(store.detectedTier)
     if (avgFps > FPS_RECOVERY_THRESHOLD && currentIdx < maxIdx) {
       const newTier = TIER_ORDER[currentIdx + 1]
-      console.log(`[PerfAutoTune] Upgrading: ${store.activeTier} → ${newTier} (FPS: ${avgFps.toFixed(0)})`)
       store._autoAdjustTier(newTier)
       this.fpsHistory = []
       this.lastChangeTime = now

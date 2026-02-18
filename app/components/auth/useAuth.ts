@@ -60,14 +60,7 @@ export function useAuth() {
   }, [session, supabaseUser, storedUser])
 
   const isAuthenticated = useMemo(() => {
-    const result = AUTH_DISABLED ? true : (!!session && !!supabaseUser)
-    console.log('[DEBUG][useAuth] isAuthenticated:', {
-      AUTH_DISABLED,
-      hasSession: !!session,
-      hasSupabaseUser: !!supabaseUser,
-      result,
-    })
-    return result
+    return AUTH_DISABLED ? true : (!!session && !!supabaseUser)
   }, [session, supabaseUser])
 
   const isLoading = useMemo(() => {
@@ -76,15 +69,6 @@ export function useAuth() {
   }, [supabaseLoading])
 
   useEffect(() => {
-    console.log('[DEBUG][useAuth] useEffect triggered:', {
-      AUTH_DISABLED,
-      hasSession: !!session,
-      hasSupabaseUser: !!supabaseUser,
-      hasAuthUser: !!authUser,
-      storeIsAuthenticated,
-      storedUserId: storedUser?.id,
-    })
-
     if (AUTH_DISABLED) {
       if (!storeIsAuthenticated) {
         const selfHostedProfile = {
@@ -92,7 +76,6 @@ export function useAuth() {
           email: undefined,
           name: 'Self-Hosted User',
         }
-        console.log('[DEBUG][useAuth] AUTH_DISABLED - calling notifyLoginSuccess with:', selfHostedProfile)
         window.api.notifyLoginSuccess(selfHostedProfile, null, null)
         setSelfHostedMode()
       }
@@ -109,7 +92,6 @@ export function useAuth() {
         email: supabaseUser.email,
         name: supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0] || 'User',
       }
-      console.log('[DEBUG][useAuth] Valid session - calling notifyLoginSuccess with profile:', profile)
       window.api.notifyLoginSuccess(profile, session.access_token, session.access_token)
       
       const authTokens: AuthTokens = {
@@ -196,7 +178,6 @@ export function useAuth() {
     resetMainState()
     resetOnboarding()
     
-    console.log('[DEBUG][useAuth] Calling logout on main process')
     window.api.logout()
 
     analytics.track(ANALYTICS_EVENTS.AUTH_LOGOUT)

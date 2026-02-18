@@ -62,22 +62,19 @@ export const useDictionaryStore = create<DictionaryStore>((set, get) => ({
   entries: [],
 
   loadEntries: async () => {
-    console.log('[DEBUG][DictionaryStore] loadEntries called')
     try {
       const items = await window.api.dictionary.getAll()
-      console.log('[DEBUG][DictionaryStore] loadEntries received items:', items?.length, items)
       const entries = items.map(mapItemToEntry)
       set({ entries })
     } catch (error) {
-      console.error('[DEBUG][DictionaryStore] Failed to load dictionary from database:', error)
+      console.error('[DictionaryStore] Failed to load dictionary from database:', error)
     }
   },
 
   addEntry: async (content: string) => {
     const { user } = useAuthStore.getState()
-    console.log('[DEBUG][DictionaryStore] addEntry called:', { content, user })
     if (!user) {
-      console.error('[DEBUG][DictionaryStore] Cannot add entry - no user!')
+      console.error('[DictionaryStore] Cannot add entry - no user!')
       return
     }
     const itemToAdd = {
@@ -85,9 +82,7 @@ export const useDictionaryStore = create<DictionaryStore>((set, get) => ({
       word: content.trim(),
       pronunciation: null,
     }
-    console.log('[DEBUG][DictionaryStore] Calling window.api.dictionary.add with:', itemToAdd)
     const result = await window.api.dictionary.add(itemToAdd)
-    console.log('[DEBUG][DictionaryStore] addEntry result:', result)
     if (!result.success) {
       throw new Error(result.error)
     }
@@ -97,9 +92,8 @@ export const useDictionaryStore = create<DictionaryStore>((set, get) => ({
 
   addReplacement: async (from: string, to: string) => {
     const { user } = useAuthStore.getState()
-    console.log('[DEBUG][DictionaryStore] addReplacement called:', { from, to, user })
     if (!user) {
-      console.error('[DEBUG][DictionaryStore] Cannot add replacement - no user!')
+      console.error('[DictionaryStore] Cannot add replacement - no user!')
       return
     }
     const itemToAdd = {
@@ -107,9 +101,7 @@ export const useDictionaryStore = create<DictionaryStore>((set, get) => ({
       word: from.trim(),
       pronunciation: to.trim(),
     }
-    console.log('[DEBUG][DictionaryStore] Calling window.api.dictionary.add with:', itemToAdd)
     const result = await window.api.dictionary.add(itemToAdd)
-    console.log('[DEBUG][DictionaryStore] addReplacement result:', result)
     if (!result.success) {
       throw new Error(result.error)
     }
