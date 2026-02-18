@@ -36,8 +36,22 @@ const MainApp = () => {
   }, [])
 
   useEffect(() => {
-    performanceAutotuner.start()
-    return () => performanceAutotuner.stop()
+    const applyAutotunerState = () => {
+      const { userSelectedTier } = usePerformanceStore.getState()
+      if (userSelectedTier === 'auto') {
+        performanceAutotuner.start()
+      } else {
+        performanceAutotuner.stop()
+      }
+    }
+
+    applyAutotunerState()
+
+    const unsub = usePerformanceStore.subscribe(applyAutotunerState)
+    return () => {
+      unsub()
+      performanceAutotuner.stop()
+    }
   }, [])
 
   const onboardingSetupCompleted =

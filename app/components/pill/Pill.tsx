@@ -84,6 +84,7 @@ const Pill = () => {
     state => state.onboardingCompleted,
   )
   const { startRecording, stopRecording } = useAudioStore()
+  const activeTier = usePerformanceStore(s => s.activeTier)
 
   const [isRecording, setIsRecording] = useState(false)
   const [isManualRecording, setIsManualRecording] = useState(false)
@@ -410,7 +411,7 @@ const Pill = () => {
               transition={getTransition()}
               style={{
                 transformOrigin: 'top center',
-                willChange: 'transform, opacity, width',
+                ...(activeTier !== 'low' && { willChange: 'transform, opacity, width' }),
               }}
               className={[
                 'relative flex flex-col items-center pointer-events-auto',

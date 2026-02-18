@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Check, X } from '@mynaui/icons-react'
+import { usePerformanceStore } from '../../store/usePerformanceStore'
 
 interface StatusIndicatorProps {
   status: 'success' | 'error' | null
@@ -16,6 +17,7 @@ export function StatusIndicator({
   successMessage = 'Operation completed successfully',
   errorMessage = 'Operation failed',
 }: StatusIndicatorProps) {
+  const activeTier = usePerformanceStore(s => s.activeTier)
   const [isExiting, setIsExiting] = useState(false)
 
   useEffect(() => {
@@ -43,7 +45,7 @@ export function StatusIndicator({
           ? 'translate-y-[-20px] opacity-0'
           : 'translate-y-0 opacity-100 animate-slide-up'
       }`}
-      style={{ willChange: 'transform, opacity' }}
+      style={{ willChange: activeTier !== 'low' ? 'transform, opacity' : 'auto' }}
     >
       <div className="px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 bg-black text-white">
         {status === 'success' ? (

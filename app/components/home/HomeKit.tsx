@@ -14,6 +14,7 @@ import { useAuth } from '@/app/components/auth/useAuth'
 import useBillingState from '@/app/hooks/useBillingState'
 import { PaidStatus } from '@/lib/main/sqlite/models'
 import { useEffect, useState, useRef } from 'react'
+import { usePerformanceStore } from '@/app/store/usePerformanceStore'
 import { NavItem } from '../ui/nav-item'
 import HomeContent from './contents/HomeContent'
 import DictionaryContent from './contents/DictionaryContent'
@@ -24,6 +25,7 @@ import AppStylingContent from './contents/AppStylingContent'
 
 export default function HomeKit() {
   const { navExpanded, currentPage, setCurrentPage } = useMainStore()
+  const activeTier = usePerformanceStore(s => s.activeTier)
   const { metadata } = useUserMetadataStore()
   const { onboardingCompleted } = useOnboardingStore()
   const { isAuthenticated, user } = useAuth()
@@ -184,7 +186,7 @@ export default function HomeKit() {
       {/* Sidebar */}
       <div
         className={`${navExpanded ? 'w-56' : 'w-[72px]'} flex flex-col justify-between py-5 px-3 transition-all duration-200 ease-in-out flex-shrink-0`}
-        style={{ willChange: 'width' }}
+        style={{ willChange: activeTier !== 'low' ? 'width' : 'auto' }}
       >
         <div>
           {/* Logo and Plan */}

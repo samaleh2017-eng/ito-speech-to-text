@@ -217,3 +217,25 @@
 [data-perf-tier="ultra"] * {
   scroll-behavior: smooth;
 }
+
+/* Hide particle/decorative elements for perf */
+.perf-no-particles .decorative-particle,
+.perf-no-particles [data-decorative="true"] {
+  display: none !important;
+}
+
+/* Low quality: reduce image rendering effort */
+.perf-low-quality img {
+  image-rendering: pixelated;
+}
+
+/* Low tier: force GPU compositing off to reduce memory */
+[data-perf-tier="low"] * {
+  will-change: auto !important;
+  transform: none !important;
+}
+
+/* Except elements that need transform for layout */
+[data-perf-tier="low"] [data-keep-transform="true"] {
+  transform: unset !important;
+}

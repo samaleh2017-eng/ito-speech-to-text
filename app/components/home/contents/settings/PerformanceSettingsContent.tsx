@@ -21,11 +21,32 @@ export default function PerformanceSettingsContent() {
     setTier,
   } = usePerformanceStore()
 
+  const [pendingTier, setPendingTier] = useState<PerformanceTier>(userSelectedTier)
+  const [showSaved, setShowSaved] = useState(false)
+  const isDirty = pendingTier !== userSelectedTier
+
+  useEffect(() => {
+    setPendingTier(userSelectedTier)
+  }, [userSelectedTier])
+
   const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null)
   useEffect(() => {
+    performanceMonitor.start()
     const unsub = performanceMonitor.subscribe(setMetrics)
-    return () => { unsub() }
+    return () => {
+      unsub()
+      const { userSelectedTier } = usePerformanceStore.getState()
+      if (userSelectedTier !== 'auto') {
+        performanceMonitor.stop()
+      }
+    }
   }, [])
+
+  const handleSave = () => {
+    setTier(pendingTier)
+    setShowSaved(true)
+    setTimeout(() => setShowSaved(false), 2000)
+  }
 
   return (
     <div className="space-y-8">
@@ -40,15 +61,15 @@ export default function PerformanceSettingsContent() {
               {TIER_OPTIONS.map((opt) => (
                 <Button
                   key={opt.id}
-                  variant={userSelectedTier === opt.id ? 'default' : 'outline'}
+                  variant={pendingTier === opt.id ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setTier(opt.id)}
+                  onClick={() => setPendingTier(opt.id)}
                 >
                   {opt.label}{opt.id === 'auto' ? ' (Recommended)' : ''}
                 </Button>
               ))}
             </div>
-            {userSelectedTier === 'auto' && (
+            {pendingTier === 'auto' && (
               <div className="text-xs text-[var(--color-subtext)] mt-3">
                 Mode automatically selected based on your hardware:{' '}
                 <span className="font-semibold uppercase text-foreground">{detectedTier}</span>
@@ -68,6 +89,21 @@ export default function PerformanceSettingsContent() {
             </span>
           </div>
         </div>
+      </div>
+
+      <div className="border-t border-[var(--border)]" />
+      <div className="flex items-center gap-3">
+        <Button onClick={handleSave} disabled={!isDirty}>
+          Save
+        </Button>
+        {showSaved && (
+          <span className="text-sm text-green-600 font-medium">&check; Saved</span>
+        )}
+        {isDirty && (
+          <span className="text-xs text-[var(--color-subtext)]">
+            Unsaved changes — click Save to apply.
+          </span>
+        )}
       </div>
 
       {hardwareInfo && (

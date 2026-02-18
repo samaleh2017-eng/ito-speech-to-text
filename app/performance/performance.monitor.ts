@@ -12,6 +12,11 @@ class PerformanceMonitor {
   private lastTime = 0
   private callbacks: Set<MonitorCallback> = new Set()
   private running = false
+  private samplingInterval = 1000
+
+  setSamplingInterval(ms: number) {
+    this.samplingInterval = ms
+  }
 
   start() {
     if (this.running) return
@@ -40,7 +45,7 @@ class PerformanceMonitor {
     const now = performance.now()
     const elapsed = now - this.lastTime
 
-    if (elapsed >= 1000) {
+    if (elapsed >= this.samplingInterval) {
       const fps = Math.round((this.frameCount * 1000) / elapsed)
       const perf = performance as any
       const memoryUsageMB = perf.memory
