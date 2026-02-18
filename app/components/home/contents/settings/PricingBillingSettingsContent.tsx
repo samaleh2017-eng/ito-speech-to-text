@@ -1,31 +1,33 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/app/components/ui/button'
 import { Check } from '@mynaui/icons-react'
-import useBillingState from '@/app/hooks/useBillingState'
+import { useBilling } from '@/app/contexts/BillingContext'
 
 type BillingPeriod = 'monthly' | 'annual'
 
 export default function PricingBillingSettingsContent() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>('annual')
-  const billingState = useBillingState()
+  const billingState = useBilling()
   const [checkoutLoading, setCheckoutLoading] = useState(false)
   const [checkoutError, setCheckoutError] = useState<string | null>(null)
   const [downgradeLoading, setDowngradeLoading] = useState(false)
   const [reactivateLoading, setReactivateLoading] = useState(false)
 
-  // Refresh billing state when checkout session completes
+  const billingRefreshRef = useRef(billingState.refresh)
+  useEffect(() => {
+    billingRefreshRef.current = billingState.refresh
+  }, [billingState.refresh])
+
   useEffect(() => {
     const offSuccess = window.api.on('billing-session-completed', async () => {
-      // Refresh billing state to reflect the new subscription
-      await billingState.refresh()
+      await billingRefreshRef.current()
       setCheckoutError(null)
     })
-
     return () => {
       offSuccess?.()
     }
-  }, [billingState])
+  }, [])
 
   const handleCheckout = async () => {
     setCheckoutLoading(true)
@@ -301,7 +303,9 @@ function PricingCard({
       }`}
     >
       {/* Title */}
-      <div className="text-sm font-medium text-[var(--color-text)] mb-2">{title}</div>
+      <div className="text-sm font-medium text-[var(--color-text)] mb-2">
+        {title}
+      </div>
 
       {/* Price */}
       <div className="mb-6">
@@ -315,7 +319,9 @@ function PricingCard({
           {price}
         </span>
         {priceSubtext && (
-          <span className="text-[var(--color-subtext)] ml-1">{priceSubtext}</span>
+          <span className="text-[var(--color-subtext)] ml-1">
+            {priceSubtext}
+          </span>
         )}
       </div>
 

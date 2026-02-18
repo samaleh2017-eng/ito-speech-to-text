@@ -11,10 +11,9 @@ import { useMainStore } from '@/app/store/useMainStore'
 import { useUserMetadataStore } from '@/app/store/useUserMetadataStore'
 import { useOnboardingStore } from '@/app/store/useOnboardingStore'
 import { useAuth } from '@/app/components/auth/useAuth'
-import useBillingState from '@/app/hooks/useBillingState'
+import { useBilling } from '@/app/contexts/BillingContext'
 import { PaidStatus } from '@/lib/main/sqlite/models'
 import { useEffect, useState, useRef } from 'react'
-import { usePerformanceStore } from '@/app/store/usePerformanceStore'
 import { NavItem } from '../ui/nav-item'
 import HomeContent from './contents/HomeContent'
 import DictionaryContent from './contents/DictionaryContent'
@@ -25,15 +24,16 @@ import AppStylingContent from './contents/AppStylingContent'
 
 export default function HomeKit() {
   const { navExpanded, currentPage, setCurrentPage } = useMainStore()
-  const activeTier = usePerformanceStore(s => s.activeTier)
   const { metadata } = useUserMetadataStore()
   const { onboardingCompleted } = useOnboardingStore()
   const { isAuthenticated, user } = useAuth()
-  const billingState = useBillingState()
+  const billingState = useBilling()
   const [showText, setShowText] = useState(navExpanded)
   const hasStartedTrialRef = useRef(false)
   const previousUserIdRef = useRef<string | undefined>(undefined)
   const [isStartingTrial, setIsStartingTrial] = useState(false)
+  const [isTransitioning, setIsTransitioning] = useState(false)
+  const isInitialRender = useRef(true)
 
   const isPro =
     metadata?.paid_status === PaidStatus.PRO ||
@@ -96,19 +96,20 @@ export default function HomeKit() {
     isPro,
   ])
 
-  // Listen for trial-started event to refresh billing state
+  const billingRefreshRef = useRef(billingState.refresh)
+  useEffect(() => {
+    billingRefreshRef.current = billingState.refresh
+  }, [billingState.refresh])
+
   useEffect(() => {
     const offTrialStarted = window.api.on('trial-started', async () => {
-      // Trial started successfully - refresh billing state
-      // HomeContent will handle showing the dialog based on billing state transition
-      await billingState.refresh()
-      setIsStartingTrial(false) // Reset flag after trial starts
+      await billingRefreshRef.current()
+      setIsStartingTrial(false)
     })
-
     return () => {
       offTrialStarted?.()
     }
-  }, [billingState])
+  }, [])
 
   // Reset trial start flag when onboarding resets
   useEffect(() => {
@@ -144,6 +145,18 @@ export default function HomeKit() {
       offCancel?.()
     }
   }, [])
+
+  useEffect(() => {
+    if (isInitialRender.current) {
+      isInitialRender.current = false
+      return
+    }
+    setIsTransitioning(true)
+    const timer = setTimeout(() => {
+      setIsTransitioning(false)
+    }, 250)
+    return () => clearTimeout(timer)
+  }, [navExpanded])
 
   // Handle text and positioning animation timing
   useEffect(() => {
@@ -186,7 +199,7 @@ export default function HomeKit() {
       {/* Sidebar */}
       <div
         className={`${navExpanded ? 'w-56' : 'w-[72px]'} flex flex-col justify-between py-5 px-3 transition-all duration-200 ease-in-out flex-shrink-0`}
-        style={{ willChange: activeTier !== 'low' ? 'width' : 'auto' }}
+        style={{ willChange: isTransitioning ? 'width' : 'auto' }}
       >
         <div>
           {/* Logo and Plan */}
@@ -258,9 +271,7 @@ export default function HomeKit() {
 
       {/* Main Content - White card with "page in page" effect */}
       <div className="flex-1 bg-[var(--color-surface)] rounded-[var(--radius-lg)] my-2 mr-2 shadow-[var(--shadow-soft)] overflow-hidden flex flex-col border border-[var(--border)]">
-        <div className="flex-1 overflow-y-auto pt-10">
-          {renderContent()}
-        </div>
+        <div className="flex-1 overflow-y-auto pt-10">{renderContent()}</div>
       </div>
     </div>
   )

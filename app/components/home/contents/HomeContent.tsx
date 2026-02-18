@@ -24,7 +24,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../../ui/dialog'
-import useBillingState from '@/app/hooks/useBillingState'
+import { useBilling } from '@/app/contexts/BillingContext'
 
 // Interface for interaction statistics
 interface InteractionStats {
@@ -85,7 +85,7 @@ export default function HomeContent({
   })
   const [showProDialog, setShowProDialog] = useState(false)
   const [showStatsDialog, setShowStatsDialog] = useState(false)
-  const billingState = useBillingState()
+  const billingState = useBilling()
 
   // Persist "has shown trial dialog" flag in electron-store to survive remounts
   const [hasShownTrialDialog, setHasShownTrialDialogState] = useState(() => {
@@ -127,24 +127,26 @@ export default function HomeContent({
     setHasShownTrialDialog,
   ])
 
-  // Listen for trial start event to refresh billing state
+  const billingRefreshRef = useRef(billingState.refresh)
+  useEffect(() => {
+    billingRefreshRef.current = billingState.refresh
+  }, [billingState.refresh])
+
   useEffect(() => {
     const offTrialStarted = window.api.on('trial-started', async () => {
-      await billingState.refresh()
+      await billingRefreshRef.current()
     })
-
     const offBillingSuccess = window.api.on(
       'billing-session-completed',
       async () => {
-        await billingState.refresh()
+        await billingRefreshRef.current()
       },
     )
-
     return () => {
       offTrialStarted?.()
       offBillingSuccess?.()
     }
-  }, [billingState])
+  }, [])
 
   // Reset dialog flag when trial is no longer active or user becomes pro
   // Only reset if we're certain the trial has ended (not just during loading/refreshing)
@@ -486,7 +488,9 @@ export default function HomeContent({
       let audio = audioInstancesRef.current.get(interaction.id)
 
       if (!audio) {
-        const fullInteraction = await window.api.interactions.getById(interaction.id)
+        const fullInteraction = await window.api.interactions.getById(
+          interaction.id,
+        )
         if (!fullInteraction?.raw_audio) {
           console.warn('Failed to load audio data')
           setPlayingAudio(null)
@@ -573,7 +577,9 @@ export default function HomeContent({
         return
       }
 
-      const fullInteraction = await window.api.interactions.getById(interaction.id)
+      const fullInteraction = await window.api.interactions.getById(
+        interaction.id,
+      )
       if (!fullInteraction?.raw_audio) {
         console.warn('Failed to load audio data for download')
         return
@@ -627,17 +633,23 @@ export default function HomeContent({
           >
             <div className="flex items-center gap-2">
               <span>🔥</span>
-              <span className="font-medium text-[var(--color-text)]">{formatStreakText(stats.streakDays)}</span>
+              <span className="font-medium text-[var(--color-text)]">
+                {formatStreakText(stats.streakDays)}
+              </span>
             </div>
             <div className="h-5 w-px bg-warm-200" />
             <div className="flex items-center gap-2">
               <span>🚀</span>
-              <span className="font-medium text-[var(--color-text)]">{stats.totalWords.toLocaleString()} words</span>
+              <span className="font-medium text-[var(--color-text)]">
+                {stats.totalWords.toLocaleString()} words
+              </span>
             </div>
             <div className="h-5 w-px bg-warm-200" />
             <div className="flex items-center gap-2">
               <span>🏆</span>
-              <span className="font-medium text-[var(--color-text)]">{stats.averageWPM} WPM</span>
+              <span className="font-medium text-[var(--color-text)]">
+                {stats.averageWPM} WPM
+              </span>
             </div>
           </div>
         </div>
@@ -699,7 +711,9 @@ export default function HomeContent({
             {Object.entries(groupedInteractions).map(
               ([dateLabel, dateInteractions]) => (
                 <div key={dateLabel} className="mb-6">
-                  <div className="text-xs font-semibold tracking-[1px] uppercase text-[var(--color-subtext)] mb-4">{dateLabel}</div>
+                  <div className="text-xs font-semibold tracking-[1px] uppercase text-[var(--color-subtext)] mb-4">
+                    {dateLabel}
+                  </div>
                   <div className="bg-white dark:bg-[var(--card)] rounded-[var(--radius-lg)] border border-[var(--border)] shadow-[var(--shadow-card)] divide-y divide-[var(--border)]">
                     {dateInteractions.map(interaction => {
                       const displayInfo = getDisplayText(interaction)
@@ -737,7 +751,9 @@ export default function HomeContent({
                             {/* Copy button */}
                             {!displayInfo.isError && (
                               <Tooltip
-                                open={openTooltipKey === `copy:${interaction.id}`}
+                                open={
+                                  openTooltipKey === `copy:${interaction.id}`
+                                }
                                 onOpenChange={open => {
                                   if (open) {
                                     setOpenTooltipKey(`copy:${interaction.id}`)
@@ -785,7 +801,8 @@ export default function HomeContent({
                             {interaction.has_raw_audio && (
                               <Tooltip
                                 open={
-                                  openTooltipKey === `download:${interaction.id}`
+                                  openTooltipKey ===
+                                  `download:${interaction.id}`
                                 }
                                 onOpenChange={open => {
                                   setOpenTooltipKey(
@@ -825,7 +842,9 @@ export default function HomeContent({
                                       ? 'bg-blue-50 text-blue-600'
                                       : 'text-[var(--color-subtext)]'
                                   }`}
-                                  onClick={() => handleAudioPlayStop(interaction)}
+                                  onClick={() =>
+                                    handleAudioPlayStop(interaction)
+                                  }
                                   disabled={!interaction.has_raw_audio}
                                 >
                                   {playingAudio === interaction.id ? (
@@ -853,7 +872,9 @@ export default function HomeContent({
             )}
             {interactions.length > visibleCount && (
               <button
-                onClick={() => setVisibleCount(prev => prev + INTERACTIONS_PAGE_SIZE)}
+                onClick={() =>
+                  setVisibleCount(prev => prev + INTERACTIONS_PAGE_SIZE)
+                }
                 className="w-full py-3 text-sm text-[var(--color-subtext)] hover:text-foreground transition-colors duration-200"
               >
                 Show more ({interactions.length - visibleCount} remaining)
@@ -886,7 +907,8 @@ export default function HomeContent({
                   Daily Streak
                 </div>
                 <div className="text-2xl font-bold mb-1">
-                  {stats.streakDays} {stats.streakDays === 1 ? 'day' : 'days'} 🔥
+                  {stats.streakDays} {stats.streakDays === 1 ? 'day' : 'days'}{' '}
+                  🔥
                 </div>
                 <div className="text-sm text-[var(--color-subtext)]">
                   {stats.streakDays === 0

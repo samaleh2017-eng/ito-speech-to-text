@@ -13,6 +13,7 @@ import { WindowContextProvider } from '@/lib/window'
 import { SupabaseProvider } from '@/app/components/auth/SupabaseProvider'
 import { usePerformanceStore } from '@/app/store/usePerformanceStore'
 import { PerformanceProvider } from '@/app/performance/performance.context'
+import { BillingProvider } from '@/app/contexts/BillingContext'
 import { useDeviceChangeListener } from './hooks/useDeviceChangeListener'
 import { verifyStoredMicrophone } from './media/microphone'
 import { performanceAutotuner } from './performance/performance.autotune'
@@ -68,7 +69,11 @@ const MainApp = () => {
       'settings.isShortcutGloballyEnabled',
       shouldEnableShortcutGlobally,
     )
-    return <HomeKit />
+    return (
+      <BillingProvider>
+        <HomeKit />
+      </BillingProvider>
+    )
   }
 
   // If authenticated but onboarding not completed, continue onboarding
