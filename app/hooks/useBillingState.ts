@@ -100,8 +100,8 @@ export function useBillingState() {
       () => {
         refresh()
       },
-      2 * 60 * 1000,
-    ) // Refresh every 2 minutes
+      5 * 60 * 1000,
+    ) // Refresh every 5 minutes
 
     return () => clearInterval(interval)
   }, [refresh])

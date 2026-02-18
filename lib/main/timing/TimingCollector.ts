@@ -52,7 +52,6 @@ export class TimingCollector {
 
   constructor() {
     this.scheduleFlush()
-    console.log('[TimingCollector] Service initialized')
   }
 
   private shouldCollect(): boolean {
@@ -204,10 +203,6 @@ export class TimingCollector {
       this.completedReports = this.completedReports.slice(-this.MAX_QUEUE_SIZE)
     }
 
-    console.log(
-      `[TimingCollector] Finalized interaction: ${id} (${events.length} events, ${totalDuration}ms total)`,
-    )
-
     // Check if we should flush
     if (this.completedReports.length >= this.BATCH_SIZE) {
       this.flush()
@@ -225,7 +220,6 @@ export class TimingCollector {
     }
 
     this.activeTimings.delete(id)
-    console.log(`[TimingCollector] Cleared interaction: ${id}`)
   }
 
   /**
@@ -241,16 +235,8 @@ export class TimingCollector {
       flushAll ? this.completedReports.length : this.BATCH_SIZE,
     )
 
-    console.log(
-      `[TimingCollector] Flushing ${reportsToSend.length} timing reports to server`,
-    )
-
     try {
       await grpcClient.submitTimingReports(reportsToSend)
-
-      console.log(
-        `[TimingCollector] Successfully submitted ${reportsToSend.length} reports`,
-      )
     } catch (error) {
       console.error('[TimingCollector] Failed to submit timing data:', error)
       // Re-add reports to the front of the queue for retry

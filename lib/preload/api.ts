@@ -266,6 +266,7 @@ const api = {
       ipcRenderer.on('update-downloaded', callback),
     installUpdate: () => ipcRenderer.send('install-update'),
     getUpdateStatus: () => ipcRenderer.invoke('get-update-status'),
+    downloadUpdate: () => ipcRenderer.invoke('download-update'),
   },
 
   // Platform info

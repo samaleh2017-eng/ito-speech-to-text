@@ -27,6 +27,7 @@ interface UpdaterAPI {
   onUpdateAvailable: (callback: () => void) => void
   onUpdateDownloaded: (callback: () => void) => void
   installUpdate: () => void
+  downloadUpdate: () => Promise<{ success: boolean; error?: string }>
 }
 
 interface SelectedTextOptions {
