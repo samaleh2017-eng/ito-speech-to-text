@@ -9,9 +9,40 @@ import { Note, Interaction, DictionaryItem } from './sqlite/models'
 import mainStore from './store'
 import { STORE_KEYS } from '../constants/store-keys'
 import type { AdvancedSettings } from './store'
-import { DEFAULT_ADVANCED_SETTINGS } from '../constants/generated-defaults.js'
-import { main } from 'bun'
 import { mainWindow } from './app'
+
+/**
+ * Execute async tasks with a concurrency limit.
+ * Returns results in the same order as input.
+ */
+async function parallelLimit<T>(
+  tasks: (() => Promise<T>)[],
+  limit: number,
+): Promise<PromiseSettledResult<T>[]> {
+  const results: PromiseSettledResult<T>[] = []
+  let index = 0
+
+  async function runNext(): Promise<void> {
+    while (index < tasks.length) {
+      const currentIndex = index++
+      try {
+        const value = await tasks[currentIndex]()
+        results[currentIndex] = { status: 'fulfilled', value }
+      } catch (reason) {
+        results[currentIndex] = { status: 'rejected', reason }
+      }
+    }
+  }
+
+  const workers = Array.from(
+    { length: Math.min(limit, tasks.length) },
+    () => runNext(),
+  )
+  await Promise.all(workers)
+  return results
+}
+
+const SYNC_CONCURRENCY = 5
 
 const LAST_SYNCED_AT_KEY = 'lastSyncedAt'
 
@@ -87,19 +118,24 @@ export class SyncService {
         (await KeyValueStore.get(lastSyncedAtKey)) || new Date(0).toISOString()
 
       // =================================================================
-      // PUSH LOCAL CHANGES
+      // PUSH LOCAL CHANGES — in parallel
       // =================================================================
-      let processedChanges = 0
-      processedChanges += await this.pushNotes(lastSyncedAt)
-      processedChanges += await this.pushInteractions(lastSyncedAt)
-      processedChanges += await this.pushDictionaryItems(lastSyncedAt)
+      const [pushNotes, pushInteractions, pushDict] = await Promise.all([
+        this.pushNotes(lastSyncedAt),
+        this.pushInteractions(lastSyncedAt),
+        this.pushDictionaryItems(lastSyncedAt),
+      ])
+      let processedChanges = pushNotes + pushInteractions + pushDict
 
       // =================================================================
-      // PULL REMOTE CHANGES
+      // PULL REMOTE CHANGES — in parallel (after push completes)
       // =================================================================
-      processedChanges += await this.pullNotes(lastSyncedAt)
-      processedChanges += await this.pullInteractions(lastSyncedAt)
-      processedChanges += await this.pullDictionaryItems(lastSyncedAt)
+      const [pullNotes, pullInteractions, pullDict] = await Promise.all([
+        this.pullNotes(lastSyncedAt),
+        this.pullInteractions(lastSyncedAt),
+        this.pullDictionaryItems(lastSyncedAt),
+      ])
+      processedChanges += pullNotes + pullInteractions + pullDict
 
       // =================================================================
       // SYNC ADVANCED SETTINGS
@@ -119,20 +155,25 @@ export class SyncService {
 
   private async pushNotes(lastSyncedAt: string): Promise<number> {
     const modifiedNotes = await NotesTable.findModifiedSince(lastSyncedAt)
-    if (modifiedNotes.length > 0) {
-      for (const note of modifiedNotes) {
-        try {
-          // If created_at is after lastSyncedAt, it's a new note
-          if (new Date(note.created_at) > new Date(lastSyncedAt)) {
-            await grpcClient.createNote(note)
-          } else if (note.deleted_at) {
-            await grpcClient.deleteNote(note)
-          } else {
-            await grpcClient.updateNote(note)
-          }
-        } catch (e) {
-          console.error(`Failed to push note ${note.id}:`, e)
-        }
+    if (modifiedNotes.length === 0) return 0
+
+    const tasks = modifiedNotes.map((note) => () => {
+      if (new Date(note.created_at) > new Date(lastSyncedAt)) {
+        return grpcClient.createNote(note)
+      } else if (note.deleted_at) {
+        return grpcClient.deleteNote(note)
+      } else {
+        return grpcClient.updateNote(note)
+      }
+    })
+
+    const results = await parallelLimit(tasks, SYNC_CONCURRENCY)
+    for (let i = 0; i < results.length; i++) {
+      if (results[i].status === 'rejected') {
+        console.error(
+          `Failed to push note ${modifiedNotes[i].id}:`,
+          (results[i] as PromiseRejectedResult).reason,
+        )
       }
     }
     return modifiedNotes.length
@@ -141,19 +182,25 @@ export class SyncService {
   private async pushInteractions(lastSyncedAt: string): Promise<number> {
     const modifiedInteractions =
       await InteractionsTable.findModifiedSince(lastSyncedAt)
-    if (modifiedInteractions.length > 0) {
-      for (const interaction of modifiedInteractions) {
-        try {
-          if (new Date(interaction.created_at) > new Date(lastSyncedAt)) {
-            await grpcClient.createInteraction(interaction)
-          } else if (interaction.deleted_at) {
-            await grpcClient.deleteInteraction(interaction)
-          } else {
-            await grpcClient.updateInteraction(interaction)
-          }
-        } catch (e) {
-          console.error(`Failed to push interaction ${interaction.id}:`, e)
-        }
+    if (modifiedInteractions.length === 0) return 0
+
+    const tasks = modifiedInteractions.map((interaction) => () => {
+      if (new Date(interaction.created_at) > new Date(lastSyncedAt)) {
+        return grpcClient.createInteraction(interaction)
+      } else if (interaction.deleted_at) {
+        return grpcClient.deleteInteraction(interaction)
+      } else {
+        return grpcClient.updateInteraction(interaction)
+      }
+    })
+
+    const results = await parallelLimit(tasks, SYNC_CONCURRENCY)
+    for (let i = 0; i < results.length; i++) {
+      if (results[i].status === 'rejected') {
+        console.error(
+          `Failed to push interaction ${modifiedInteractions[i].id}:`,
+          (results[i] as PromiseRejectedResult).reason,
+        )
       }
     }
     return modifiedInteractions.length
@@ -161,19 +208,25 @@ export class SyncService {
 
   private async pushDictionaryItems(lastSyncedAt: string): Promise<number> {
     const modifiedItems = await DictionaryTable.findModifiedSince(lastSyncedAt)
-    if (modifiedItems.length > 0) {
-      for (const item of modifiedItems) {
-        try {
-          if (new Date(item.created_at) > new Date(lastSyncedAt)) {
-            await grpcClient.createDictionaryItem(item)
-          } else if (item.deleted_at) {
-            await grpcClient.deleteDictionaryItem(item)
-          } else {
-            await grpcClient.updateDictionaryItem(item)
-          }
-        } catch (e) {
-          console.error(`Failed to push dictionary item ${item.id}:`, e)
-        }
+    if (modifiedItems.length === 0) return 0
+
+    const tasks = modifiedItems.map((item) => () => {
+      if (new Date(item.created_at) > new Date(lastSyncedAt)) {
+        return grpcClient.createDictionaryItem(item)
+      } else if (item.deleted_at) {
+        return grpcClient.deleteDictionaryItem(item)
+      } else {
+        return grpcClient.updateDictionaryItem(item)
+      }
+    })
+
+    const results = await parallelLimit(tasks, SYNC_CONCURRENCY)
+    for (let i = 0; i < results.length; i++) {
+      if (results[i].status === 'rejected') {
+        console.error(
+          `Failed to push dictionary item ${modifiedItems[i].id}:`,
+          (results[i] as PromiseRejectedResult).reason,
+        )
       }
     }
     return modifiedItems.length
