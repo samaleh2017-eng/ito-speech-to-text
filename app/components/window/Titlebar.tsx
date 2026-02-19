@@ -2,7 +2,7 @@ import { useWindowContext } from './WindowContext'
 import React, { useState, useEffect } from 'react'
 import { OnboardingTitlebar } from './OnboardingTitlebar'
 import { useOnboardingStore } from '@/app/store/useOnboardingStore'
-import { UserCircle, PanelLeft, CogFour, Logout, Bell } from '@mynaui/icons-react'
+import { UserCircle, CogFour, Logout, Bell } from '@mynaui/icons-react'
 import { useMainStore } from '@/app/store/useMainStore'
 import { useAuthStore } from '@/app/store/useAuthStore'
 import { useAuth } from '@/app/components/auth/useAuth'
@@ -11,7 +11,7 @@ export const Titlebar = () => {
   const { onboardingCompleted } = useOnboardingStore()
   const { isAuthenticated } = useAuthStore()
   const showOnboarding = !onboardingCompleted || !isAuthenticated
-  const { toggleNavExpanded, setCurrentPage, setSettingsPage, navExpanded } =
+  const { setCurrentPage, setSettingsPage, navExpanded } =
     useMainStore()
   const { logoutUser } = useAuth()
   const wcontext = useWindowContext().window
@@ -102,27 +102,8 @@ export const Titlebar = () => {
           <div
             className={`h-full border-r border-transparent transition-all duration-200 ease-in-out ${navExpanded ? 'w-56' : 'w-[72px]'}`}
           ></div>
-          <div
-            className="titlebar-action-btn hover:bg-warm-200 ml-2"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 36,
-              height: 30,
-              border: 'none',
-              cursor: 'pointer',
-              borderRadius: 6,
-              padding: 0,
-            }}
-            aria-label="Open Panel"
-            tabIndex={0}
-            onClick={toggleNavExpanded}
-          >
-            <PanelLeft style={{ width: 20, height: 20 }} />
-          </div>
 
-          <div className="relative">
+          <div className="relative ml-2">
             <div
               className="titlebar-action-btn hover:bg-warm-200"
               style={{
