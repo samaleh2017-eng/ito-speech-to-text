@@ -40,11 +40,11 @@ class GeminiClient implements LlmProvider {
 
     try {
       let promptText =
-        'Transcris ce fichier audio mot à mot. Retourne UNIQUEMENT le texte transcrit, sans formatage, sans commentaire, sans explication. Si tu ne détectes pas de parole, retourne une chaîne vide.'
+        'Transcris ce fichier audio en français, mot à mot, fidèlement. Retourne UNIQUEMENT le texte transcrit, sans formatage, sans commentaire, sans explication. Conserve les noms propres (Ito, Arka) tels quels. Si tu ne détectes pas de parole, retourne une chaîne vide.'
 
       const vocabulary = options?.vocabulary
       if (vocabulary && vocabulary.length > 0) {
-        promptText += `\nVocabulaire spécifique à utiliser: ${vocabulary.join(', ')}`
+        promptText += `\nMots importants à reconnaître dans l'audio: ${vocabulary.join(', ')}`
       }
 
       const response = await this._client.models.generateContent({
