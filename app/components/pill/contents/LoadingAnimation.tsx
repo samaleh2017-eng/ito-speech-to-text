@@ -4,9 +4,9 @@ interface LoadingAnimationProps {
   color?: string
 }
 
-export const LoadingAnimation: React.FC<LoadingAnimationProps> = ({
+export const LoadingAnimation: React.FC<LoadingAnimationProps> = React.memo(function LoadingAnimation({
   color = '#FFFFFF',
-}) => {
+}) {
   return (
     <>
       <style>{`
@@ -55,4 +55,4 @@ export const LoadingAnimation: React.FC<LoadingAnimationProps> = ({
       />
     </>
   )
-}
+})

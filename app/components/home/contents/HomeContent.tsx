@@ -1,6 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
-  ChartNoAxesColumn,
   InfoCircle,
   Play,
   Stop,
@@ -13,24 +12,19 @@ import { useSettingsStore } from '../../../store/useSettingsStore'
 import { Tooltip, TooltipTrigger, TooltipContent } from '../../ui/tooltip'
 import { useAuthStore } from '@/app/store/useAuthStore'
 import { Interaction } from '@/lib/main/sqlite/models'
-import { TotalWordsIcon } from '../../icons/TotalWordsIcon'
-import { SpeedIcon } from '../../icons/SpeedIcon'
-import {
-  STREAK_MESSAGES,
-  SPEED_MESSAGES,
-  TOTAL_WORDS_MESSAGES,
-  getStreakLevel,
-  getSpeedLevel,
-  getTotalWordsLevel,
-  getActivityMessage,
-} from './activityMessages'
 import { ItoMode } from '@/app/generated/ito_pb'
 import { getKeyDisplay } from '@/app/utils/keyboard'
 import { createStereo48kWavFromMonoPCM } from '@/app/utils/audioUtils'
 import { KeyName } from '@/lib/types/keyboard'
 import { usePlatform } from '@/app/hooks/usePlatform'
 import { ProUpgradeDialog } from '../ProUpgradeDialog'
-import useBillingState from '@/app/hooks/useBillingState'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '../../ui/dialog'
+import { useBilling } from '@/app/contexts/BillingContext'
 
 // Interface for interaction statistics
 interface InteractionStats {
@@ -39,7 +33,7 @@ interface InteractionStats {
   averageWPM: number
 }
 
-const StatCard = ({
+const _StatCard = ({
   title,
   value,
   description,
@@ -51,7 +45,7 @@ const StatCard = ({
   icon: React.ReactNode
 }) => {
   return (
-    <div className="flex flex-col p-4 w-1/3 border-2 border-neutral-100 rounded-xl gap-4">
+    <div className="flex flex-col p-4 w-1/3 border border-[var(--border)] rounded-[var(--radius-lg)] gap-4">
       <div className="flex flex-row items-center">
         <div className="flex flex-col gap-1">
           <div>{title}</div>
@@ -59,7 +53,7 @@ const StatCard = ({
         </div>
         <div className="flex flex-col items-end flex-1">{icon}</div>
       </div>
-      <div className="w-full text-neutral-400">{description}</div>
+      <div className="w-full text-[var(--color-subtext)]">{description}</div>
     </div>
   )
 }
@@ -76,12 +70,12 @@ export default function HomeContent({
   const { user } = useAuthStore()
   const firstName = user?.name?.split(' ')[0]
   const platform = usePlatform()
+  const INTERACTIONS_PAGE_SIZE = 50
   const [interactions, setInteractions] = useState<Interaction[]>([])
   const [loading, setLoading] = useState(true)
   const [playingAudio, setPlayingAudio] = useState<string | null>(null)
-  const [audioInstances, setAudioInstances] = useState<
-    Map<string, HTMLAudioElement>
-  >(new Map())
+  const audioInstancesRef = useRef<Map<string, HTMLAudioElement>>(new Map())
+  const [visibleCount, setVisibleCount] = useState(INTERACTIONS_PAGE_SIZE)
   const [copiedItems, setCopiedItems] = useState<Set<string>>(new Set())
   const [openTooltipKey, setOpenTooltipKey] = useState<string | null>(null)
   const [stats, setStats] = useState<InteractionStats>({
@@ -90,7 +84,8 @@ export default function HomeContent({
     averageWPM: 0,
   })
   const [showProDialog, setShowProDialog] = useState(false)
-  const billingState = useBillingState()
+  const [showStatsDialog, setShowStatsDialog] = useState(false)
+  const billingState = useBilling()
 
   // Persist "has shown trial dialog" flag in electron-store to survive remounts
   const [hasShownTrialDialog, setHasShownTrialDialogState] = useState(() => {
@@ -132,24 +127,26 @@ export default function HomeContent({
     setHasShownTrialDialog,
   ])
 
-  // Listen for trial start event to refresh billing state
+  const billingRefreshRef = useRef(billingState.refresh)
+  useEffect(() => {
+    billingRefreshRef.current = billingState.refresh
+  }, [billingState.refresh])
+
   useEffect(() => {
     const offTrialStarted = window.api.on('trial-started', async () => {
-      await billingState.refresh()
+      await billingRefreshRef.current()
     })
-
     const offBillingSuccess = window.api.on(
       'billing-session-completed',
       async () => {
-        await billingState.refresh()
+        await billingRefreshRef.current()
       },
     )
-
     return () => {
       offTrialStarted?.()
       offBillingSuccess?.()
     }
-  }, [billingState])
+  }, [])
 
   // Reset dialog flag when trial is no longer active or user becomes pro
   // Only reset if we're certain the trial has ended (not just during loading/refreshing)
@@ -323,14 +320,18 @@ export default function HomeContent({
     return unsubscribe
   }, [loadInteractions])
 
+  useEffect(() => {
+    setVisibleCount(INTERACTIONS_PAGE_SIZE)
+  }, [interactions.length])
+
   // Cleanup audio instances on unmount
   useEffect(() => {
+    const map = audioInstancesRef.current
     return () => {
-      audioInstances.forEach(audio => {
+      map.forEach(audio => {
         try {
           audio.pause()
           audio.currentTime = 0
-          // Best-effort release of object URL if used
           if (audio.src?.startsWith('blob:')) {
             URL.revokeObjectURL(audio.src)
           }
@@ -338,8 +339,27 @@ export default function HomeContent({
           /* ignore */
         }
       })
+      map.clear()
     }
-  }, [audioInstances])
+  }, [])
+
+  const MAX_AUDIO_CACHE = 5
+
+  const evictOldestAudio = useCallback(() => {
+    const map = audioInstancesRef.current
+    if (map.size <= MAX_AUDIO_CACHE) return
+    const oldestKey = map.keys().next().value
+    if (oldestKey) {
+      const oldAudio = map.get(oldestKey)
+      if (oldAudio) {
+        oldAudio.pause()
+        if (oldAudio.src?.startsWith('blob:')) {
+          URL.revokeObjectURL(oldAudio.src)
+        }
+      }
+      map.delete(oldestKey)
+    }
+  }, [])
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString)
@@ -438,13 +458,10 @@ export default function HomeContent({
     try {
       // If this interaction is currently playing, stop it
       if (playingAudio === interaction.id) {
-        const current = audioInstances.get(interaction.id)
+        const current = audioInstancesRef.current.get(interaction.id)
         if (current) {
           current.pause()
           current.currentTime = 0
-          if (current.src?.startsWith('blob:')) {
-            URL.revokeObjectURL(current.src)
-          }
         }
         setPlayingAudio(null)
         return
@@ -452,17 +469,14 @@ export default function HomeContent({
 
       // Stop any other playing audio
       if (playingAudio) {
-        const other = audioInstances.get(playingAudio)
+        const other = audioInstancesRef.current.get(playingAudio)
         if (other) {
           other.pause()
           other.currentTime = 0
-          if (other.src?.startsWith('blob:')) {
-            URL.revokeObjectURL(other.src)
-          }
         }
       }
 
-      if (!interaction.raw_audio) {
+      if (!interaction.has_raw_audio) {
         console.warn('No audio data available for this interaction')
         return
       }
@@ -471,10 +485,18 @@ export default function HomeContent({
       setPlayingAudio(interaction.id)
 
       // Reuse existing audio instance if available
-      let audio = audioInstances.get(interaction.id)
+      let audio = audioInstancesRef.current.get(interaction.id)
 
       if (!audio) {
-        const pcmData = new Uint8Array(interaction.raw_audio)
+        const fullInteraction = await window.api.interactions.getById(
+          interaction.id,
+        )
+        if (!fullInteraction?.raw_audio) {
+          console.warn('Failed to load audio data')
+          setPlayingAudio(null)
+          return
+        }
+        const pcmData = new Uint8Array(fullInteraction.raw_audio)
         try {
           // Convert raw PCM (mono, typically 16 kHz) to 48 kHz stereo WAV for smoother playback
           const wavBuffer = createStereo48kWavFromMonoPCM(
@@ -488,19 +510,14 @@ export default function HomeContent({
           audio = new Audio(audioUrl)
           audio.onended = () => {
             setPlayingAudio(null)
-            if (audio && audio.src?.startsWith('blob:')) {
-              URL.revokeObjectURL(audio.src)
-            }
           }
           audio.onerror = err => {
             console.error('Audio playback error:', err)
             setPlayingAudio(null)
-            if (audio && audio.src?.startsWith('blob:')) {
-              URL.revokeObjectURL(audio.src)
-            }
           }
 
-          setAudioInstances(prev => new Map(prev).set(interaction.id, audio!))
+          audioInstancesRef.current.set(interaction.id, audio!)
+          evictOldestAudio()
         } catch (error) {
           console.error('Failed to create audio instance:', error)
           setPlayingAudio(null)
@@ -520,7 +537,15 @@ export default function HomeContent({
     }
   }
 
-  const groupedInteractions = groupInteractionsByDate(interactions)
+  const visibleInteractions = useMemo(
+    () => interactions.slice(0, visibleCount),
+    [interactions, visibleCount],
+  )
+
+  const groupedInteractions = useMemo(
+    () => groupInteractionsByDate(visibleInteractions),
+    [visibleInteractions],
+  )
 
   const copyToClipboard = async (text: string, interactionId: string) => {
     try {
@@ -547,12 +572,20 @@ export default function HomeContent({
 
   const handleAudioDownload = async (interaction: Interaction) => {
     try {
-      if (!interaction.raw_audio) {
+      if (!interaction.has_raw_audio) {
         console.warn('No audio data available for download')
         return
       }
 
-      const pcmData = new Uint8Array(interaction.raw_audio)
+      const fullInteraction = await window.api.interactions.getById(
+        interaction.id,
+      )
+      if (!fullInteraction?.raw_audio) {
+        console.warn('Failed to load audio data for download')
+        return
+      }
+
+      const pcmData = new Uint8Array(fullInteraction.raw_audio)
       // Convert raw PCM to WAV format
       const wavBuffer = createStereo48kWavFromMonoPCM(
         pcmData,
@@ -589,72 +622,49 @@ export default function HomeContent({
   return (
     <div className="w-full h-full flex flex-col">
       {/* Fixed Header Content */}
-      <div className="flex-shrink-0 px-24">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-medium">
-              Welcome back{firstName ? `, ${firstName}!` : '!'}
-            </h1>
-          </div>
-        </div>
-        <div className="flex gap-4 w-full mb-6">
-          <div className="flex w-full items-center text-sm text-gray-700 gap-2">
-            <StatCard
-              title="Weekly Streak"
-              value={formatStreakText(stats.streakDays)}
-              description={getActivityMessage(
-                STREAK_MESSAGES,
-                getStreakLevel(stats.streakDays),
-              )}
-              icon={
-                <div className="p-2 bg-blue-50 rounded-md">
-                  <ChartNoAxesColumn
-                    className="w-6 h-6 text-blue-400 border-2 p-1 rounded-full"
-                    strokeWidth={4}
-                  />
-                </div>
-              }
-            />
-            <StatCard
-              title="Average Speed"
-              value={`${stats.averageWPM} words / minute`}
-              description={getActivityMessage(
-                SPEED_MESSAGES,
-                getSpeedLevel(stats.averageWPM),
-              )}
-              icon={
-                <div className="p-2 bg-green-50 rounded-md">
-                  <SpeedIcon />
-                </div>
-              }
-            />
-            <StatCard
-              title="Total Words"
-              value={`${stats.totalWords} ${stats.totalWords === 1 ? 'word' : 'words'}`}
-              description={getActivityMessage(
-                TOTAL_WORDS_MESSAGES,
-                getTotalWordsLevel(stats.totalWords),
-              )}
-              icon={
-                <div className="p-2 bg-orange-50 rounded-md">
-                  <TotalWordsIcon />
-                </div>
-              }
-            />
+      <div className="flex-shrink-0 px-12 max-w-4xl mx-auto w-full">
+        <div className="flex items-center justify-between mb-10">
+          <h1 className="text-[30px] font-semibold tracking-tight font-sans">
+            Welcome back{firstName ? `, ${firstName}` : ''}
+          </h1>
+          <div
+            className="flex items-center gap-5 text-[13px] bg-[var(--color-surface)] border border-[var(--border)] rounded-[var(--radius-lg)] px-6 py-3 shadow-card cursor-pointer hover:shadow-soft hover:-translate-y-0.5 transition-all duration-180"
+            onClick={() => setShowStatsDialog(true)}
+          >
+            <div className="flex items-center gap-2">
+              <span>🔥</span>
+              <span className="font-medium text-[var(--color-text)]">
+                {formatStreakText(stats.streakDays)}
+              </span>
+            </div>
+            <div className="h-5 w-px bg-warm-200" />
+            <div className="flex items-center gap-2">
+              <span>🚀</span>
+              <span className="font-medium text-[var(--color-text)]">
+                {stats.totalWords.toLocaleString()} words
+              </span>
+            </div>
+            <div className="h-5 w-px bg-warm-200" />
+            <div className="flex items-center gap-2">
+              <span>🏆</span>
+              <span className="font-medium text-[var(--color-text)]">
+                {stats.averageWPM} WPM
+              </span>
+            </div>
           </div>
         </div>
 
         {/* Dictation Info Box */}
-        <div className="bg-slate-100 rounded-xl p-6 flex items-center justify-between mb-10">
+        <div className="bg-[var(--color-surface)] border border-[var(--border)] rounded-[var(--radius-lg)] p-7 flex items-center justify-between mb-10 shadow-[var(--shadow-soft)]">
           <div>
-            <div className="text-base font-medium mb-1">
+            <div className="text-lg font-sans font-medium mb-1">
               Voice dictation in any app
             </div>
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-[var(--color-subtext)]">
               <span key="hold-down">Hold down the trigger key </span>
               {keyboardShortcut.map((key, index) => (
                 <React.Fragment key={index}>
-                  <span className="bg-slate-50 px-1 py-0.5 rounded text-xs font-mono shadow-sm">
+                  <span className="bg-white border border-[var(--border)] px-1.5 py-0.5 rounded text-xs font-mono shadow-sm">
                     {getKeyDisplay(key as KeyName, platform, {
                       showDirectionalText: false,
                       format: 'label',
@@ -667,7 +677,7 @@ export default function HomeContent({
             </div>
           </div>
           <button
-            className="bg-gray-900 text-white px-6 py-3 rounded-full font-semibold hover:bg-gray-800 cursor-pointer"
+            className="bg-[var(--primary)] text-[var(--primary-foreground)] px-6 py-3 rounded-[var(--radius-lg)] font-semibold hover:opacity-90 cursor-pointer transition-opacity"
             onClick={() =>
               window.api?.invoke('web-open-url', EXTERNAL_LINKS.WEBSITE)
             }
@@ -677,19 +687,19 @@ export default function HomeContent({
         </div>
 
         {/* Recent Activity Header */}
-        <div className="text-sm text-muted-foreground mb-6">
+        <div className="text-xs font-semibold tracking-[1px] uppercase text-[var(--color-subtext)] mb-6">
           Recent activity
         </div>
       </div>
 
       {/* Scrollable Recent Activity Section */}
-      <div className="flex-1 px-24 overflow-y-auto scrollbar-hide">
+      <div className="flex-1 px-12 max-w-4xl mx-auto w-full overflow-y-auto scrollbar-hide">
         {loading ? (
-          <div className="bg-white rounded-lg border border-slate-200 p-8 text-center text-gray-500">
+          <div className="bg-white dark:bg-[var(--card)] rounded-[var(--radius-lg)] border border-[var(--border)] p-8 text-center text-[var(--color-subtext)]">
             Loading recent activity...
           </div>
         ) : interactions.length === 0 ? (
-          <div className="bg-white rounded-lg border border-slate-200 p-8 text-center text-gray-500">
+          <div className="bg-white dark:bg-[var(--card)] rounded-[var(--radius-lg)] border border-[var(--border)] p-8 text-center text-[var(--color-subtext)]">
             <p className="text-sm">No interactions yet</p>
             <p className="text-xs mt-1">
               Try using voice dictation by pressing{' '}
@@ -697,169 +707,265 @@ export default function HomeContent({
             </p>
           </div>
         ) : (
-          Object.entries(groupedInteractions).map(
-            ([dateLabel, dateInteractions]) => (
-              <div key={dateLabel} className="mb-6">
-                <div className="text-xs text-gray-500 mb-4">{dateLabel}</div>
-                <div className="bg-white rounded-lg border border-slate-200 divide-y divide-slate-200">
-                  {dateInteractions.map(interaction => {
-                    const displayInfo = getDisplayText(interaction)
+          <>
+            {Object.entries(groupedInteractions).map(
+              ([dateLabel, dateInteractions]) => (
+                <div key={dateLabel} className="mb-6">
+                  <div className="text-xs font-semibold tracking-[1px] uppercase text-[var(--color-subtext)] mb-4">
+                    {dateLabel}
+                  </div>
+                  <div className="bg-white dark:bg-[var(--card)] rounded-[var(--radius-lg)] border border-[var(--border)] shadow-[var(--shadow-card)] divide-y divide-[var(--border)]">
+                    {dateInteractions.map(interaction => {
+                      const displayInfo = getDisplayText(interaction)
 
-                    return (
-                      <div
-                        key={interaction.id}
-                        className="flex items-center justify-between px-4 py-4 gap-10 hover:bg-gray-50 transition-colors duration-200 group"
-                      >
-                        <div className="flex items-center gap-10">
-                          <div className="text-gray-600 min-w-[60px]">
-                            {formatTime(interaction.created_at)}
+                      return (
+                        <div
+                          key={interaction.id}
+                          className="flex items-center justify-between px-4 py-4 gap-10 hover:bg-[var(--color-muted-bg)] transition-colors duration-200 group"
+                        >
+                          <div className="flex items-center gap-10">
+                            <div className="text-[var(--color-subtext)] text-[13px] min-w-[60px]">
+                              {formatTime(interaction.created_at)}
+                            </div>
+                            <div
+                              className={`${displayInfo.isError ? 'text-[var(--color-subtext)]' : 'text-foreground'} flex items-center gap-1`}
+                            >
+                              {displayInfo.text}
+                              {displayInfo.tooltip && (
+                                <Tooltip>
+                                  <TooltipTrigger>
+                                    <InfoCircle className="w-4 h-4 text-[var(--color-subtext)]" />
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    {displayInfo.tooltip}
+                                  </TooltipContent>
+                                </Tooltip>
+                              )}
+                            </div>
                           </div>
+
+                          {/* Copy, Download, and Play buttons - only show on hover or when playing */}
                           <div
-                            className={`${displayInfo.isError ? 'text-gray-600' : 'text-gray-900'} flex items-center gap-1`}
+                            className={`flex items-center gap-2 ${playingAudio === interaction.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-200`}
                           >
-                            {displayInfo.text}
-                            {displayInfo.tooltip && (
-                              <Tooltip>
-                                <TooltipTrigger>
-                                  <InfoCircle className="w-4 h-4 text-gray-400" />
+                            {/* Copy button */}
+                            {!displayInfo.isError && (
+                              <Tooltip
+                                open={
+                                  openTooltipKey === `copy:${interaction.id}`
+                                }
+                                onOpenChange={open => {
+                                  if (open) {
+                                    setOpenTooltipKey(`copy:${interaction.id}`)
+                                  } else {
+                                    if (!copiedItems.has(interaction.id)) {
+                                      setOpenTooltipKey(prev =>
+                                        prev === `copy:${interaction.id}`
+                                          ? null
+                                          : prev,
+                                      )
+                                    }
+                                  }
+                                }}
+                              >
+                                <TooltipTrigger asChild>
+                                  <button
+                                    className={`p-1.5 hover:bg-warm-200 rounded transition-colors cursor-pointer ${
+                                      copiedItems.has(interaction.id)
+                                        ? 'text-green-600'
+                                        : 'text-[var(--color-subtext)]'
+                                    }`}
+                                    onClick={() =>
+                                      copyToClipboard(
+                                        displayInfo.text,
+                                        interaction.id,
+                                      )
+                                    }
+                                  >
+                                    {copiedItems.has(interaction.id) ? (
+                                      <Check className="w-4 h-4" />
+                                    ) : (
+                                      <Copy className="w-4 h-4" />
+                                    )}
+                                  </button>
                                 </TooltipTrigger>
-                                <TooltipContent>
-                                  {displayInfo.tooltip}
+                                <TooltipContent side="top" sideOffset={5}>
+                                  {copiedItems.has(interaction.id)
+                                    ? 'Copied 🎉'
+                                    : 'Copy'}
                                 </TooltipContent>
                               </Tooltip>
                             )}
-                          </div>
-                        </div>
 
-                        {/* Copy, Download, and Play buttons - only show on hover or when playing */}
-                        <div
-                          className={`flex items-center gap-2 ${playingAudio === interaction.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-200`}
-                        >
-                          {/* Copy button */}
-                          {!displayInfo.isError && (
-                            <Tooltip
-                              open={openTooltipKey === `copy:${interaction.id}`}
-                              onOpenChange={open => {
-                                if (open) {
-                                  // Opening: exclusively show this tooltip
-                                  setOpenTooltipKey(`copy:${interaction.id}`)
-                                } else {
-                                  // Closing: if in copied state, keep it open until timer clears,
-                                  // otherwise close normally
-                                  if (!copiedItems.has(interaction.id)) {
-                                    setOpenTooltipKey(prev =>
-                                      prev === `copy:${interaction.id}`
-                                        ? null
-                                        : prev,
-                                    )
-                                  }
+                            {/* Download button */}
+                            {interaction.has_raw_audio && (
+                              <Tooltip
+                                open={
+                                  openTooltipKey ===
+                                  `download:${interaction.id}`
                                 }
-                              }}
-                            >
-                              <TooltipTrigger asChild>
-                                <button
-                                  className={`p-1.5 hover:bg-gray-200 rounded transition-colors cursor-pointer ${
-                                    copiedItems.has(interaction.id)
-                                      ? 'text-green-600'
-                                      : 'text-gray-600'
-                                  }`}
-                                  onClick={() =>
-                                    copyToClipboard(
-                                      displayInfo.text,
-                                      interaction.id,
-                                    )
-                                  }
-                                >
-                                  {copiedItems.has(interaction.id) ? (
-                                    <Check className="w-4 h-4" />
-                                  ) : (
-                                    <Copy className="w-4 h-4" />
-                                  )}
-                                </button>
-                              </TooltipTrigger>
-                              <TooltipContent side="top" sideOffset={5}>
-                                {copiedItems.has(interaction.id)
-                                  ? 'Copied 🎉'
-                                  : 'Copy'}
-                              </TooltipContent>
-                            </Tooltip>
-                          )}
+                                onOpenChange={open => {
+                                  setOpenTooltipKey(
+                                    open ? `download:${interaction.id}` : null,
+                                  )
+                                }}
+                              >
+                                <TooltipTrigger asChild>
+                                  <button
+                                    className="p-1.5 hover:bg-warm-200 rounded transition-colors cursor-pointer text-[var(--color-subtext)]"
+                                    onClick={() =>
+                                      handleAudioDownload(interaction)
+                                    }
+                                  >
+                                    <Download className="w-4 h-4" />
+                                  </button>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" sideOffset={5}>
+                                  Download audio
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
 
-                          {/* Download button */}
-                          {interaction.raw_audio && (
+                            {/* Play/Stop button with tooltip */}
                             <Tooltip
-                              open={
-                                openTooltipKey === `download:${interaction.id}`
-                              }
+                              open={openTooltipKey === `play:${interaction.id}`}
                               onOpenChange={open => {
                                 setOpenTooltipKey(
-                                  open ? `download:${interaction.id}` : null,
+                                  open ? `play:${interaction.id}` : null,
                                 )
                               }}
                             >
                               <TooltipTrigger asChild>
                                 <button
-                                  className="p-1.5 hover:bg-gray-200 rounded transition-colors cursor-pointer text-gray-600"
+                                  className={`p-1.5 hover:bg-warm-200 rounded transition-colors cursor-pointer ${
+                                    playingAudio === interaction.id
+                                      ? 'bg-blue-50 text-blue-600'
+                                      : 'text-[var(--color-subtext)]'
+                                  }`}
                                   onClick={() =>
-                                    handleAudioDownload(interaction)
+                                    handleAudioPlayStop(interaction)
                                   }
+                                  disabled={!interaction.has_raw_audio}
                                 >
-                                  <Download className="w-4 h-4" />
+                                  {playingAudio === interaction.id ? (
+                                    <Stop className="w-4 h-4" />
+                                  ) : (
+                                    <Play className="w-4 h-4" />
+                                  )}
                                 </button>
                               </TooltipTrigger>
                               <TooltipContent side="top" sideOffset={5}>
-                                Download audio
+                                {!interaction.has_raw_audio
+                                  ? 'No audio available'
+                                  : playingAudio === interaction.id
+                                    ? 'Stop'
+                                    : 'Play'}
                               </TooltipContent>
                             </Tooltip>
-                          )}
-
-                          {/* Play/Stop button with tooltip */}
-                          <Tooltip
-                            open={openTooltipKey === `play:${interaction.id}`}
-                            onOpenChange={open => {
-                              setOpenTooltipKey(
-                                open ? `play:${interaction.id}` : null,
-                              )
-                            }}
-                          >
-                            <TooltipTrigger asChild>
-                              <button
-                                className={`p-1.5 hover:bg-gray-200 rounded transition-colors cursor-pointer ${
-                                  playingAudio === interaction.id
-                                    ? 'bg-blue-50 text-blue-600'
-                                    : 'text-gray-600'
-                                }`}
-                                onClick={() => handleAudioPlayStop(interaction)}
-                                disabled={!interaction.raw_audio}
-                              >
-                                {playingAudio === interaction.id ? (
-                                  <Stop className="w-4 h-4" />
-                                ) : (
-                                  <Play className="w-4 h-4" />
-                                )}
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent side="top" sideOffset={5}>
-                              {!interaction.raw_audio
-                                ? 'No audio available'
-                                : playingAudio === interaction.id
-                                  ? 'Stop'
-                                  : 'Play'}
-                            </TooltipContent>
-                          </Tooltip>
+                          </div>
                         </div>
-                      </div>
-                    )
-                  })}
+                      )
+                    })}
+                  </div>
                 </div>
-              </div>
-            ),
-          )
+              ),
+            )}
+            {interactions.length > visibleCount && (
+              <button
+                onClick={() =>
+                  setVisibleCount(prev => prev + INTERACTIONS_PAGE_SIZE)
+                }
+                className="w-full py-3 text-sm text-[var(--color-subtext)] hover:text-foreground transition-colors duration-200"
+              >
+                Show more ({interactions.length - visibleCount} remaining)
+              </button>
+            )}
+          </>
         )}
       </div>
 
       {/* Pro Upgrade Dialog */}
       <ProUpgradeDialog open={showProDialog} onOpenChange={setShowProDialog} />
+
+      {/* Stats Detail Dialog */}
+      <Dialog open={showStatsDialog} onOpenChange={setShowStatsDialog}>
+        <DialogContent className="!border-0 shadow-xl p-0 max-w-lg rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="sr-only">Your Stats</DialogTitle>
+          </DialogHeader>
+          <div className="p-8">
+            <h2 className="text-xl font-bold text-center mb-1">
+              You've been Flowing. Hard.
+            </h2>
+            <p className="text-sm text-[var(--color-subtext)] text-center mb-8">
+              Here's a personal snapshot of your productivity with Ito.
+            </p>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-[var(--color-surface)] rounded-[var(--radius-lg)] p-5">
+                <div className="text-xs font-semibold tracking-wider text-[var(--color-subtext)] uppercase mb-3">
+                  Daily Streak
+                </div>
+                <div className="text-2xl font-bold mb-1">
+                  {stats.streakDays} {stats.streakDays === 1 ? 'day' : 'days'}{' '}
+                  🔥
+                </div>
+                <div className="text-sm text-[var(--color-subtext)]">
+                  {stats.streakDays === 0
+                    ? 'Start your streak today!'
+                    : stats.streakDays === 1
+                      ? 'Just getting started!'
+                      : stats.streakDays < 7
+                        ? `${stats.streakDays} days strong.`
+                        : 'On fire! Keep going!'}
+                </div>
+              </div>
+
+              <div className="bg-[var(--color-surface)] rounded-[var(--radius-lg)] p-5">
+                <div className="text-xs font-semibold tracking-wider text-[var(--color-subtext)] uppercase mb-3">
+                  Average Speed
+                </div>
+                <div className="text-2xl font-bold mb-1">
+                  {stats.averageWPM} WPM 🏆
+                </div>
+                <div className="text-sm text-[var(--color-subtext)]">
+                  Top performer!
+                </div>
+              </div>
+
+              <div className="bg-[var(--color-surface)] rounded-[var(--radius-lg)] p-5">
+                <div className="text-xs font-semibold tracking-wider text-[var(--color-subtext)] uppercase mb-3">
+                  Total Words Dictated
+                </div>
+                <div className="text-2xl font-bold mb-1">
+                  {stats.totalWords.toLocaleString()} 🚀
+                </div>
+                <div className="text-sm text-[var(--color-subtext)]">
+                  {stats.totalWords < 1000
+                    ? 'Getting warmed up!'
+                    : stats.totalWords < 5000
+                      ? `You've written ${Math.floor(stats.totalWords / 280)} tweets!`
+                      : `That's ${Math.floor(stats.totalWords / 250)} pages of text!`}
+                </div>
+              </div>
+
+              <div className="bg-[var(--color-surface)] rounded-[var(--radius-lg)] p-5">
+                <div className="text-xs font-semibold tracking-wider text-[var(--color-subtext)] uppercase mb-3">
+                  Total Interactions
+                </div>
+                <div className="text-2xl font-bold mb-1">
+                  {interactions.length} ⭐
+                </div>
+                <div className="text-sm text-[var(--color-subtext)]">
+                  {interactions.length < 10
+                    ? 'Keep using Ito!'
+                    : 'You are almost at flow mastery!'}
+                </div>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

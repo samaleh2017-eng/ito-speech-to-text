@@ -11,14 +11,14 @@
   --window-titlebar-font-weight: 500;
   --window-c-popup-font-weight: 500;
 
-  --window-c-background: #fff;
-  --window-c-titlebar-background: #fff;
-  --window-c-titlebar-border: #8080801a;
-  --window-c-text: #000000c8;
-  --window-c-hover: #ececec;
-  --window-c-popup-background: #f6f6f6;
-  --window-c-popup-border: #dcdcdc;
-  --window-c-popup-shadow: hsla(0, 0%, 0%, 0.1);
+  --window-c-background: var(--background, #ffffff);
+  --window-c-titlebar-background: var(--background, #ffffff);
+  --window-c-titlebar-border: transparent;
+  --window-c-text: var(--foreground, #1f1f1f);
+  --window-c-hover: #f5f5f5;
+  --window-c-popup-background: #ffffff;
+  --window-c-popup-border: rgba(31,31,31,0.08);
+  --window-c-popup-shadow: rgba(31,31,31,0.06);
   --window-c-separator: #80808033;
   --window-c-control-hover: #0000001a;
   --window-c-control-close-hover: #ff453b;
@@ -40,14 +40,14 @@
   --window-background-transition-duration: 0.3s;
   --window-c-popup-font-weight: normal;
 
-  --window-c-background: #1c1c1c;
-  --window-c-titlebar-background: #282828;
+  --window-c-background: var(--background, #0a0a0a);
+  --window-c-titlebar-background: var(--background, #0a0a0a);
   --window-c-titlebar-border: transparent;
-  --window-c-text: #ffffffc8;
-  --window-c-hover: #3c3c3c;
-  --window-c-popup-background: #282828;
-  --window-c-popup-border: #3c3c3c;
-  --window-c-popup-shadow: #00000080;
+  --window-c-text: var(--foreground, #fafafa);
+  --window-c-hover: #1a1a1a;
+  --window-c-popup-background: #141414;
+  --window-c-popup-border: rgba(250,250,250,0.08);
+  --window-c-popup-shadow: rgba(0,0,0,0.3);
   --window-c-separator: #80808033;
   --window-c-control-hover: #0000003d;
   --window-c-control-close-hover: #c42b1c;
@@ -82,6 +82,7 @@
   position: relative;
   height: var(--window-titlebar-height);
   align-items: center;
+  justify-content: space-between;
   -webkit-app-region: drag;
   background-color: var(--window-c-titlebar-background);
   color: var(--window-c-text);
@@ -127,9 +128,7 @@
 
 .window-titlebar-controls {
   display: flex;
-  position: absolute;
-  left: 0;
-  top: 0;
+  position: relative;
   -webkit-app-region: no-drag;
   z-index: 20;
 }

@@ -29,14 +29,29 @@ const floatLengthLimit = 4
 const asrPromptLengthLimit = 100
 const llmPromptLengthLimit = 1500
 
+const DEFAULT_MODELS_BY_PROVIDER: Record<string, { asrModel?: string; llmModel?: string }> = {
+  groq: {
+    asrModel: 'whisper-large-v3-turbo',
+    llmModel: 'llama-3.3-70b-versatile',
+  },
+  gemini: {
+    asrModel: 'gemini-2.5-flash-lite',
+    llmModel: 'gemini-2.5-flash-lite',
+  },
+  cerebras: {
+    llmModel: 'llama-3.3-70b',
+  },
+}
+
 const llmSettingsConfig: LlmSettingConfig[] = [
   {
     name: 'asrProvider',
     label: 'ASR Provider',
-    placeholder: 'Enter ASR provider name',
-    description: '',
+    placeholder: 'Select ASR provider',
+    description: 'Speech-to-text provider for audio transcription',
     maxLength: modelProviderLengthLimit,
-    readOnly: true,
+    isSelect: true,
+    options: ['gemini', 'groq'],
   },
   {
     name: 'asrModel',
@@ -61,7 +76,7 @@ const llmSettingsConfig: LlmSettingConfig[] = [
     description: 'LLM provider for text generation tasks',
     maxLength: modelProviderLengthLimit,
     isSelect: true,
-    options: ['groq', 'cerebras'],
+    options: ['gemini', 'groq', 'cerebras'],
   },
   {
     name: 'llmModel',
@@ -162,7 +177,7 @@ const SettingInput = memo(function SettingInput({
     <div className="mb-5">
       <label
         htmlFor={config.name}
-        className="block text-sm font-medium text-slate-700 mb-1 ml-1"
+        className="block text-sm font-medium text-[var(--color-text)] mb-1 ml-1"
       >
         {config.label}
       </label>
@@ -171,7 +186,7 @@ const SettingInput = memo(function SettingInput({
           id={config.name}
           value={value ?? ''}
           onChange={handleChange}
-          className="w-3/4 ml-1 px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-3/4 ml-1 px-3 py-2 border border-[var(--border)] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
           disabled={config.readOnly}
         >
           {config.options?.map(option => (
@@ -187,13 +202,13 @@ const SettingInput = memo(function SettingInput({
           onChange={handleChange}
           onFocus={handleFocus}
           onBlur={handleBlur}
-          className="w-3/4 ml-1 px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-3/4 ml-1 px-3 py-2 border border-[var(--border)] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
           placeholder={config.placeholder}
           maxLength={config.maxLength}
           readOnly={config.readOnly}
         />
       )}
-      <p className="w-3/4 text-xs text-slate-500 mt-1 ml-1">
+      <p className="w-3/4 text-xs text-[var(--color-subtext)] mt-1 ml-1">
         {config.description}
       </p>
     </div>
@@ -277,8 +292,24 @@ export default function AdvancedSettingsContent() {
         newValue = rawValue
       }
 
-      const updatedLlm = { ...llm, [config.name]: newValue }
-      setLlmSettings({ [config.name]: newValue })
+      // Build updated settings object
+      const settingsUpdate: Partial<LlmSettings> = { [config.name]: newValue }
+
+      // Auto-update model when provider changes
+      if (config.name === 'asrProvider' && typeof newValue === 'string') {
+        const defaultModel = DEFAULT_MODELS_BY_PROVIDER[newValue]?.asrModel
+        if (defaultModel) {
+          settingsUpdate.asrModel = defaultModel
+        }
+      } else if (config.name === 'llmProvider' && typeof newValue === 'string') {
+        const defaultModel = DEFAULT_MODELS_BY_PROVIDER[newValue]?.llmModel
+        if (defaultModel) {
+          settingsUpdate.llmModel = defaultModel
+        }
+      }
+
+      const updatedLlm = { ...llm, ...settingsUpdate }
+      setLlmSettings(settingsUpdate)
       scheduleAdvancedSettingsUpdate(
         updatedLlm,
         grammarServiceEnabled,
@@ -352,15 +383,15 @@ export default function AdvancedSettingsContent() {
   ])
 
   return (
-    <div className="max-h-[70vh] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-500 scrollbar-track-transparent">
+    <div className="max-h-[70vh] overflow-y-auto scrollbar-thin scrollbar-thumb-warm-500 scrollbar-track-transparent">
       {/* LLM Settings Section */}
       <div className="space-y-6">
         <div>
           <div className="flex items-center justify-between mb-3 ml-1 mr-1">
-            <h3 className="text-md font-medium text-slate-900">LLM Settings</h3>
+            <h3 className="text-md font-sans font-normal text-foreground">LLM Settings</h3>
             <button
               onClick={handleRestoreDefaults}
-              className="px-3 py-1 text-sm text-slate-600 hover:text-slate-900 border border-slate-300 rounded-md hover:bg-slate-50 transition-colors"
+              className="px-3 py-1 text-sm text-[var(--color-subtext)] hover:text-foreground border border-[var(--border)] rounded-md hover:bg-[var(--color-surface)] transition-colors"
             >
               Restore Defaults
             </button>
@@ -378,7 +409,7 @@ export default function AdvancedSettingsContent() {
         </div>
 
         <div>
-          <h3 className="text-md font-medium text-slate-900 mb-3 ml-1">
+          <h3 className="text-md font-sans font-normal text-foreground mb-3 ml-1">
             Grammar
           </h3>
           <label className="flex items-start gap-3 ml-1">
@@ -386,13 +417,13 @@ export default function AdvancedSettingsContent() {
               type="checkbox"
               checked={grammarServiceEnabled}
               onChange={handleGrammarServiceToggle}
-              className="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+              className="mt-1 h-4 w-4 rounded border-[var(--border)] text-blue-600 focus:ring-blue-500"
             />
             <span>
-              <span className="block text-sm font-medium text-slate-700">
+              <span className="block text-sm font-medium text-[var(--color-text)]">
                 Enable Grammar Service
               </span>
-              <span className="block text-xs text-slate-500 mt-1">
+              <span className="block text-xs text-[var(--color-subtext)] mt-1">
                 Apply Ito's local grammar adjustments before inserting text.
               </span>
             </span>
@@ -401,7 +432,7 @@ export default function AdvancedSettingsContent() {
 
         {windowContext?.window?.platform === 'darwin' && (
           <div>
-            <h3 className="text-md font-medium text-slate-900 mb-3 ml-1">
+            <h3 className="text-md font-sans font-normal text-foreground mb-3 ml-1">
               Context
             </h3>
             <label className="flex items-start gap-3 ml-1">
@@ -409,13 +440,13 @@ export default function AdvancedSettingsContent() {
                 type="checkbox"
                 checked={macosAccessibilityContextEnabled}
                 onChange={handleMacosAccessibilityContextToggle}
-                className="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                className="mt-1 h-4 w-4 rounded border-[var(--border)] text-blue-600 focus:ring-blue-500"
               />
               <span>
-                <span className="block text-sm font-medium text-slate-700">
+                <span className="block text-sm font-medium text-[var(--color-text)]">
                   Use Accessibility Context
                 </span>
-                <span className="block text-xs text-slate-500 mt-1">
+                <span className="block text-xs text-[var(--color-subtext)] mt-1">
                   Use Accessibility APIs to capture text context around the
                   cursor for improved accuracy.
                 </span>

@@ -1,31 +1,33 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/app/components/ui/button'
 import { Check } from '@mynaui/icons-react'
-import useBillingState from '@/app/hooks/useBillingState'
+import { useBilling } from '@/app/contexts/BillingContext'
 
 type BillingPeriod = 'monthly' | 'annual'
 
 export default function PricingBillingSettingsContent() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>('annual')
-  const billingState = useBillingState()
+  const billingState = useBilling()
   const [checkoutLoading, setCheckoutLoading] = useState(false)
   const [checkoutError, setCheckoutError] = useState<string | null>(null)
   const [downgradeLoading, setDowngradeLoading] = useState(false)
   const [reactivateLoading, setReactivateLoading] = useState(false)
 
-  // Refresh billing state when checkout session completes
+  const billingRefreshRef = useRef(billingState.refresh)
+  useEffect(() => {
+    billingRefreshRef.current = billingState.refresh
+  }, [billingState.refresh])
+
   useEffect(() => {
     const offSuccess = window.api.on('billing-session-completed', async () => {
-      // Refresh billing state to reflect the new subscription
-      await billingState.refresh()
+      await billingRefreshRef.current()
       setCheckoutError(null)
     })
-
     return () => {
       offSuccess?.()
     }
-  }, [billingState])
+  }, [])
 
   const handleCheckout = async () => {
     setCheckoutLoading(true)
@@ -236,7 +238,7 @@ export default function PricingBillingSettingsContent() {
             <Button
               variant="default"
               size="lg"
-              className="w-full bg-gray-900 hover:bg-gray-800 text-white rounded-xl"
+              className="w-full bg-foreground hover:bg-foreground/90 text-white rounded-xl"
               disabled={getProButtonDisabled()}
               onClick={
                 billingState.isScheduledForCancellation
@@ -263,7 +265,7 @@ export default function PricingBillingSettingsContent() {
             <Button
               variant="outline"
               size="lg"
-              className="w-full rounded-xl border-gray-200"
+              className="w-full rounded-xl border-[var(--border)]"
               onClick={handleContactUs}
             >
               Contact Us
@@ -294,14 +296,16 @@ function PricingCard({
 }: PricingCardProps) {
   return (
     <div
-      className={`rounded-xl border-2 p-6 flex flex-col ${
+      className={`rounded-[var(--radius-lg)] border-2 p-6 flex flex-col ${
         isHighlighted
           ? 'border-purple-500 bg-gradient-to-br from-purple-50/30 to-pink-50/30'
-          : 'border-gray-200 bg-white'
+          : 'border-[var(--border)] bg-[var(--color-surface)]'
       }`}
     >
       {/* Title */}
-      <div className="text-sm font-medium text-gray-700 mb-2">{title}</div>
+      <div className="text-sm font-medium text-[var(--color-text)] mb-2">
+        {title}
+      </div>
 
       {/* Price */}
       <div className="mb-6">
@@ -309,13 +313,15 @@ function PricingCard({
           className={`text-4xl font-bold ${
             isHighlighted
               ? 'bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent'
-              : 'text-gray-900'
+              : 'text-foreground'
           }`}
         >
           {price}
         </span>
         {priceSubtext && (
-          <span className="text-gray-600 ml-1">{priceSubtext}</span>
+          <span className="text-[var(--color-subtext)] ml-1">
+            {priceSubtext}
+          </span>
         )}
       </div>
 
@@ -326,7 +332,7 @@ function PricingCard({
             <div className="flex-shrink-0 mt-0.5">
               <Check className="w-5 h-5" strokeWidth={3} />
             </div>
-            <span className="text-sm text-gray-900">{feature}</span>
+            <span className="text-sm text-foreground">{feature}</span>
           </div>
         ))}
       </div>

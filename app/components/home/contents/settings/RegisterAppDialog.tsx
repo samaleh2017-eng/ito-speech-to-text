@@ -13,7 +13,8 @@ import {
   type MatchType,
   type DetectedContext,
 } from '@/app/store/useAppStylingStore'
-import { Globe, AppWindow, Check } from 'lucide-react'
+import { Globe, Check } from '@mynaui/icons-react'
+import AppWindowIcon from '@/app/components/icons/AppWindowIcon'
 
 type Props = {
   open: boolean
@@ -73,15 +74,15 @@ export function RegisterAppDialog({ open, onOpenChange, context }: Props) {
             className={`w-full flex items-start gap-3 p-4 rounded-lg border-2 transition-all text-left ${
               selectedType === 'app'
                 ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-200 hover:border-gray-300'
+                : 'border-[var(--border)] hover:border-warm-200'
             }`}
           >
             <div
               className={`mt-0.5 p-2 rounded-lg ${
-                selectedType === 'app' ? 'bg-blue-500 text-white' : 'bg-gray-100'
+                selectedType === 'app' ? 'bg-blue-500 text-white' : 'bg-[var(--color-muted-bg)]'
               }`}
             >
-              <AppWindow className="h-5 w-5" />
+              <AppWindowIcon className="h-5 w-5" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
@@ -90,10 +91,10 @@ export function RegisterAppDialog({ open, onOpenChange, context }: Props) {
                   <Check className="h-4 w-4 text-blue-500" />
                 )}
               </div>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-[var(--color-subtext)] mt-1">
                 Match any window from this app
               </p>
-              <p className="text-sm font-medium text-gray-900 mt-2 truncate">
+              <p className="text-sm font-medium text-foreground mt-2 truncate">
                 {context.appName}
               </p>
             </div>
@@ -105,17 +106,17 @@ export function RegisterAppDialog({ open, onOpenChange, context }: Props) {
             disabled={!hasDomain}
             className={`w-full flex items-start gap-3 p-4 rounded-lg border-2 transition-all text-left ${
               !hasDomain
-                ? 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed'
+                ? 'border-[var(--border)] bg-[var(--color-surface)] opacity-50 cursor-not-allowed'
                 : selectedType === 'domain'
                   ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 hover:border-gray-300'
+                  : 'border-[var(--border)] hover:border-warm-200'
             }`}
           >
             <div
               className={`mt-0.5 p-2 rounded-lg ${
                 selectedType === 'domain' && hasDomain
                   ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100'
+                  : 'bg-[var(--color-muted-bg)]'
               }`}
             >
               <Globe className="h-5 w-5" />
@@ -127,13 +128,13 @@ export function RegisterAppDialog({ open, onOpenChange, context }: Props) {
                   <Check className="h-4 w-4 text-blue-500" />
                 )}
               </div>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-[var(--color-subtext)] mt-1">
                 {hasDomain
                   ? 'Match when browsing this website'
                   : 'Not available - no browser URL detected'}
               </p>
               {hasDomain && (
-                <p className="text-sm font-medium text-gray-900 mt-2 truncate">
+                <p className="text-sm font-medium text-foreground mt-2 truncate">
                   {context.browserDomain}
                 </p>
               )}

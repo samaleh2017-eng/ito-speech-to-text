@@ -101,7 +101,7 @@ export function initializeLogging() {
         // If more remain, schedule another cycle
         scheduleFlush()
       }
-    }, 2000)
+    }, 10_000)
   }
 
   const toEvent = (
@@ -132,6 +132,13 @@ export function initializeLogging() {
     return event
   }
 
+  // Periodic safety-net persist (every 30s) — limits log loss on crash to ~30s
+  setInterval(() => {
+    if (queue.length > 0) {
+      persistQueue()
+    }
+  }, 30_000)
+
   // Wrap core log methods to enqueue events
   const originalInfo = _originalInfo
   const originalWarn = _originalWarn
@@ -142,7 +149,6 @@ export function initializeLogging() {
     try {
       queue.push(toEvent('log', String(args[0] ?? ''), { args }))
       if (queue.length > MAX_QUEUE) queue.splice(0, queue.length - MAX_QUEUE)
-      persistQueue()
       scheduleFlush()
     } catch (err) {
       originalError('Failed to enqueue log event (log):', err)
@@ -153,7 +159,6 @@ export function initializeLogging() {
     try {
       queue.push(toEvent('info', String(args[0] ?? ''), { args }))
       if (queue.length > MAX_QUEUE) queue.splice(0, queue.length - MAX_QUEUE)
-      persistQueue()
       scheduleFlush()
     } catch (err) {
       originalError('Failed to enqueue log event (info):', err)
@@ -164,7 +169,6 @@ export function initializeLogging() {
     try {
       queue.push(toEvent('warn', String(args[0] ?? ''), { args }))
       if (queue.length > MAX_QUEUE) queue.splice(0, queue.length - MAX_QUEUE)
-      persistQueue()
       scheduleFlush()
     } catch (err) {
       originalError('Failed to enqueue log event (warn):', err)
@@ -175,7 +179,6 @@ export function initializeLogging() {
     try {
       queue.push(toEvent('error', String(args[0] ?? ''), { args }))
       if (queue.length > MAX_QUEUE) queue.splice(0, queue.length - MAX_QUEUE)
-      persistQueue()
       scheduleFlush()
     } catch (err) {
       originalError('Failed to enqueue log event (error):', err)
@@ -203,7 +206,6 @@ export function initializeLogging() {
         const mapped = levelMap[method] || 'info'
         queue.push(toEvent(mapped as any, String(args[0] ?? ''), { args }))
         if (queue.length > MAX_QUEUE) queue.splice(0, queue.length - MAX_QUEUE)
-        persistQueue()
         scheduleFlush()
       } catch (err) {
         originalError(`Failed to enqueue electron-log event (${method}):`, err)

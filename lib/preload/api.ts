@@ -181,6 +181,7 @@ const api = {
     delete: (id: string) => ipcRenderer.invoke('app-targets:delete', id),
     detectCurrent: () => ipcRenderer.invoke('app-targets:detect-current'),
     getCurrent: () => ipcRenderer.invoke('app-targets:get-current'),
+    listInstalledApps: (): Promise<string[]> => ipcRenderer.invoke('app-targets:list-installed-apps'),
   },
   tones: {
     list: () => ipcRenderer.invoke('tones:list'),
@@ -265,6 +266,7 @@ const api = {
       ipcRenderer.on('update-downloaded', callback),
     installUpdate: () => ipcRenderer.send('install-update'),
     getUpdateStatus: () => ipcRenderer.invoke('get-update-status'),
+    downloadUpdate: () => ipcRenderer.invoke('download-update'),
   },
 
   // Platform info

@@ -6,6 +6,7 @@ import type {
   AuthStore,
 } from '../../lib/main/store'
 import { STORE_KEYS } from '../../lib/constants/store-keys'
+import { debouncedSyncToStore } from '@/app/utils/debouncedStoreSync'
 
 interface AuthZustandStore {
   // State
@@ -34,12 +35,6 @@ const getInitialState = () => {
     | (AuthStore & { isSelfHosted?: boolean })
     | undefined
 
-  console.log('[DEBUG][AuthStore] Initial state from electron-store:', {
-    hasTokens: !!storedAuth?.tokens?.access_token,
-    isSelfHosted: !!storedAuth?.isSelfHosted,
-    userId: storedAuth?.user?.id,
-  })
-
   return {
     isAuthenticated:
       !!storedAuth?.tokens?.access_token || !!storedAuth?.isSelfHosted,
@@ -52,7 +47,6 @@ const getInitialState = () => {
   }
 }
 
-// Sync to electron store
 const syncToStore = (state: {
   user?: AuthUser | null
   tokens?: AuthTokens | null
@@ -60,27 +54,12 @@ const syncToStore = (state: {
   isSelfHosted?: boolean
 }) => {
   if (!window.electron?.store) return
-
-  const currentStore = window.electron?.store?.get(STORE_KEYS.AUTH) || {}
-  const updates: any = { ...currentStore }
-
-  if ('user' in state) {
-    updates.user = state.user
-  }
-
-  if ('tokens' in state) {
-    updates.tokens = state.tokens
-  }
-
-  if ('state' in state) {
-    updates.state = state.state
-  }
-
-  if ('isSelfHosted' in state) {
-    updates.isSelfHosted = state.isSelfHosted
-  }
-
-  window.electron?.store?.set(STORE_KEYS.AUTH, updates)
+  const update: Record<string, unknown> = {}
+  if ('user' in state) update.user = state.user
+  if ('tokens' in state) update.tokens = state.tokens
+  if ('state' in state) update.state = state.state
+  if ('isSelfHosted' in state) update.isSelfHosted = state.isSelfHosted
+  debouncedSyncToStore(STORE_KEYS.AUTH, update, true)
 }
 
 export const useAuthStore = create<AuthZustandStore>((set, get) => {

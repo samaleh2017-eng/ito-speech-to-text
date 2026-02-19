@@ -1,4 +1,5 @@
 import { ReactNode } from 'react'
+import React from 'react'
 import { Tooltip, TooltipTrigger, TooltipContent } from './tooltip'
 
 interface NavItemProps {
@@ -9,7 +10,7 @@ interface NavItemProps {
   onClick?: () => void
 }
 
-export function NavItem({
+export const NavItem = React.memo(function NavItem({
   icon,
   label,
   isActive = false,
@@ -18,8 +19,10 @@ export function NavItem({
 }: NavItemProps) {
   const navContent = (
     <div
-      className={`flex items-center px-3 py-3 rounded cursor-pointer ${
-        isActive ? 'bg-slate-200 font-medium' : 'hover:bg-slate-200'
+      className={`flex items-center px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-180 ${
+        isActive
+          ? 'bg-[var(--sidebar-active)] text-[var(--sidebar-active-text)] font-medium shadow-sm'
+          : 'text-[var(--foreground)] hover:bg-[var(--muted)]'
       }`}
       onClick={onClick}
     >
@@ -27,7 +30,7 @@ export function NavItem({
       <span
         className={`transition-opacity duration-100 ${
           showText ? 'opacity-100' : 'opacity-0'
-        } ${showText ? 'ml-2' : 'w-0 overflow-hidden'}`}
+        } ${showText ? 'ml-3' : 'w-0 overflow-hidden'}`}
       >
         {label}
       </span>
@@ -46,4 +49,4 @@ export function NavItem({
   }
 
   return navContent
-}
+})

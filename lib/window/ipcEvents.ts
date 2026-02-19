@@ -2,6 +2,7 @@ import { BrowserWindow, ipcMain, shell, app, dialog } from 'electron'
 import log from 'electron-log'
 import os from 'os'
 import { exec } from 'child_process'
+import { promisify } from 'util'
 import fs from 'fs/promises'
 import path from 'path'
 import store, { getCurrentUserId } from '../main/store'
@@ -10,7 +11,7 @@ import {
   checkAccessibilityPermission,
   checkMicrophonePermission,
 } from '../utils/crossPlatform'
-import { getUpdateStatus, installUpdateNow } from '../main/autoUpdaterWrapper'
+import { getUpdateStatus, installUpdateNow, downloadUpdate } from '../main/autoUpdaterWrapper'
 
 import {
   startKeyListener,
@@ -48,6 +49,8 @@ import {
 import { IPC_EVENTS } from '../types/ipc'
 import { itoHttpClient } from '../clients/itoHttpClient'
 
+const execAsync = promisify(exec)
+
 const handleIPC = (channel: string, handler: (...args: any[]) => any) => {
   ipcMain.handle(channel, handler)
 }
@@ -78,6 +81,16 @@ export function registerIPC() {
 
   ipcMain.on('install-update', async () => {
     await installUpdateNow()
+  })
+
+  ipcMain.handle('download-update', async () => {
+    try {
+      await downloadUpdate()
+      return { success: true }
+    } catch (error) {
+      console.error('Failed to download update:', error)
+      return { success: false, error: String(error) }
+    }
   })
 
   ipcMain.handle('get-update-status', () => {
@@ -994,6 +1007,98 @@ ipcMain.handle('app-targets:get-current', async () => {
 
   const id = normalizeAppTargetId(window.appName)
   return AppTargetTable.findById(id, userId)
+})
+
+ipcMain.handle('app-targets:list-installed-apps', async () => {
+  const platform = process.platform
+
+  try {
+    if (platform === 'darwin') {
+      const { stdout } = await execAsync(
+        `{ ls -1 /Applications/ 2>/dev/null; ls -1 ~/Applications/ 2>/dev/null; ls -1 /System/Applications/ 2>/dev/null; } | grep '\\.app$' | sed 's/\\.app$//' | sort -u`,
+        { timeout: 2000 }
+      )
+      return stdout.trim().split('\n').filter(Boolean).filter(name => {
+        const lower = name.toLowerCase()
+        return !['electron', 'ito'].some(b => lower.includes(b))
+      })
+    }
+
+    if (platform === 'win32') {
+      const registryPaths = [
+        'HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall',
+        'HKLM\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall',
+        'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall',
+      ]
+
+      const NOISE_PATTERNS = [
+        /microsoft \.net/i,
+        /microsoft visual c\+\+/i,
+        /visual c\+\+ .* redistributable/i,
+        /\.net (framework|runtime|sdk|desktop runtime)/i,
+        /windows sdk/i,
+        /windows software development kit/i,
+        /microsoft windows desktop runtime/i,
+        /^microsoft asp\.net/i,
+        /^nvidia (graphics |physx|geforce|hd audio)/i,
+        /^amd (software|chipset|catalyst)/i,
+        /^intel\(r\) (graphics|chipset|management|rapid|network)/i,
+        /^realtek /i,
+        /^vulkan runtime/i,
+        /^microsoft update/i,
+        /^windows driver/i,
+        /hotfix/i,
+        /^security update/i,
+        /^update for microsoft/i,
+        /^service pack/i,
+        /^microsoft edge update/i,
+        /^microsoft onedrive/i,
+      ]
+
+      const results: string[] = []
+
+      for (const regPath of registryPaths) {
+        try {
+          const { stdout } = await execAsync(
+            `reg query "${regPath}" /s /v DisplayName`,
+            { timeout: 3000, windowsHide: true }
+          )
+          const lines = stdout.split('\n')
+          for (const line of lines) {
+            const match = line.match(/DisplayName\s+REG_SZ\s+(.+)/)
+            if (match) {
+              const name = match[1].trim()
+              if (name && !NOISE_PATTERNS.some(p => p.test(name))) {
+                results.push(name)
+              }
+            }
+          }
+        } catch {
+          // Registry path may not exist, skip
+        }
+      }
+
+      return [...new Set(results)]
+        .sort((a, b) => a.localeCompare(b))
+        .filter(name => {
+          const lower = name.toLowerCase()
+          return !['electron', 'ito'].some(b => lower.includes(b))
+        })
+    }
+
+    if (platform === 'linux') {
+      const { stdout } = await execAsync(
+        `grep -rh '^Name=' /usr/share/applications/*.desktop 2>/dev/null | sed 's/^Name=//' | sort -u`,
+        { timeout: 2000 }
+      )
+      return stdout.trim().split('\n').filter(Boolean)
+    }
+
+    return []
+  } catch (error) {
+    console.error('[ListInstalledApps] Failed:', error)
+    return []
+  }
 })
 
 // Tones

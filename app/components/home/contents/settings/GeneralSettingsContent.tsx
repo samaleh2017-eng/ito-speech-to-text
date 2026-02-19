@@ -24,9 +24,7 @@ export default function GeneralSettingsContent() {
     setIsDownloading(true)
     try {
       const result = await window.api.logs.download()
-      if (result.success) {
-        console.log('Logs downloaded successfully to:', result.path)
-      } else {
+      if (!result.success) {
         if (result.error !== 'Download cancelled') {
           console.error('Failed to download logs:', result.error)
           alert(`Failed to download logs: ${result.error}`)
@@ -50,7 +48,6 @@ export default function GeneralSettingsContent() {
     try {
       const result = await window.api.logs.clear()
       if (result.success) {
-        console.log('Logs cleared successfully')
         alert('Logs cleared successfully')
       } else {
         console.error('Failed to clear logs:', result.error)
@@ -71,7 +68,7 @@ export default function GeneralSettingsContent() {
           <div className="flex items-center justify-between">
             <div>
               <div className="text-sm font-medium">Share analytics</div>
-              <div className="text-xs text-gray-600 mt-1">
+              <div className="text-xs text-[var(--color-subtext)] mt-1">
                 Share anonymous usage data to help us improve Ito.
               </div>
             </div>
@@ -84,7 +81,7 @@ export default function GeneralSettingsContent() {
           <div className="flex items-center justify-between">
             <div>
               <div className="text-sm font-medium">Launch at Login</div>
-              <div className="text-xs text-gray-600 mt-1">
+              <div className="text-xs text-[var(--color-subtext)] mt-1">
                 Open Ito automatically when your computer starts.
               </div>
             </div>
@@ -99,7 +96,7 @@ export default function GeneralSettingsContent() {
               <div className="text-sm font-medium">
                 Show Ito bar at all times
               </div>
-              <div className="text-xs text-gray-600 mt-1">
+              <div className="text-xs text-[var(--color-subtext)] mt-1">
                 Show the Ito bar at all times.
               </div>
             </div>
@@ -113,7 +110,7 @@ export default function GeneralSettingsContent() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-sm font-medium">Show app in dock</div>
-                <div className="text-xs text-gray-600 mt-1">
+                <div className="text-xs text-[var(--color-subtext)] mt-1">
                   Show the Ito app in the dock for quick access.
                 </div>
               </div>
@@ -127,12 +124,12 @@ export default function GeneralSettingsContent() {
       </div>
 
       <div>
-        <div className="text-lg font-medium mb-4">Log Management</div>
+        <div className="text-lg font-sans font-normal mb-4">Log Management</div>
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div>
               <div className="text-sm font-medium">Download Logs</div>
-              <div className="text-xs text-gray-600 mt-1">
+              <div className="text-xs text-[var(--color-subtext)] mt-1">
                 Export your local logs to a file for troubleshooting.
               </div>
             </div>
@@ -149,7 +146,7 @@ export default function GeneralSettingsContent() {
           <div className="flex items-center justify-between">
             <div>
               <div className="text-sm font-medium">Clear Logs</div>
-              <div className="text-xs text-gray-600 mt-1">
+              <div className="text-xs text-[var(--color-subtext)] mt-1">
                 Permanently delete all local logs from your device.
               </div>
             </div>

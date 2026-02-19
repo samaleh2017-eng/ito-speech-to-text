@@ -2,8 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNotesStore } from '../../../store/useNotesStore'
 import { useSettingsStore } from '../../../store/useSettingsStore'
 import Masonry from '@mui/lab/Masonry'
-import { AudioIcon } from '../../icons/AudioIcon'
-import { ArrowUp, Grid, Rows, Search, X } from '@mynaui/icons-react'
+import { ArrowUp, Grid, Rows, Search, X, Microphone, Refresh } from '@mynaui/icons-react'
 import { Note } from '../../ui/note'
 import { StatusIndicator } from '../../ui/status-indicator'
 import {
@@ -92,7 +91,6 @@ export default function NotesContent() {
     })
 
     const timestamp = fmt.format(new Date())
-    console.log(`${timestamp}: Pasted content: ${content}`)
     if (content.trim() !== '') {
       setShowAddNoteButton(true)
     } else {
@@ -315,7 +313,7 @@ export default function NotesContent() {
   return (
     <div
       ref={containerRef}
-      className="w-full max-w-6xl mx-auto px-4 h-200 overflow-y-auto relative px-24"
+      className="w-full h-full flex flex-col px-12 overflow-y-auto relative"
       style={{
         height: '640px',
         msOverflowStyle: 'none' /* Internet Explorer 10+ */,
@@ -324,58 +322,69 @@ export default function NotesContent() {
     >
       {/* Header */}
       {showSearch ? (
-        <div className="flex items-center gap-4 mb-8 px-4 py-2 bg-white border border-gray-200 rounded-lg">
-          <Search className="w-5 h-5 text-gray-400 flex-shrink-0" />
+        <div className="flex items-center gap-4 mb-8 px-4 py-2 bg-[var(--color-surface)] border border-[var(--border)] rounded-xl">
+          <Search className="w-5 h-5 text-[var(--color-subtext)] flex-shrink-0" />
           <input
             ref={searchInputRef}
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search your notes"
-            className="flex-1 text-sm outline-none placeholder-gray-400"
+            className="flex-1 text-sm outline-none placeholder-warm-400 bg-transparent"
           />
           <button
             onClick={closeSearch}
-            className="p-1 hover:bg-gray-100 rounded transition-colors flex-shrink-0"
+            className="p-1 hover:bg-[var(--color-muted-bg)] rounded transition-colors flex-shrink-0"
             title="Close search"
           >
-            <X className="w-5 h-5 text-gray-400" />
+            <X className="w-5 h-5 text-[var(--color-subtext)]" />
           </button>
         </div>
       ) : (
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-xl font-medium text-gray-900 w-full text-center">
-            What's on your mind today?
-          </h1>
+          <h1 className="font-bold text-lg text-center w-full font-sans">For quick thoughts you want to come back to</h1>
         </div>
       )}
 
-      {/* Text Input Area - Only show when not searching */}
-      {!showSearch && (
+      {/* Voice Input / Text Input Area - Only show when not searching */}
+      {!showSearch && !creatingNote && (
         <div
-          className="shadow-lg rounded-2xl mb-8 border border-gray-200 w-3/5 mx-auto transition-all duration-200 ease-in-out relative"
+          className="w-full max-w-2xl mx-auto mt-6 mb-8 cursor-pointer"
+          onClick={() => {
+            setContainerHeight(128)
+            setCreatingNote(true)
+          }}
+        >
+          <div className="flex items-center justify-between p-5 rounded-[var(--radius-lg)] bg-[var(--color-surface)] border border-[var(--border)] shadow-[var(--shadow-soft)] hover:shadow-soft transition-shadow">
+            <span className="text-[var(--color-subtext)] text-sm">Take a quick note with your voice</span>
+            <div
+              className="w-12 h-12 rounded-full bg-[var(--primary)] text-white flex items-center justify-center shadow-[0_6px_14px_rgba(31,31,31,0.08)] hover:-translate-y-0.5 hover:shadow-[0_8px_18px_rgba(31,31,31,0.12)] transition-all duration-180 focus:outline-none focus:ring-3 focus:ring-[rgba(31,31,31,0.12)]"
+              aria-label="Start voice note"
+            >
+              <Microphone className="w-5 h-5 text-white" />
+            </div>
+          </div>
+        </div>
+      )}
+      {!showSearch && creatingNote && (
+        <div
+          className="shadow-lg rounded-[var(--radius-lg)] mb-8 border border-[var(--border)] w-3/5 mx-auto transition-all duration-200 ease-in-out relative"
           style={{ height: `${containerHeight}px` }}
         >
-          {!creatingNote && (
-            <div className="absolute top-6 left-6 flex items-center gap-1 text-gray-500 pointer-events-none">
-              <AudioIcon />
-              <span>Take a quick note with your voice</span>
-            </div>
-          )}
           <textarea
             ref={textareaRef}
-            className={`w-full pt-6 px-6 focus:outline-none resize-none overflow-hidden ${creatingNote ? 'cursor-text' : 'cursor-pointer'}`}
+            className="w-full pt-6 px-6 focus:outline-none resize-none overflow-hidden cursor-text"
             value={noteContent}
             onChange={e => updateNoteContent(e.target.value)}
-            onClick={() => setCreatingNote(true)}
             onBlur={handleBlur}
-            placeholder={`${creatingNote ? `Press and hold ${keyboardShortcut.map(k => getKeyDisplayInfo(k, platform).label).join(' + ')} and start speaking` : ''}`}
+            placeholder={`Press and hold ${keyboardShortcut.map(k => getKeyDisplayInfo(k, platform).label).join(' + ')} and start speaking`}
+            autoFocus
           />
           {showAddNoteButton && (
             <div className="absolute bottom-3 right-3">
               <button
                 onClick={handleAddNote}
-                className="bg-neutral-200 px-4 py-2 rounded-md font-semibold hover:bg-neutral-300 cursor-pointer"
+                className="bg-[var(--color-muted-bg)] px-4 py-2 rounded-lg font-semibold hover:bg-warm-200 cursor-pointer"
               >
                 Add note
               </button>
@@ -387,36 +396,46 @@ export default function NotesContent() {
         className={`${viewMode === 'grid' || showSearch ? '' : 'm-auto w-3/5'}`}
       >
         <div className="flex items-center justify-between mb-1">
-          <div className="text-xs text-gray-500 font-medium uppercase tracking-wide">
+          <h2 className="text-xs font-semibold tracking-[1px] uppercase text-[var(--color-subtext)]">
             {showSearch
               ? `Search Results (${filteredNotes.length})`
-              : `Notes (${notes.length})`}
-          </div>
+              : 'Recents'}
+          </h2>
           <div className="flex items-center gap-1">
             <button
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+              className="p-2 hover:bg-[var(--color-muted-bg)] rounded-lg transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2"
               title="Search"
+              aria-label="Search notes"
               onClick={openSearch}
             >
-              <Search className="w-5 h-5 text-neutral-400" />
+              <Search className="w-5 h-5 text-[var(--color-subtext)] hover:text-[var(--color-text)]" />
             </button>
             <button
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+              className="p-2 hover:bg-[var(--color-muted-bg)] rounded-lg transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2"
               title="List view"
+              aria-label="Grid view"
               onClick={toggleViewMode}
             >
               {viewMode === 'grid' ? (
-                <Rows className="w-5 h-5 text-neutral-400" />
+                <Rows className="w-5 h-5 text-[var(--color-subtext)] hover:text-[var(--color-text)]" />
               ) : (
-                <Grid className="w-5 h-5 text-neutral-400" />
+                <Grid className="w-5 h-5 text-[var(--color-subtext)] hover:text-[var(--color-text)]" />
               )}
+            </button>
+            <button
+              className="p-2 hover:bg-[var(--color-muted-bg)] rounded-lg transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2"
+              title="Refresh"
+              aria-label="Refresh"
+              onClick={loadNotes}
+            >
+              <Refresh className="w-5 h-5 text-[var(--color-subtext)] hover:text-[var(--color-text)]" />
             </button>
           </div>
         </div>
-        <div className="w-full h-[1px] bg-slate-200 mb-4"></div>
+        <div className="w-full h-[1px] bg-[var(--border)] mb-4"></div>
         {/* Notes Masonry Layout */}
         {(showSearch ? filteredNotes.length === 0 : notes.length === 0) ? (
-          <div className="py-4 text-gray-500">
+          <div className="py-4 text-[var(--color-subtext)]">
             {showSearch ? (
               <>
                 <p className="text-sm">No notes found</p>
@@ -431,7 +450,7 @@ export default function NotesContent() {
         ) : (
           <div className="py-4">
             {viewMode === 'grid' && (
-              <Masonry columns={{ xs: 1, sm: 2, md: 3 }} spacing={2}>
+              <Masonry columns={{ xs: 1, sm: 2, md: 2 }} spacing={3}>
                 {(showSearch ? filteredNotes : notes).map((note, index) => (
                   <Note
                     key={note.id}
@@ -510,7 +529,7 @@ export default function NotesContent() {
           </div>
           <DialogFooter className="p-4">
             <Button
-              className="bg-neutral-200 hover:bg-neutral-300 text-black cursor-pointer"
+              className="bg-[var(--color-muted-bg)] hover:bg-warm-200 text-[var(--color-text)] cursor-pointer"
               onClick={handleCancelEdit}
             >
               Cancel

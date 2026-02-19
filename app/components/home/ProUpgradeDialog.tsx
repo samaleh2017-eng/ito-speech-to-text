@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Check } from '@mynaui/icons-react'
 import { Dialog, DialogContent, DialogFooter } from '@/app/components/ui/dialog'
 import { Button } from '@/app/components/ui/button'
 import proBannerImage from '@/app/assets/pro-banner.png'
-import useBillingState from '@/app/hooks/useBillingState'
+import { useBilling } from '@/app/contexts/BillingContext'
 
 interface ProUpgradeDialogProps {
   open: boolean
@@ -14,24 +14,25 @@ export function ProUpgradeDialog({
   open,
   onOpenChange,
 }: ProUpgradeDialogProps) {
-  const billingState = useBillingState()
+  const billingState = useBilling()
   const [checkoutLoading, setCheckoutLoading] = useState(false)
   const [checkoutError, setCheckoutError] = useState<string | null>(null)
 
-  // Refresh billing state when checkout session completes
+  const billingRefreshRef = useRef(billingState.refresh)
+  useEffect(() => {
+    billingRefreshRef.current = billingState.refresh
+  }, [billingState.refresh])
+
   useEffect(() => {
     const offSuccess = window.api.on('billing-session-completed', async () => {
-      // Refresh billing state to reflect the new subscription
-      await billingState.refresh()
+      await billingRefreshRef.current()
       setCheckoutError(null)
-      // Close the dialog after successful checkout
       onOpenChange(false)
     })
-
     return () => {
       offSuccess?.()
     }
-  }, [billingState, onOpenChange])
+  }, [onOpenChange])
 
   const handleCheckout = async () => {
     setCheckoutLoading(true)
@@ -94,7 +95,7 @@ export function ProUpgradeDialog({
           )}
 
           {/* Features List */}
-          <div className="space-y-3 mb-6 border border-gray-200 rounded-lg p-4">
+          <div className="space-y-3 mb-6 border border-[var(--border)] rounded-[var(--radius-lg)] p-4">
             <FeatureItem text="Unlimited words per week" />
             <FeatureItem text="Ultra fast dictation as fast as 0.3 second" />
             <FeatureItem text="Priority customer support" />
@@ -115,7 +116,7 @@ export function ProUpgradeDialog({
               onClick={handleCheckout}
               variant="outline"
               size="lg"
-              className="rounded-xl border-gray-200"
+              className="rounded-xl border-[var(--border)]"
               disabled={checkoutLoading || billingState.isLoading}
             >
               {checkoutLoading ? 'Loading...' : 'Upgrade Now'}{' '}

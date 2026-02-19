@@ -58,7 +58,7 @@ export function initializeAutoUpdater() {
       autoUpdater.logger = log
 
       autoUpdater.autoRunAppAfterInstall = true
-      autoUpdater.autoDownload = true
+      autoUpdater.autoDownload = false
       autoUpdater.autoInstallOnAppQuit = false
 
       setupAutoUpdaterEvents()
@@ -112,6 +112,10 @@ function setupAutoUpdaterEvents() {
 }
 
 let installing = false
+
+export function downloadUpdate() {
+  return autoUpdater.downloadUpdate()
+}
 
 export async function installUpdateNow() {
   if (installing) return

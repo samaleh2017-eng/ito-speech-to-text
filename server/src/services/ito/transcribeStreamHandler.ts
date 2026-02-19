@@ -109,6 +109,16 @@ export class TranscribeStreamHandler {
         `📝 [${new Date().toISOString()}] Received transcript: "${transcript}"`,
       )
 
+      const trimmedTranscript = transcript.trim()
+      if (!trimmedTranscript || trimmedTranscript.length < 2) {
+        console.log(
+          `⏭️ [${new Date().toISOString()}] Transcript too short or empty ("${transcript}"), skipping LLM adjustment`,
+        )
+        return create(TranscriptionResponseSchema, {
+          transcript: trimmedTranscript,
+        })
+      }
+
       const windowTitle = context.requestHeader.get('window-title') || ''
       const appName = context.requestHeader.get('app-name') || ''
       const browserUrl = context.requestHeader.get('browser-url') || ''

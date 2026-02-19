@@ -2,7 +2,7 @@ import { useWindowContext } from './WindowContext'
 import React, { useState, useEffect } from 'react'
 import { OnboardingTitlebar } from './OnboardingTitlebar'
 import { useOnboardingStore } from '@/app/store/useOnboardingStore'
-import { UserCircle, PanelLeft, CogFour, Logout } from '@mynaui/icons-react'
+import { UserCircle, PanelLeft, CogFour, Logout, Bell } from '@mynaui/icons-react'
 import { useMainStore } from '@/app/store/useMainStore'
 import { useAuthStore } from '@/app/store/useAuthStore'
 import { useAuth } from '@/app/components/auth/useAuth'
@@ -18,8 +18,8 @@ export const Titlebar = () => {
   const [showUserDropdown, setShowUserDropdown] = useState(false)
   const [isUpdateAvailable, setIsUpdateAvailable] = useState(false)
   const [isUpdateDownloaded, setUpdateDownloaded] = useState(false)
+  const [isDownloading, setIsDownloading] = useState(false)
 
-  // Handle clicks outside dropdown to close it
   useEffect(() => {
     const handleClickOutside = () => {
       setShowUserDropdown(false)
@@ -34,7 +34,6 @@ export const Titlebar = () => {
   }, [showUserDropdown])
 
   useEffect(() => {
-    // Check current update status on mount
     window.api.updater.getUpdateStatus().then(status => {
       if (status.updateAvailable) {
         setIsUpdateAvailable(true)
@@ -44,13 +43,13 @@ export const Titlebar = () => {
       }
     })
 
-    // Listen for future update events
     window.api.updater.onUpdateAvailable(() => {
       setIsUpdateAvailable(true)
     })
 
     window.api.updater.onUpdateDownloaded(() => {
       setUpdateDownloaded(true)
+      setIsDownloading(false)
     })
   }, [])
 
@@ -76,7 +75,6 @@ export const Titlebar = () => {
     setShowUserDropdown(false)
   }
 
-  // Inline style override for onboarding completed
   const style: React.CSSProperties = onboardingCompleted
     ? {
         position: 'relative' as const,
@@ -89,24 +87,23 @@ export const Titlebar = () => {
       className={`window-titlebar ${wcontext?.platform ? `platform-${wcontext.platform}` : ''}`}
       style={style}
     >
+      {showOnboarding && <OnboardingTitlebar />}
+      {showOnboarding && wcontext?.platform === 'win32' && (
+        <div className="titlebar-action-btn ml-auto z-10">
+          <TitlebarControls />
+        </div>
+      )}
+
       {!showOnboarding && (
         <div
-          style={{
-            position: 'absolute',
-            left: 0,
-            top: 0,
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '2px',
-            zIndex: 10,
-          }}
+          className="titlebar-action-btn flex items-center z-10"
+          style={{ gap: '2px' }}
         >
           <div
-            className={`h-full border-r border-neutral-200 transition-all duration-100 ease-in-out ${navExpanded ? 'w-48' : 'w-20'}`}
+            className={`h-full border-r border-transparent transition-all duration-200 ease-in-out ${navExpanded ? 'w-56' : 'w-[72px]'}`}
           ></div>
           <div
-            className="titlebar-action-btn hover:bg-slate-200 border-l border-neutral-200 ml-2"
+            className="titlebar-action-btn hover:bg-warm-200 ml-2"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -124,49 +121,10 @@ export const Titlebar = () => {
           >
             <PanelLeft style={{ width: 20, height: 20 }} />
           </div>
-        </div>
-      )}
 
-      {showOnboarding && <OnboardingTitlebar />}
-      {wcontext?.platform === 'win32' && <TitlebarControls />}
-
-      {!showOnboarding && (
-        <div
-          style={{
-            position: 'absolute',
-            right: 0,
-            top: 0,
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '2px',
-            zIndex: 10,
-          }}
-        >
-          {isUpdateAvailable && (
-            <button
-              className={`titlebar-action-btn bg-sky-800 text-white px-3 py-1 rounded-md font-semibold ${
-                isUpdateDownloaded
-                  ? 'hover:bg-sky-700 cursor-pointer'
-                  : 'cursor-not-allowed opacity-70'
-              }`}
-              disabled={!isUpdateDownloaded}
-              onClick={() => {
-                if (
-                  confirm(
-                    'Are you sure you want to install the update? The app will restart.',
-                  )
-                ) {
-                  window.api.updater.installUpdate()
-                }
-              }}
-            >
-              {isUpdateDownloaded ? 'Install Update' : 'Downloading Update...'}
-            </button>
-          )}
           <div className="relative">
             <div
-              className="titlebar-action-btn hover:bg-slate-200"
+              className="titlebar-action-btn hover:bg-warm-200"
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -177,7 +135,6 @@ export const Titlebar = () => {
                 cursor: 'pointer',
                 borderRadius: 6,
                 padding: 0,
-                marginRight: 12,
               }}
               aria-label="Account"
               tabIndex={0}
@@ -186,19 +143,18 @@ export const Titlebar = () => {
               <UserCircle style={{ width: 20, height: 20 }} />
             </div>
 
-            {/* User Dropdown Menu */}
             {showUserDropdown && (
-              <div className="absolute top-full right-0 mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
+              <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-[var(--card)] border border-warm-100 dark:border-warm-800 rounded-lg shadow-lg z-20">
                 <button
                   onClick={handleSettingsClick}
-                  className="w-full px-2 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 rounded-t-lg cursor-pointer"
+                  className="w-full px-2 py-2 text-left text-sm text-warm-700 hover:bg-warm-50 flex items-center gap-2 rounded-t-lg cursor-pointer"
                 >
                   <CogFour className="w-4 h-4" />
                   Settings
                 </button>
                 <button
                   onClick={handleSignOutClick}
-                  className="w-full px-2 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 rounded-b-lg cursor-pointer"
+                  className="w-full px-2 py-2 text-left text-sm text-warm-700 hover:bg-warm-50 flex items-center gap-2 rounded-b-lg cursor-pointer"
                 >
                   <Logout className="w-4 h-4" />
                   Sign Out
@@ -206,6 +162,56 @@ export const Titlebar = () => {
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {!showOnboarding && (
+        <div
+          className="titlebar-action-btn flex items-center z-10"
+          style={{ gap: '2px' }}
+        >
+          {isUpdateAvailable && (
+            <button
+              className={`titlebar-action-btn bg-sky-800 text-white px-3 py-1 rounded-md font-semibold ${
+                isDownloading
+                  ? 'cursor-not-allowed opacity-70'
+                  : 'hover:bg-sky-700 cursor-pointer'
+              }`}
+              disabled={isDownloading}
+              onClick={() => {
+                if (isUpdateDownloaded) {
+                  if (
+                    confirm(
+                      'Are you sure you want to install the update? The app will restart.',
+                    )
+                  ) {
+                    window.api.updater.installUpdate()
+                  }
+                } else if (!isDownloading) {
+                  setIsDownloading(true)
+                  window.api.updater.downloadUpdate().catch(() => {
+                    setIsDownloading(false)
+                  })
+                }
+              }}
+            >
+              {isUpdateDownloaded
+                ? 'Install Update'
+                : isDownloading
+                  ? 'Downloading...'
+                  : 'Download Update'}
+            </button>
+          )}
+
+          <button
+            className="titlebar-action-btn flex items-center justify-center w-8 h-8 rounded-lg hover:bg-warm-100 transition-colors"
+            title="Notifications"
+            onClick={() => {}}
+          >
+            <Bell className="w-4 h-4 text-warm-600" />
+          </button>
+
+          {wcontext?.platform === 'win32' && <TitlebarControls />}
         </div>
       )}
     </div>
@@ -221,13 +227,13 @@ const TitlebarControls = () => {
 
   return (
     <div className="window-titlebar-controls">
-      <TitlebarControlButton label="close" svgPath={closePath} />
-      {wcontext?.maximizable && (
-        <TitlebarControlButton label="maximize" svgPath={maximizePath} />
-      )}
       {wcontext?.minimizable && (
         <TitlebarControlButton label="minimize" svgPath={minimizePath} />
       )}
+      {wcontext?.maximizable && (
+        <TitlebarControlButton label="maximize" svgPath={maximizePath} />
+      )}
+      <TitlebarControlButton label="close" svgPath={closePath} />
     </div>
   )
 }

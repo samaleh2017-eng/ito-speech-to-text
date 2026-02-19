@@ -82,19 +82,19 @@ export default function AccountSettingsContent() {
       <div className="space-y-6">
         {/* First name */}
         <div className="flex items-center justify-between">
-          <label className="text-sm font-medium text-gray-900">Name</label>
+          <label className="text-sm font-medium text-foreground">Name</label>
           <input
             type="text"
             value={user?.name}
             onChange={e => setName(e.target.value)}
-            className="w-80 bg-white border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-80 bg-white border border-[var(--border)] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
           />
         </div>
 
         {/* Email */}
         <div className="flex items-center justify-between py-3 my-1">
-          <label className="text-sm font-medium text-gray-900">Email</label>
-          <div className="w-80 text-sm text-gray-600 px-4">{user?.email}</div>
+          <label className="text-sm font-medium text-foreground">Email</label>
+          <div className="w-80 text-sm text-[var(--color-subtext)] px-4">{user?.email}</div>
         </div>
       </div>
 
@@ -104,7 +104,7 @@ export default function AccountSettingsContent() {
           variant="outline"
           size="lg"
           onClick={handleSignOut}
-          className="px-6 py-3 bg-neutral-200 text-neutral-700 hover:bg-neutral-300"
+          className="px-6 py-3 bg-[var(--color-muted-bg)] text-[var(--color-text)] hover:bg-warm-200"
         >
           Sign out
         </Button>
@@ -125,7 +125,7 @@ export default function AccountSettingsContent() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-red-600">Delete Account</DialogTitle>
-            <DialogDescription className="text-gray-600">
+            <DialogDescription className="text-[var(--color-subtext)]">
               Are you absolutely sure you want to delete your account? This
               action cannot be undone and will permanently remove:
               <br />
