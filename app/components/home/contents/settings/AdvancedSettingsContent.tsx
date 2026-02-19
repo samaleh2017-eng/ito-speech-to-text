@@ -32,7 +32,7 @@ const llmPromptLengthLimit = 1500
 const DEFAULT_MODELS_BY_PROVIDER: Record<string, { asrModel?: string; llmModel?: string }> = {
   groq: {
     asrModel: 'whisper-large-v3-turbo',
-    llmModel: 'llama-3.3-70b-versatile',
+    llmModel: 'openai/gpt-oss-120b',
   },
   gemini: {
     asrModel: 'gemini-2.5-flash-lite',
