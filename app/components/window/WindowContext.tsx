@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { Titlebar, TitlebarProps } from './Titlebar'
-import { TitlebarContextProvider } from './TitlebarContext'
 
 const WindowContext = createContext<WindowContextProps | undefined>(undefined)
 
@@ -34,9 +33,7 @@ export const WindowContextProvider = ({
 
   return (
     <WindowContext.Provider value={{ titlebar, window: initProps! }}>
-      <TitlebarContextProvider>
-        <Titlebar />
-      </TitlebarContextProvider>
+      <Titlebar />
       <WindowContent>{children}</WindowContent>
     </WindowContext.Provider>
   )

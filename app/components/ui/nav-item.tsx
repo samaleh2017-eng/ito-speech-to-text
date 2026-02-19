@@ -1,4 +1,5 @@
 import { ReactNode } from 'react'
+import React from 'react'
 import { Tooltip, TooltipTrigger, TooltipContent } from './tooltip'
 
 interface NavItemProps {
@@ -9,7 +10,7 @@ interface NavItemProps {
   onClick?: () => void
 }
 
-export function NavItem({
+export const NavItem = React.memo(function NavItem({
   icon,
   label,
   isActive = false,
@@ -48,4 +49,4 @@ export function NavItem({
   }
 
   return navContent
-}
+})

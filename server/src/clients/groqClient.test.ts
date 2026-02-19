@@ -43,7 +43,8 @@ mock.module('dotenv', () => ({
 }))
 
 // Now we can safely import the groqClient
-const { groqClient, itoVocabulary } = await import('./groqClient.js')
+const { groqClient: _groqClient, itoVocabulary } = await import('./groqClient.js')
+const groqClient = _groqClient!
 const { createTranscriptionPrompt } = await import(
   '../prompts/transcription.js'
 )

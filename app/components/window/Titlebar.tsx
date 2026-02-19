@@ -18,6 +18,7 @@ export const Titlebar = () => {
   const [showUserDropdown, setShowUserDropdown] = useState(false)
   const [isUpdateAvailable, setIsUpdateAvailable] = useState(false)
   const [isUpdateDownloaded, setUpdateDownloaded] = useState(false)
+  const [isDownloading, setIsDownloading] = useState(false)
 
   useEffect(() => {
     const handleClickOutside = () => {
@@ -48,6 +49,7 @@ export const Titlebar = () => {
 
     window.api.updater.onUpdateDownloaded(() => {
       setUpdateDownloaded(true)
+      setIsDownloading(false)
     })
   }, [])
 
@@ -171,22 +173,33 @@ export const Titlebar = () => {
           {isUpdateAvailable && (
             <button
               className={`titlebar-action-btn bg-sky-800 text-white px-3 py-1 rounded-md font-semibold ${
-                isUpdateDownloaded
-                  ? 'hover:bg-sky-700 cursor-pointer'
-                  : 'cursor-not-allowed opacity-70'
+                isDownloading
+                  ? 'cursor-not-allowed opacity-70'
+                  : 'hover:bg-sky-700 cursor-pointer'
               }`}
-              disabled={!isUpdateDownloaded}
+              disabled={isDownloading}
               onClick={() => {
-                if (
-                  confirm(
-                    'Are you sure you want to install the update? The app will restart.',
-                  )
-                ) {
-                  window.api.updater.installUpdate()
+                if (isUpdateDownloaded) {
+                  if (
+                    confirm(
+                      'Are you sure you want to install the update? The app will restart.',
+                    )
+                  ) {
+                    window.api.updater.installUpdate()
+                  }
+                } else if (!isDownloading) {
+                  setIsDownloading(true)
+                  window.api.updater.downloadUpdate().catch(() => {
+                    setIsDownloading(false)
+                  })
                 }
               }}
             >
-              {isUpdateDownloaded ? 'Install Update' : 'Downloading Update...'}
+              {isUpdateDownloaded
+                ? 'Install Update'
+                : isDownloading
+                  ? 'Downloading...'
+                  : 'Download Update'}
             </button>
           )}
 

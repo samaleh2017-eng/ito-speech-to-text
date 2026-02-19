@@ -5,7 +5,8 @@ import {
 } from '@/app/components/ui/dialog'
 import { Button } from '@/app/components/ui/button'
 import { useAppStylingStore, type MatchType } from '@/app/store/useAppStylingStore'
-import { Globe, AppWindow, Check, RefreshCw, Search } from 'lucide-react'
+import { Globe, Check, Refresh, Search } from '@mynaui/icons-react'
+import AppWindowIcon from '@/app/components/icons/AppWindowIcon'
 
 function extractDomainFromInput(input: string): string | null {
   const trimmed = input.trim()
@@ -117,7 +118,7 @@ export function ManualAddDialog({ open, onOpenChange }: Props) {
               }`}
             >
               <div className={`p-2 rounded-lg ${selectedType === 'app' ? 'bg-blue-500 text-white' : 'bg-[var(--color-muted-bg)]'}`}>
-                <AppWindow className="h-4 w-4" />
+                <AppWindowIcon className="h-4 w-4" />
               </div>
               <div>
                 <div className="flex items-center gap-1.5">
@@ -167,7 +168,7 @@ export function ManualAddDialog({ open, onOpenChange }: Props) {
                   className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-[var(--color-muted-bg)] transition-colors"
                   title="Refresh app list"
                 >
-                  <RefreshCw className={`h-3.5 w-3.5 text-[var(--color-subtext)] ${isLoadingApps ? 'animate-spin' : ''}`} />
+                  <Refresh className={`h-3.5 w-3.5 text-[var(--color-subtext)] ${isLoadingApps ? 'animate-spin' : ''}`} />
                 </button>
               </div>
 

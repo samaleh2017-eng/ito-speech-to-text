@@ -13,7 +13,8 @@ import {
   type MatchType,
   type DetectedContext,
 } from '@/app/store/useAppStylingStore'
-import { Globe, AppWindow, Check } from 'lucide-react'
+import { Globe, Check } from '@mynaui/icons-react'
+import AppWindowIcon from '@/app/components/icons/AppWindowIcon'
 
 type Props = {
   open: boolean
@@ -81,7 +82,7 @@ export function RegisterAppDialog({ open, onOpenChange, context }: Props) {
                 selectedType === 'app' ? 'bg-blue-500 text-white' : 'bg-[var(--color-muted-bg)]'
               }`}
             >
-              <AppWindow className="h-5 w-5" />
+              <AppWindowIcon className="h-5 w-5" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">

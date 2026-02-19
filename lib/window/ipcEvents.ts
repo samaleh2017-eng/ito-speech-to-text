@@ -11,7 +11,7 @@ import {
   checkAccessibilityPermission,
   checkMicrophonePermission,
 } from '../utils/crossPlatform'
-import { getUpdateStatus, installUpdateNow } from '../main/autoUpdaterWrapper'
+import { getUpdateStatus, installUpdateNow, downloadUpdate } from '../main/autoUpdaterWrapper'
 
 import {
   startKeyListener,
@@ -81,6 +81,16 @@ export function registerIPC() {
 
   ipcMain.on('install-update', async () => {
     await installUpdateNow()
+  })
+
+  ipcMain.handle('download-update', async () => {
+    try {
+      await downloadUpdate()
+      return { success: true }
+    } catch (error) {
+      console.error('Failed to download update:', error)
+      return { success: false, error: String(error) }
+    }
   })
 
   ipcMain.handle('get-update-status', () => {

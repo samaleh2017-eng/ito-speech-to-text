@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { STORE_KEYS } from '../../lib/constants/store-keys'
+import { debouncedSyncToStore } from '@/app/utils/debouncedStoreSync'
 
 export interface LlmSettings {
   asrProvider: string | null
@@ -39,20 +40,12 @@ const getInitialState = () => {
   }
 }
 
-// Sync to electron store
 const syncToStore = (state: Partial<AdvancedSettingsState>) => {
-  const currentAdvancedSettings =
-    window.electron?.store?.get(STORE_KEYS.ADVANCED_SETTINGS) || {}
-
-  const updatedAdvancedSettings = {
-    ...currentAdvancedSettings,
-    ...state,
+  const update: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(state)) {
+    if (typeof value !== 'function') update[key] = value
   }
-
-  window.electron?.store?.set(
-    STORE_KEYS.ADVANCED_SETTINGS,
-    updatedAdvancedSettings,
-  )
+  debouncedSyncToStore(STORE_KEYS.ADVANCED_SETTINGS, update)
 }
 
 export const useAdvancedSettingsStore = create<AdvancedSettingsState>(set => {

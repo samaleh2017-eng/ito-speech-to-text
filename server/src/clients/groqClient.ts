@@ -174,15 +174,22 @@ class GroqClient implements LlmProvider {
 }
 
 // --- Singleton Instance ---
-// Create and export a single, pre-configured instance of the client for use across the server.
-// Only check for GROQ_API_KEY since ASR model is now provided per-request
-if (!process.env.GROQ_API_KEY) {
-  console.error(
-    'FATAL: GROQ_API_KEY is not set in the .env file. The application cannot start.',
-  )
-  process.exit(1)
-}
 const apiKey = process.env.GROQ_API_KEY
 
-// Note: userCommandModel is empty for now as we are only using transcription.
-export const groqClient = new GroqClient(apiKey, '')
+let groqClient: GroqClient | null = null
+
+if (apiKey) {
+  try {
+    groqClient = new GroqClient(apiKey, '')
+    console.log('Groq client initialized successfully')
+  } catch (error) {
+    console.error('Failed to initialize Groq client:', error)
+    groqClient = null
+  }
+} else {
+  console.log(
+    'GROQ_API_KEY not set - Groq client will not be available',
+  )
+}
+
+export { groqClient }

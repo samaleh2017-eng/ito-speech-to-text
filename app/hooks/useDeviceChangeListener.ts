@@ -8,9 +8,6 @@ import { useEffect } from 'react'
 export const useDeviceChangeListener = (): void => {
   useEffect(() => {
     const handleDeviceChange = () => {
-      console.log(
-        '[Renderer] `devicechange` event detected. Notifying main process.',
-      )
       window.api?.send('audio-devices-changed')
     }
 
@@ -21,7 +18,6 @@ export const useDeviceChangeListener = (): void => {
         'devicechange',
         handleDeviceChange,
       )
-      console.log('[useDeviceChangeListener] Removed devicechange listener.')
     }
   }, [])
 }

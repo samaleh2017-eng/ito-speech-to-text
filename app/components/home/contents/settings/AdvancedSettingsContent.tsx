@@ -29,14 +29,29 @@ const floatLengthLimit = 4
 const asrPromptLengthLimit = 100
 const llmPromptLengthLimit = 1500
 
+const DEFAULT_MODELS_BY_PROVIDER: Record<string, { asrModel?: string; llmModel?: string }> = {
+  groq: {
+    asrModel: 'whisper-large-v3-turbo',
+    llmModel: 'llama-3.3-70b-versatile',
+  },
+  gemini: {
+    asrModel: 'gemini-2.5-flash-lite',
+    llmModel: 'gemini-2.5-flash-lite',
+  },
+  cerebras: {
+    llmModel: 'llama-3.3-70b',
+  },
+}
+
 const llmSettingsConfig: LlmSettingConfig[] = [
   {
     name: 'asrProvider',
     label: 'ASR Provider',
-    placeholder: 'Enter ASR provider name',
-    description: '',
+    placeholder: 'Select ASR provider',
+    description: 'Speech-to-text provider for audio transcription',
     maxLength: modelProviderLengthLimit,
-    readOnly: true,
+    isSelect: true,
+    options: ['gemini', 'groq'],
   },
   {
     name: 'asrModel',
@@ -61,7 +76,7 @@ const llmSettingsConfig: LlmSettingConfig[] = [
     description: 'LLM provider for text generation tasks',
     maxLength: modelProviderLengthLimit,
     isSelect: true,
-    options: ['groq', 'cerebras'],
+    options: ['gemini', 'groq', 'cerebras'],
   },
   {
     name: 'llmModel',
@@ -277,8 +292,24 @@ export default function AdvancedSettingsContent() {
         newValue = rawValue
       }
 
-      const updatedLlm = { ...llm, [config.name]: newValue }
-      setLlmSettings({ [config.name]: newValue })
+      // Build updated settings object
+      const settingsUpdate: Partial<LlmSettings> = { [config.name]: newValue }
+
+      // Auto-update model when provider changes
+      if (config.name === 'asrProvider' && typeof newValue === 'string') {
+        const defaultModel = DEFAULT_MODELS_BY_PROVIDER[newValue]?.asrModel
+        if (defaultModel) {
+          settingsUpdate.asrModel = defaultModel
+        }
+      } else if (config.name === 'llmProvider' && typeof newValue === 'string') {
+        const defaultModel = DEFAULT_MODELS_BY_PROVIDER[newValue]?.llmModel
+        if (defaultModel) {
+          settingsUpdate.llmModel = defaultModel
+        }
+      }
+
+      const updatedLlm = { ...llm, ...settingsUpdate }
+      setLlmSettings(settingsUpdate)
       scheduleAdvancedSettingsUpdate(
         updatedLlm,
         grammarServiceEnabled,

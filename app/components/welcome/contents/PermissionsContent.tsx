@@ -59,9 +59,6 @@ export default function PermissionsContent() {
 
   useEffect(() => {
     if (isAccessibilityEnabled) {
-      console.log(
-        'Accessibility permission granted. Starting key listener service...',
-      )
       window.api.invoke('start-key-listener-service')
       setAccessibilityCheckTrigger(false)
       setTimeout(() => setAccessibilityCheckTrigger(true), 100)

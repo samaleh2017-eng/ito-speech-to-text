@@ -1,23 +1,94 @@
-import { AudioBarsBase, BAR_COUNT } from './AudioBarsBase'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
+import { usePerformanceStore } from '../../../store/usePerformanceStore'
+import { BAR_COUNT, BAR_WIDTH, BAR_SPACING, MIN_BAR_HEIGHT, MAX_BAR_HEIGHT } from './AudioBarsBase'
 
-const BARS = Array(BAR_COUNT).fill(1)
+export const AudioVisualizer: React.FC<{
+  audioLevel: number
+  color: string
+  isActive: boolean
+}> = ({ audioLevel, color, isActive }) => {
+  const activeTier = usePerformanceStore(s => s.activeTier)
+  const phases = useMemo(
+    () => Array.from({ length: BAR_COUNT }, (_, i) => i * 0.4),
+    []
+  )
+  const [time, setTime] = useState(0)
+  const rafRef = useRef<number>(0)
+  const lastUpdateRef = useRef(0)
 
-export const AudioBars = ({
-  volumeHistory,
-  barColor = 'white',
-}: {
-  volumeHistory: number[]
-  barColor?: string
-}) => {
-  const activeBarIndex = volumeHistory.length % BAR_COUNT
+  useEffect(() => {
+    if (!isActive) return
+    const start = performance.now()
+    lastUpdateRef.current = 0
+    const tick = (now: number) => {
+      const elapsed = now - start
+      if (activeTier === 'low' && elapsed - lastUpdateRef.current < 100) {
+        rafRef.current = requestAnimationFrame(tick)
+        return
+      }
+      lastUpdateRef.current = elapsed
+      setTime(elapsed / 1000)
+      rafRef.current = requestAnimationFrame(tick)
+    }
+    rafRef.current = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(rafRef.current)
+  }, [isActive, activeTier])
 
-  const dynamicHeights = BARS.map((baseHeight, index) => {
-    const volume = volumeHistory[volumeHistory.length - index - 1] || 0
-    const scale = Math.max(0.05, Math.min(1, volume * 20))
-    const activeBarHeight = index === activeBarIndex ? 2 : 0
-    const height = activeBarHeight + baseHeight * 20 * scale
-    return Math.min(Math.max(height, 1), 16)
-  })
+  const heights = useMemo(() => {
+    if (!isActive) return Array(BAR_COUNT).fill(MIN_BAR_HEIGHT)
+    const amplitude = Math.max(0, Math.min(1, audioLevel))
+    const boosted = Math.pow(amplitude, 0.7)
+    return phases.map((phase, i) => {
+      const wave = Math.sin(time * 8 + phase) * 0.5 + 0.5
+      const centerDist = Math.abs(i - BAR_COUNT / 2) / (BAR_COUNT / 2)
+      const centerBoost = 1 - centerDist * 0.4
+      return Math.max(
+        MIN_BAR_HEIGHT,
+        MIN_BAR_HEIGHT + boosted * wave * centerBoost * (MAX_BAR_HEIGHT - MIN_BAR_HEIGHT)
+      )
+    })
+  }, [isActive, audioLevel, time, phases])
 
-  return <AudioBarsBase heights={dynamicHeights} barColor={barColor} />
+  const gpuAccel = activeTier !== 'low'
+
+  return (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: BAR_SPACING,
+      height: MAX_BAR_HEIGHT,
+      ...(gpuAccel && { willChange: 'contents', transform: 'translateZ(0)' }),
+    }}>
+      {heights.map((h, i) => (
+        <div
+          key={i}
+          style={{
+            width: BAR_WIDTH,
+            height: h,
+            borderRadius: BAR_WIDTH / 2,
+            backgroundColor: color,
+            opacity: 0.85,
+            transition: isActive ? 'none' : 'height 0.3s ease',
+          }}
+        />
+      ))}
+    </div>
+  )
 }
+
+export const StaticVisualizer: React.FC<{ color: string }> = ({ color }) => (
+  <div style={{ display: 'flex', alignItems: 'center', gap: BAR_SPACING, height: MAX_BAR_HEIGHT }}>
+    {Array.from({ length: BAR_COUNT }).map((_, i) => (
+      <div
+        key={i}
+        style={{
+          width: BAR_WIDTH,
+          height: MIN_BAR_HEIGHT,
+          borderRadius: BAR_WIDTH / 2,
+          backgroundColor: color,
+          opacity: 0.5,
+        }}
+      />
+    ))}
+  </div>
+)

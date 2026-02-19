@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Sparkles, Square } from 'lucide-react'
-import { X } from '@mynaui/icons-react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
+import { usePerformanceStore } from '../../store/usePerformanceStore'
+import { Square, X } from '@mynaui/icons-react'
 import { useSettingsStore } from '../../store/useSettingsStore'
 import {
   useOnboardingStore,
   ONBOARDING_CATEGORIES,
 } from '../../store/useOnboardingStore'
-import { AudioBars } from './contents/AudioBars'
+import { AudioVisualizer, StaticVisualizer } from './contents/AudioBars'
+import { ProcessingStatusDisplay } from './contents/AudioBarsBase'
 import { useAudioStore } from '@/app/store/useAudioStore'
 import { analytics, ANALYTICS_EVENTS } from '../analytics'
 import { ItoIcon } from '../icons/ItoIcon'
@@ -41,21 +41,32 @@ const globalStyles = `
   }
 `
 
-const BAR_UPDATE_INTERVAL = 64
+const PILL_WIDTH = 360
+const PILL_HEIGHT = 46
+const TOP_CORNER_RADIUS = 6
+const BOTTOM_CORNER_RADIUS = 10
 
-const springTransition = {
-  type: 'spring' as const,
-  stiffness: 400,
-  damping: 30,
-  mass: 0.5,
-  restDelta: 0.001,
+function buildNotchPath(w: number, h: number): string {
+  const tr = TOP_CORNER_RADIUS
+  const br = BOTTOM_CORNER_RADIUS
+  return [
+    `M 0 0`,
+    `Q ${tr} 0 ${tr} ${tr}`,
+    `L ${tr} ${h - br}`,
+    `Q ${tr} ${h} ${tr + br} ${h}`,
+    `L ${w - tr - br} ${h}`,
+    `Q ${w - tr} ${h} ${w - tr} ${h - br}`,
+    `L ${w - tr} ${tr}`,
+    `Q ${w - tr} 0 ${w} 0`,
+    `Z`,
+  ].join(' ')
 }
 
-const getDimensions = (state: 'idle' | 'listening' | 'thinking') => {
-  if (state === 'listening' || state === 'thinking') {
-    return { width: 360, height: 46, borderBottomRadius: 20 }
-  }
-  return { width: 200, height: 46, borderBottomRadius: 20 }
+function getBarUpdateInterval(): number {
+  const { activeTier } = usePerformanceStore.getState()
+  if (activeTier === 'low') return 200
+  if (activeTier === 'balanced') return 100
+  return 64
 }
 
 const Pill = () => {
@@ -72,6 +83,8 @@ const Pill = () => {
     state => state.onboardingCompleted,
   )
   const { startRecording, stopRecording } = useAudioStore()
+  const activeTier = usePerformanceStore(s => s.activeTier)
+  const config = usePerformanceStore(s => s.config)
 
   const [isRecording, setIsRecording] = useState(false)
   const [isManualRecording, setIsManualRecording] = useState(false)
@@ -95,6 +108,12 @@ const Pill = () => {
   const lastVolumeUpdateRef = useRef(0)
   const [volumeHistory, setVolumeHistory] = useState<number[]>([])
   const [appTarget, setAppTarget] = useState<AppTarget | null>(null)
+  const hasBeenShownRef = useRef(false)
+
+  const notchPath = useMemo(() => buildNotchPath(PILL_WIDTH, PILL_HEIGHT), [])
+  const animDuration = config.animationDurationMultiplier === 0 ? '0s' : '0.25s'
+  const animDurationOut = config.animationDurationMultiplier === 0 ? '0s' : '0.2s'
+  const currentAudioLevel = volumeHistory[volumeHistory.length - 1] || 0
 
   useEffect(() => {
     soundPlayer.init()
@@ -147,7 +166,7 @@ const Pill = () => {
 
     const unsubVolume = window.api.on('volume-update', (vol: number) => {
       const now = Date.now()
-      if (now - lastVolumeUpdateRef.current < BAR_UPDATE_INTERVAL) {
+      if (now - lastVolumeUpdateRef.current < getBarUpdateInterval()) {
         return
       }
       const newHistory = [...volumeHistoryRef.current, vol]
@@ -220,13 +239,15 @@ const Pill = () => {
       onboardingCompleted) &&
     (anyRecording || isProcessing || showItoBarAlways || isHovered)
 
+  if (shouldShow) {
+    hasBeenShownRef.current = true
+  }
+
   const notchState: 'idle' | 'listening' | 'thinking' = anyRecording
     ? 'listening'
     : isProcessing
       ? 'thinking'
       : 'idle'
-
-  const { width, height, borderBottomRadius } = getDimensions(notchState)
 
   const handleMouseEnter = () => {
     setIsHovered(true)
@@ -274,105 +295,65 @@ const Pill = () => {
   const renderIcon = () => {
     if (appTarget?.iconBase64) {
       return (
-        <motion.img
-          key="app-icon"
+        <img
           src={`data:image/png;base64,${appTarget.iconBase64}`}
-          className="w-6 h-6 rounded"
-          initial={{ scale: 0, rotate: -90 }}
-          animate={{ scale: 1, rotate: 0 }}
-          exit={{ scale: 0, rotate: 90 }}
-          transition={springTransition}
+          style={{ width: 24, height: 24, borderRadius: 4 }}
         />
       )
     }
-    return (
-      <motion.div
-        key="ito-icon"
-        initial={{ scale: 0, rotate: -90 }}
-        animate={{ scale: 1, rotate: 0 }}
-        exit={{ scale: 0, rotate: 90 }}
-        transition={springTransition}
-      >
-        <ItoIcon width={24} height={24} className="text-white" />
-      </motion.div>
-    )
+    return <ItoIcon width={24} height={24} className="text-white" />
   }
 
   const renderRightContent = () => {
     if (isManualRecording) {
       return (
-        <motion.div
-          key="manual-recording"
-          className="absolute inset-0 w-full h-full flex items-center justify-between px-5"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.15 }}
-        >
+        <>
           <button
             onClick={handleCancel}
-            className="flex items-center justify-center opacity-60 hover:opacity-100 transition-opacity"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              opacity: 0.6,
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 0,
+            }}
           >
             <X width={16} height={16} color="white" />
           </button>
-          <div className="h-full flex items-center flex-1 justify-center">
-            <AudioBars volumeHistory={volumeHistory} barColor="#007AFF" />
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <AudioVisualizer audioLevel={currentAudioLevel} color="white" isActive />
           </div>
           <button
             onClick={handleStop}
-            className="flex items-center justify-center opacity-80 hover:opacity-100 transition-opacity"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              opacity: 0.8,
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 0,
+            }}
           >
-            <Square className="w-4 h-4 text-[#007AFF]" fill="currentColor" />
+            <Square width={16} height={16} color="white" fill="currentColor" />
           </button>
-        </motion.div>
+        </>
       )
     }
 
     if (anyRecording) {
-      return (
-        <motion.div
-          key="recording"
-          className="h-full flex items-center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.15 }}
-        >
-          <AudioBars volumeHistory={volumeHistory} barColor="#007AFF" />
-        </motion.div>
-      )
+      return <AudioVisualizer audioLevel={currentAudioLevel} color="white" isActive />
     }
 
     if (isProcessing) {
-      return (
-        <motion.div
-          key="thinking"
-          className="flex items-center gap-2"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.15 }}
-        >
-          <motion.div
-            animate={{ rotate: 360, scale: [1, 1.1, 1] }}
-            transition={{
-              rotate: { repeat: Infinity, duration: 3, ease: 'linear' },
-              scale: { repeat: Infinity, duration: 2 },
-            }}
-          >
-            <Sparkles
-              className="w-4 h-4 text-[#007AFF]"
-              fill="currentColor"
-            />
-          </motion.div>
-          <span className="text-[14px] font-medium text-[#007AFF]">
-            Thinking
-          </span>
-        </motion.div>
-      )
+      return <ProcessingStatusDisplay color="white" />
     }
 
-    return null
+    return <StaticVisualizer color="white" />
   }
 
   const isIdle = notchState === 'idle'
@@ -380,70 +361,71 @@ const Pill = () => {
   return (
     <>
       <style>{globalStyles}</style>
+      <style>{`
+        @keyframes notch-fadeIn {
+          from { opacity: 0; transform: translateY(-8px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes notch-fadeOut {
+          from { opacity: 1; transform: translateY(0); }
+          to   { opacity: 0; transform: translateY(-8px); }
+        }
+      `}</style>
       <div className="fixed top-0 left-0 w-full flex justify-center z-50 pointer-events-none">
-        <AnimatePresence>
-          {shouldShow && (
-            <motion.div
-              initial={{ opacity: 0, scaleX: 0.7, scaleY: 0.5 }}
-              animate={{
-                opacity: 1,
-                scaleX: 1,
-                scaleY: 1,
-                width,
-                height,
-                borderBottomLeftRadius: borderBottomRadius,
-                borderBottomRightRadius: borderBottomRadius,
-              }}
-              exit={{ opacity: 0, scaleX: 0.7, scaleY: 0.5 }}
-              transition={springTransition}
-              style={{ transformOrigin: 'top center' }}
-              className={[
-                'relative flex flex-col items-center pointer-events-auto',
-                'overflow-hidden',
-                'rounded-t-none border-t-0',
-                'bg-[rgba(10,10,10,0.88)] backdrop-blur-[12px]',
-                'shadow-[0_8px_24px_rgba(0,0,0,0.6)]',
-                'border-x border-b border-white/[0.06]',
-                isIdle && !anyRecording && !isProcessing
-                  ? 'cursor-pointer'
-                  : 'cursor-default',
-              ].join(' ')}
-              whileHover={
-                isIdle && !anyRecording && !isProcessing
-                  ? { scale: 1.02 }
-                  : undefined
-              }
-              onClick={handleClick}
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-            >
-              {!isManualRecording && (
-                <motion.div
-                  className="absolute inset-0 w-full h-full flex items-center justify-between px-5"
-                  layout
-                  transition={springTransition}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <AnimatePresence mode="wait">
-                      {renderIcon()}
-                    </AnimatePresence>
-                    <span className="text-[14px] font-semibold tracking-wide text-white">
-                      {appTarget?.name || 'Ito'}
-                    </span>
-                  </div>
-                  <AnimatePresence mode="wait">
-                    {renderRightContent()}
-                  </AnimatePresence>
-                </motion.div>
-              )}
-              {isManualRecording && (
-                <AnimatePresence mode="wait">
+        <svg width={0} height={0} style={{ position: 'absolute' }}>
+          <defs>
+            <clipPath id="notch-clip">
+              <path d={notchPath} />
+            </clipPath>
+          </defs>
+        </svg>
+        <div
+          style={{
+            width: PILL_WIDTH,
+            height: PILL_HEIGHT,
+            clipPath: 'url(#notch-clip)',
+            WebkitClipPath: 'url(#notch-clip)',
+            background: 'rgba(0,0,0,0.95)',
+            backdropFilter: config.enableBackdropBlur ? 'blur(20px)' : 'none',
+            WebkitBackdropFilter: config.enableBackdropBlur ? 'blur(20px)' : 'none',
+            opacity: !hasBeenShownRef.current && !shouldShow ? 0 : undefined,
+            animation: hasBeenShownRef.current || shouldShow
+              ? shouldShow
+                ? `notch-fadeIn ${animDuration} ease-out forwards`
+                : `notch-fadeOut ${animDurationOut} ease-in forwards`
+              : 'none',
+            pointerEvents: shouldShow ? 'auto' : 'none',
+            cursor: isIdle && !anyRecording && !isProcessing ? 'pointer' : 'default',
+            ...(activeTier !== 'low' && { willChange: 'transform, opacity' }),
+          }}
+          onClick={handleClick}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            width: '100%',
+            height: '100%',
+            padding: '0 20px',
+          }}>
+            {!isManualRecording && (
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  {renderIcon()}
+                  <span style={{ fontSize: 14, fontWeight: 600, letterSpacing: '0.025em', color: 'white' }}>
+                    {appTarget?.name || 'Ito'}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
                   {renderRightContent()}
-                </AnimatePresence>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+                </div>
+              </>
+            )}
+            {isManualRecording && renderRightContent()}
+          </div>
+        </div>
       </div>
     </>
   )

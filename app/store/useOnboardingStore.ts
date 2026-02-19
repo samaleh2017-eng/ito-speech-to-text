@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { analytics, ANALYTICS_EVENTS } from '../components/analytics'
 import { STORE_KEYS } from '../../lib/constants/store-keys'
+import { debouncedSyncToStore } from '@/app/utils/debouncedStoreSync'
 
 // Onboarding category constants
 export const ONBOARDING_CATEGORIES = {
@@ -80,27 +81,20 @@ const getStepName = (step: number): string => {
 const getInitialState = () => {
   const storedOnboarding = window.electron?.store?.get(STORE_KEYS.ONBOARDING)
 
-  console.log('[DEBUG][OnboardingStore] Initial state from electron-store:', storedOnboarding)
-
   return {
     onboardingStep: storedOnboarding?.onboardingStep ?? 0,
     onboardingCompleted: storedOnboarding?.onboardingCompleted ?? false,
   }
 }
 
-// Sync to electron store
 const syncToStore = (state: Partial<OnboardingState>) => {
-  if ('onboardingStep' in state || 'onboardingCompleted' in state) {
-    const currentStore = window.electron?.store?.get(STORE_KEYS.ONBOARDING) || {}
-    window.electron?.store?.set(STORE_KEYS.ONBOARDING, {
-      ...currentStore,
-      onboardingStep: state.onboardingStep ?? currentStore.onboardingStep,
-      onboardingCompleted:
-        state.onboardingCompleted ?? currentStore.onboardingCompleted,
-    })
+  const update: Record<string, unknown> = {}
+  if ('onboardingStep' in state) update.onboardingStep = state.onboardingStep
+  if ('onboardingCompleted' in state) update.onboardingCompleted = state.onboardingCompleted
+  if (Object.keys(update).length === 0) return
+  debouncedSyncToStore(STORE_KEYS.ONBOARDING, update)
 
-    window.api?.notifyOnboardingUpdate(state)
-  }
+  window.api?.notifyOnboardingUpdate(state)
 }
 
 export const useOnboardingStore = create<OnboardingState>(set => {

@@ -5,6 +5,7 @@ import {
   updateAnalyticsFromSettings,
 } from '@/app/components/analytics'
 import { STORE_KEYS } from '../../lib/constants/store-keys'
+import { debouncedSyncToStore } from '@/app/utils/debouncedStoreSync'
 import type { KeyboardShortcutConfig } from '@/lib/main/store'
 import { ItoMode } from '../generated/ito_pb'
 
@@ -76,28 +77,17 @@ const getInitialState = () => {
   }
 }
 
-// --- START: CORRECTED CODE ---
-
-// Sync to electron store
 const syncToStore = (state: Partial<SettingsState>) => {
-  const currentSettings = window.electron?.store?.get(STORE_KEYS.SETTINGS) || {}
-
-  // A much simpler and more robust way to merge the settings.
-  // This takes all existing settings and overwrites them with only the keys
-  // present in the new partial state, without accidentally unsetting others.
-  const updatedSettings = {
-    ...currentSettings,
-    ...state,
+  const update: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(state)) {
+    if (typeof value !== 'function') update[key] = value
   }
+  debouncedSyncToStore(STORE_KEYS.SETTINGS, update)
 
-  window.electron?.store?.set(STORE_KEYS.SETTINGS, updatedSettings)
-
-  // Notify pill window of settings changes
   if (window.api?.notifySettingsUpdate) {
-    window.api.notifySettingsUpdate(updatedSettings)
+    const currentStore = window.electron?.store?.get(STORE_KEYS.SETTINGS) || {}
+    window.api.notifySettingsUpdate({ ...currentStore, ...update })
   }
-
-  // Re-register hotkeys when keyboard shortcuts change
   if ('keyboardShortcuts' in state && window.api?.registerHotkeys) {
     window.api.registerHotkeys()
   }

@@ -11,23 +11,42 @@ import {
 import { useAuth } from '@/app/components/auth/useAuth'
 import { WindowContextProvider } from '@/lib/window'
 import { SupabaseProvider } from '@/app/components/auth/SupabaseProvider'
+import { usePerformanceStore } from '@/app/store/usePerformanceStore'
+import { PerformanceProvider } from '@/app/performance/performance.context'
+import { BillingProvider } from '@/app/contexts/BillingContext'
 import { useDeviceChangeListener } from './hooks/useDeviceChangeListener'
 import { verifyStoredMicrophone } from './media/microphone'
+import { performanceAutotuner } from './performance/performance.autotune'
 import { useEffect } from 'react'
+
+usePerformanceStore.getState().initialize()
 
 const MainApp = () => {
   const { onboardingCompleted, onboardingStep } = useOnboardingStore()
   const { isAuthenticated } = useAuth()
   useDeviceChangeListener()
 
-  console.log('[DEBUG][MainApp] State:', {
-    isAuthenticated,
-    onboardingCompleted,
-    onboardingStep,
-  })
-
   useEffect(() => {
     verifyStoredMicrophone()
+  }, [])
+
+  useEffect(() => {
+    const applyAutotunerState = () => {
+      const { userSelectedTier } = usePerformanceStore.getState()
+      if (userSelectedTier === 'auto') {
+        performanceAutotuner.start()
+      } else {
+        performanceAutotuner.stop()
+      }
+    }
+
+    applyAutotunerState()
+
+    const unsub = usePerformanceStore.subscribe(applyAutotunerState)
+    return () => {
+      unsub()
+      performanceAutotuner.stop()
+    }
   }, [])
 
   const onboardingSetupCompleted =
@@ -38,17 +57,18 @@ const MainApp = () => {
 
   // If authenticated and onboarding completed, show main app
   if (isAuthenticated && onboardingCompleted) {
-    console.log('[DEBUG][MainApp] Rendering: HomeKit')
     window.api?.send(
       'electron-store-set',
       'settings.isShortcutGloballyEnabled',
       shouldEnableShortcutGlobally,
     )
-    return <HomeKit />
+    return (
+      <BillingProvider>
+        <HomeKit />
+      </BillingProvider>
+    )
   }
 
-  // If authenticated but onboarding not completed, continue onboarding
-  console.log('[DEBUG][MainApp] Rendering: WelcomeKit')
   window.api?.send(
     'electron-store-set',
     'settings.isShortcutGloballyEnabled',
@@ -60,33 +80,35 @@ const MainApp = () => {
 export default function App() {
   return (
     <SupabaseProvider>
-      <HashRouter>
-        <Routes>
-          {/* Route for the pill window */}
-          <Route
-            path="/pill"
-            element={
-              <>
-                <Pill />
-              </>
-            }
-          />
+      <PerformanceProvider>
+        <HashRouter>
+          <Routes>
+            {/* Route for the pill window */}
+            <Route
+              path="/pill"
+              element={
+                <>
+                  <Pill />
+                </>
+              }
+            />
 
-          {/* Default route for the main application window */}
-          <Route
-            path="/"
-            element={
-              <>
-                <WindowContextProvider
-                  titlebar={{ title: 'Ito', icon: appIcon }}
-                >
-                  <MainApp />
-                </WindowContextProvider>
-              </>
-            }
-          />
-        </Routes>
-      </HashRouter>
+            {/* Default route for the main application window */}
+            <Route
+              path="/"
+              element={
+                <>
+                  <WindowContextProvider
+                    titlebar={{ title: 'Ito', icon: appIcon }}
+                  >
+                    <MainApp />
+                  </WindowContextProvider>
+                </>
+              }
+            />
+          </Routes>
+        </HashRouter>
+      </PerformanceProvider>
     </SupabaseProvider>
   )
 }
