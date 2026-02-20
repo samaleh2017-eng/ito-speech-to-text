@@ -43,14 +43,19 @@ export const Titlebar = () => {
       }
     })
 
-    window.api.updater.onUpdateAvailable(() => {
+    const cleanupAvailable = window.api.updater.onUpdateAvailable(() => {
       setIsUpdateAvailable(true)
     })
 
-    window.api.updater.onUpdateDownloaded(() => {
+    const cleanupDownloaded = window.api.updater.onUpdateDownloaded(() => {
       setUpdateDownloaded(true)
       setIsDownloading(false)
     })
+
+    return () => {
+      cleanupAvailable()
+      cleanupDownloaded()
+    }
   }, [])
 
   const toggleUserDropdown = (e: React.MouseEvent) => {
