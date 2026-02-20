@@ -5,6 +5,7 @@ import {
   Sparkles,
   CogFour,
   InfoCircle,
+  PanelLeft,
 } from '@mynaui/icons-react'
 import { ItoIcon } from '../icons/ItoIcon'
 import { useMainStore } from '@/app/store/useMainStore'
@@ -23,7 +24,7 @@ import AboutContent from './contents/AboutContent'
 import AppStylingContent from './contents/AppStylingContent'
 
 export default function HomeKit() {
-  const { navExpanded, currentPage, setCurrentPage } = useMainStore()
+  const { navExpanded, currentPage, setCurrentPage, toggleNavExpanded } = useMainStore()
   const { metadata } = useUserMetadataStore()
   const { onboardingCompleted } = useOnboardingStore()
   const { isAuthenticated, user } = useAuth()
@@ -203,13 +204,15 @@ export default function HomeKit() {
       >
         <div>
           {/* Logo and Plan */}
-          <div className="flex items-center mb-10 px-3">
-            <ItoIcon
-              className="w-6 text-foreground flex-shrink-0"
-              style={{ height: '32px' }}
-            />
+          <div className="flex items-center px-3 mb-10">
+            <div className="w-6 flex items-center justify-center flex-shrink-0">
+              <ItoIcon
+                className="w-6 text-foreground"
+                style={{ height: '32px' }}
+              />
+            </div>
             <span
-              className={`text-2xl font-bold font-sans transition-opacity duration-100 ${showText ? 'opacity-100' : 'opacity-0'} ${showText ? 'ml-2' : 'w-0 overflow-hidden'}`}
+              className={`text-2xl font-bold font-sans transition-opacity duration-100 ${showText ? 'opacity-100' : 'opacity-0'} ${showText ? 'ml-3' : 'w-0 overflow-hidden'}`}
             >
               ito
             </span>
@@ -266,6 +269,15 @@ export default function HomeKit() {
               onClick={() => setCurrentPage('about')}
             />
           </div>
+        </div>
+
+        <div className="text-sm">
+          <NavItem
+            icon={<PanelLeft className="w-5 h-5" />}
+            label={navExpanded ? 'Collapse' : 'Expand'}
+            showText={showText}
+            onClick={toggleNavExpanded}
+          />
         </div>
       </div>
 
