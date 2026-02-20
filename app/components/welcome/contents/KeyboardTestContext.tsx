@@ -1,3 +1,6 @@
+import { Button } from '@/app/components/ui/button'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { ArrowLeft01Icon } from '@hugeicons/core-free-icons'
 import { useOnboardingStore } from '@/app/store/useOnboardingStore'
 import { useSettingsStore } from '@/app/store/useSettingsStore'
 import KeyboardShortcutEditor from '../../ui/keyboard-shortcut-editor'
@@ -21,13 +24,15 @@ export default function KeyboardTestContent() {
       <div className="flex flex-col w-[45%] justify-center items-start px-24">
         <div className="flex flex-col h-full min-h-[400px] justify-between py-12 overflow-hidden">
           <div className="mt-8">
-            <button
-              className="mb-4 text-sm text-muted-foreground hover:underline"
-              type="button"
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mb-4 gap-1 text-muted-foreground"
               onClick={decrementOnboardingStep}
             >
-              &lt; Back
-            </button>
+              <HugeiconsIcon icon={ArrowLeft01Icon} strokeWidth={2} className="w-4 h-4" />
+              Back
+            </Button>
             <h1 className="text-3xl mb-4 mt-12">
               Press the keyboard shortcut to test it out.
             </h1>
@@ -35,7 +40,7 @@ export default function KeyboardTestContent() {
               <span key="we-recommend">We recommend the </span>
               {defaultKeys.map((key, index) => (
                 <React.Fragment key={index}>
-                  <span className="inline-flex items-center px-2 py-0.5 bg-neutral-100 border rounded text-xs font-mono ml-1">
+                  <span className="inline-flex items-center px-2 py-0.5 bg-muted border rounded text-xs font-mono ml-1">
                     {getKeyDisplay(key as KeyName, platform, {
                       showDirectionalText: false,
                       format: 'label',
@@ -52,7 +57,7 @@ export default function KeyboardTestContent() {
           </div>
         </div>
       </div>
-      <div className="flex w-[55%] items-center justify-center bg-gradient-to-b from-purple-50/10 to-purple-100 border-l-2 border-purple-100">
+      <div className="flex w-[55%] items-center justify-center bg-gradient-to-b from-sky-50/20 to-sky-100 border-l-2 border-sky-100">
         <KeyboardShortcutEditor
           shortcut={keyboardShortcut}
           onShortcutChange={updateKeyboardShortcut}

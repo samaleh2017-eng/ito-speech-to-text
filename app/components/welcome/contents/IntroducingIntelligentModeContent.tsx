@@ -1,6 +1,7 @@
 import { Button } from '@/app/components/ui/button'
 import { useOnboardingStore } from '@/app/store/useOnboardingStore'
-import { CheckCircle, ArrowRight } from '@mynaui/icons-react'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { CheckmarkCircle01Icon, ArrowRight01Icon, ArrowLeft01Icon } from '@hugeicons/core-free-icons'
 import KeyboardShortcutEditor from '../../ui/keyboard-shortcut-editor'
 import { ItoMode } from '@/app/generated/ito_pb'
 import { Tip } from '../../ui/tip'
@@ -18,13 +19,15 @@ export default function IntroducingIntelligentMode() {
       <div className="flex flex-col w-[45%] justify-center items-start px-24">
         <div className="flex flex-col h-full min-h-[400px] justify-between py-12">
           <div className="mt-8">
-            <button
-              className="mb-4 text-sm text-muted-foreground hover:underline"
-              type="button"
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mb-4 gap-1 text-muted-foreground"
               onClick={decrementOnboardingStep}
             >
-              &lt; Back
-            </button>
+              <HugeiconsIcon icon={ArrowLeft01Icon} strokeWidth={2} className="w-4 h-4" />
+              Back
+            </Button>
             <div className="text-2xl mb-1 font-medium">
               Introducing Ito Intelligent Mode
             </div>
@@ -40,7 +43,7 @@ export default function IntroducingIntelligentMode() {
                 key={index}
                 className="flex items-center gap-2 text-base font-light mb-1"
               >
-                <CheckCircle />
+                <HugeiconsIcon icon={CheckmarkCircle01Icon} strokeWidth={2} className="w-5 h-5 text-sky-500" />
                 {step}
               </div>
             ))}
@@ -54,7 +57,7 @@ export default function IntroducingIntelligentMode() {
                 key={index}
                 className="flex items-center gap-2 text-base font-light mb-1 italic"
               >
-                <ArrowRight className="h-5 w-5 shrink-0 text-black" />
+                <HugeiconsIcon icon={ArrowRight01Icon} strokeWidth={2} className="h-5 w-5 shrink-0 text-foreground" />
                 {step}
               </div>
             ))}
@@ -71,7 +74,7 @@ export default function IntroducingIntelligentMode() {
           </div>
         </div>
       </div>
-      <div className="flex w-[55%] items-center justify-center bg-gradient-to-b from-purple-50/10 to-purple-100 border-l-2 border-purple-100">
+      <div className="flex w-[55%] items-center justify-center bg-gradient-to-b from-sky-50/20 to-sky-100 border-l-2 border-sky-100">
         <KeyboardShortcutEditor
           shortcut={keyboardShortcut}
           onShortcutChange={updateKeyboardShortcut}

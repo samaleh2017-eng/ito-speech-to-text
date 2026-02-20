@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { usePerformanceStore } from '../../store/usePerformanceStore'
-import { Square, X } from '@mynaui/icons-react'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { StopIcon, Cancel01Icon } from '@hugeicons/core-free-icons'
 import { useSettingsStore } from '../../store/useSettingsStore'
 import {
   useOnboardingStore,
@@ -31,12 +32,13 @@ const globalStyles = `
     justify-content: center;
     pointer-events: none;
     font-family:
-      'Inter',
+      'Roboto',
       system-ui,
       -apple-system,
       BlinkMacSystemFont,
       'Segoe UI',
-      Roboto,
+      'Helvetica Neue',
+      Arial,
       sans-serif;
   }
 `
@@ -321,7 +323,7 @@ const Pill = () => {
               padding: 0,
             }}
           >
-            <X width={16} height={16} color="white" />
+            <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} className="w-4 h-4 text-white" />
           </button>
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <AudioVisualizer audioLevel={currentAudioLevel} color="white" isActive />
@@ -339,7 +341,7 @@ const Pill = () => {
               padding: 0,
             }}
           >
-            <Square width={16} height={16} color="white" fill="currentColor" />
+            <HugeiconsIcon icon={StopIcon} strokeWidth={2} className="w-4 h-4 text-white" />
           </button>
         </>
       )

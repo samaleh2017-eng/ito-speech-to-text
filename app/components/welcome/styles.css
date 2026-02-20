@@ -1,9 +1,5 @@
 :root {
-  --welcome-c-variant: #8aa6cf;
-}
-
-:root:not(.dark) {
-  --welcome-c-variant: #43679d;
+  --welcome-c-variant: hsl(var(--primary));
 }
 
 #era-shape {
@@ -78,7 +74,7 @@
 
 .welcome-content p {
   margin-bottom: 1rem;
-  color: var(--window-c-text);
+  color: hsl(var(--muted-foreground));
   font-size: 15px;
   font-weight: 400;
 }
@@ -93,7 +89,7 @@
   padding: 10px 0;
 }
 .welcome-content-step + .welcome-content-step {
-  border-top: 1px solid #8080802e;
+  border-top: 1px solid hsl(var(--border));
 }
 
 .welcome-content-step h3 {
@@ -114,7 +110,6 @@
   width: 20px;
   height: 20px;
   fill: var(--welcome-c-variant);
-  /* fill: #8aa6cf; */
   margin: 0 20px;
 }
 

@@ -1,4 +1,7 @@
 import { Button } from '@/app/components/ui/button'
+import { Input } from '@/app/components/ui/input'
+import { Label } from '@/app/components/ui/label'
+import { Separator } from '@/app/components/ui/separator'
 import {
   Tooltip,
   TooltipTrigger,
@@ -20,7 +23,6 @@ import { AppOrbitImage } from '@/app/components/ui/app-orbit-image'
 import { STORE_KEYS } from '../../../../lib/constants/store-keys'
 import { isValidEmail, isStrongPassword } from '@/app/utils/utils'
 
-// Auth provider configuration
 const AUTH_PROVIDERS = {
   email: {
     key: 'email',
@@ -60,7 +62,6 @@ const AUTH_PROVIDERS = {
   },
 }
 
-// Reusable AuthButton component
 interface AuthButtonProps {
   provider: keyof typeof AUTH_PROVIDERS
   onClick: () => void
@@ -134,26 +135,21 @@ export default function SignInContent() {
     loginWithEmailPassword,
   } = useAuth()
 
-  // Check server health on component mount and every 5 seconds
   useEffect(() => {
     const checkHealth = async () => {
       const { isHealthy } = await checkLocalServerHealth()
       setIsServerHealthy(isHealthy)
     }
 
-    // Initial check
     checkHealth()
 
-    // Set up periodic checks every 5 seconds
     const intervalId = setInterval(checkHealth, 5000)
 
-    // Cleanup interval on unmount
     return () => {
       clearInterval(intervalId)
     }
   }, [])
 
-  // If user is authenticated, proceed to next step
   useEffect(() => {
     if (isAuthenticated && user) {
       incrementOnboardingStep()
@@ -191,12 +187,10 @@ export default function SignInContent() {
     }
   }
 
-  // Get stored user info for display
   const storedUser = window.electron?.store?.get(STORE_KEYS.AUTH)?.user
   const userEmail = storedUser?.email
   const userProvider = storedUser?.provider as keyof typeof AUTH_PROVIDERS
 
-  // Prefill email if available
   useEffect(() => {
     if (typeof userEmail === 'string' && userEmail.length > 0) {
       setEmail(userEmail)
@@ -223,7 +217,6 @@ export default function SignInContent() {
     }
   }
 
-  // Helper function to format provider names for display
   const formatProviderName = (provider?: string): string => {
     if (!provider) return 'Unknown'
     return (
@@ -232,7 +225,6 @@ export default function SignInContent() {
     )
   }
 
-  // Render all auth options
   const renderAllAuthOptions = () => (
     <>
       <div className="space-y-3 mb-8">
@@ -259,15 +251,18 @@ export default function SignInContent() {
         </div>
       </div>
 
-      {/* Email sign in */}
       <div className="space-y-3 mb-8">
-        <input
-          type="email"
-          placeholder="Enter your email"
-          className="w-full h-12 px-3 rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground"
-          onChange={e => setEmail(e.target.value)}
-          defaultValue={userEmail}
-        />
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="signin-email">Email</Label>
+          <Input
+            id="signin-email"
+            type="email"
+            placeholder="Enter your email"
+            className="h-12"
+            onChange={e => setEmail(e.target.value)}
+            defaultValue={userEmail}
+          />
+        </div>
         <AuthButton
           provider="google-oauth2"
           onClick={() => {}}
@@ -281,14 +276,12 @@ export default function SignInContent() {
         </Button>
       </div>
 
-      {/* Divider */}
-      <div className="flex items-center my-8">
-        <div className="flex-1 border-t border-border"></div>
-        <span className="px-4 text-xs text-muted-foreground">OR</span>
-        <div className="flex-1 border-t border-border"></div>
+      <div className="flex items-center my-8 gap-4">
+        <Separator className="flex-1" />
+        <span className="text-xs text-muted-foreground">OR</span>
+        <Separator className="flex-1" />
       </div>
 
-      {/* Self-hosted option */}
       <div className="space-y-4">
         <AuthButton
           provider="self-hosted"
@@ -305,30 +298,31 @@ export default function SignInContent() {
     </>
   )
 
-  // Render single provider option
   const renderSingleProviderOption = (
     provider: keyof typeof AUTH_PROVIDERS,
   ) => {
-    // Special-case: email provider renders inline email/password form
     if (provider === 'email') {
       return (
         <div className="space-y-5">
           <div className="flex flex-col gap-2">
-            <label className="text-sm text-foreground">Email</label>
-            <input
+            <Label htmlFor="signin-email-provider">Email</Label>
+            <Input
+              id="signin-email-provider"
               type="email"
               placeholder="Enter your email"
+              className="h-10"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              className="h-10 w-full rounded-md border border-border bg-background px-3 text-foreground placeholder:text-muted-foreground"
             />
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-sm text-foreground">Password</label>
-            <input
+            <Label htmlFor="signin-password-provider">Password</Label>
+            <Input
+              id="signin-password-provider"
               type="password"
               placeholder="Enter your password"
+              className="h-10"
               value={password}
               onKeyDown={e => {
                 if (e.key === 'Enter') {
@@ -337,7 +331,6 @@ export default function SignInContent() {
                 }
               }}
               onChange={e => setPassword(e.target.value)}
-              className="h-10 w-full rounded-md border border-border bg-background px-3 text-foreground placeholder:text-muted-foreground"
             />
           </div>
 
@@ -401,9 +394,7 @@ export default function SignInContent() {
     )
   }
 
-  // Helper function to render the appropriate auth button based on stored provider
   const renderAuthButton = () => {
-    // If provider is email, render the inline email/password form
     if (userProvider === 'email') {
       return renderSingleProviderOption('email')
     }
@@ -415,15 +406,12 @@ export default function SignInContent() {
 
   return (
     <div className="flex h-full w-full bg-background">
-      {/* Left side - Sign in form */}
       <div className="flex w-[30%] flex-col items-center justify-center px-12 py-12">
         <div className="w-full max-w-md">
-          {/* Logo */}
           <div className="mb-8 bg-black rounded-md p-2 w-10 h-10 mx-auto">
             <ItoIcon height={24} width={24} style={{ color: '#FFFFFF' }} />
           </div>
 
-          {/* Title and subtitle */}
           <div className="text-center mb-10">
             <h1 className="text-3xl font-semibold mb-4 text-foreground">
               Welcome back!
@@ -437,10 +425,8 @@ export default function SignInContent() {
             </p>
           </div>
 
-          {/* Auth buttons - conditionally rendered based on previous provider */}
           {renderAuthButton()}
 
-          {/* Terms and privacy - only show for self-hosted */}
           {(userProvider === 'self-hosted' || !userProvider) && (
             <p className="text-xs text-muted-foreground text-center mt-8 leading-relaxed">
               Running Ito locally requires additional setup. Please refer to our{' '}
@@ -454,7 +440,6 @@ export default function SignInContent() {
             </p>
           )}
 
-          {/* Link to create new account */}
           <div className="text-center mt-8">
             <p className="text-sm text-muted-foreground">
               {userProvider
@@ -462,7 +447,6 @@ export default function SignInContent() {
                 : 'Need to create an account?'}{' '}
               <button
                 onClick={() => {
-                  // Clear auth to allow selecting a different account, but do not reset onboarding
                   clearAuth(false)
                   loadNotes()
                   loadEntries()
@@ -477,7 +461,6 @@ export default function SignInContent() {
         </div>
       </div>
 
-      {/* Right side - Placeholder for image */}
       <div className="flex w-[70%] bg-muted/20 items-center justify-center border-l border-border">
         <AppOrbitImage />
       </div>

@@ -41,7 +41,7 @@ export default function ReferralContent() {
             </p>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="mb-8 w-48 px-4 py-2 border border-border rounded-md bg-background text-base focus:outline-none text-left flex items-center justify-between">
+                <Button variant="outline" className="mb-8 w-48 h-10 justify-between text-left">
                   {referralSource ? (
                     <span className="text-sm">{referralSource}</span>
                   ) : (
@@ -62,7 +62,7 @@ export default function ReferralContent() {
                       d="M19 9l-7 7-7-7"
                     />
                   </svg>
-                </button>
+                </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-48 text-sm border-border">
                 {sources.map(s => (
@@ -87,7 +87,7 @@ export default function ReferralContent() {
           </div>
         </div>
       </div>
-      <div className="flex w-[55%] items-center justify-center bg-gradient-to-b from-purple-50/10 to-purple-100 border-l-2 border-purple-100">
+      <div className="flex w-[55%] items-center justify-center bg-gradient-to-b from-sky-50/20 to-sky-100 border-l-2 border-sky-100">
         <AvatarIcon />
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { Button } from '@/app/components/ui/button'
-import { InfoCircle } from '@mynaui/icons-react'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { InformationCircleIcon, LockIcon, ArrowLeft01Icon } from '@hugeicons/core-free-icons'
 import {
   Tooltip,
   TooltipContent,
@@ -8,7 +9,6 @@ import {
 import { useState, useEffect, useRef } from 'react'
 import { Spinner } from '@/app/components/ui/spinner'
 import { AnimatedCheck } from '@/app/components/ui/animated-checkmark'
-import { Lock } from '@mynaui/icons-react'
 import { usePermissionsStore } from '@/app/store/usePermissionsStore'
 import { useOnboardingStore } from '@/app/store/useOnboardingStore'
 import accessibilityVideo from '@/app/assets/accesssibility.webm'
@@ -139,13 +139,15 @@ export default function PermissionsContent() {
       <div className="flex flex-col w-[45%] justify-center items-start pl-24">
         <div className="flex flex-col h-full min-h-[400px] justify-between py-12">
           <div className="mt-8">
-            <button
-              className="mb-4 text-sm text-muted-foreground hover:underline"
-              type="button"
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mb-4 gap-1 text-muted-foreground"
               onClick={decrementOnboardingStep}
             >
-              &lt; Back
-            </button>
+              <HugeiconsIcon icon={ArrowLeft01Icon} strokeWidth={2} className="w-4 h-4" />
+              Back
+            </Button>
             <h1 className="text-3xl mb-4 mt-12 pr-24">
               {isAccessibilityEnabled && isMicrophoneEnabled
                 ? 'Thank you for trusting us. We take your privacy seriously.'
@@ -183,7 +185,7 @@ export default function PermissionsContent() {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <span className="inline-flex items-center">
-                              <InfoCircle style={{ width: 20, height: 20 }} />
+                              <HugeiconsIcon icon={InformationCircleIcon} strokeWidth={2} className="w-5 h-5 text-sky-500" />
                             </span>
                           </TooltipTrigger>
                           <TooltipContent side="right" align="start">
@@ -234,7 +236,7 @@ export default function PermissionsContent() {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <span className="inline-flex items-center">
-                              <InfoCircle style={{ width: 20, height: 20 }} />
+                              <HugeiconsIcon icon={InformationCircleIcon} strokeWidth={2} className="w-5 h-5 text-sky-500" />
                             </span>
                           </TooltipTrigger>
                           <TooltipContent side="right" align="start">
@@ -266,10 +268,10 @@ export default function PermissionsContent() {
           </div>
         </div>
       </div>
-      <div className="flex w-[55%] items-center justify-center bg-gradient-to-b from-purple-50/10 to-purple-100 border-l-2 border-purple-100">
+      <div className="flex w-[55%] items-center justify-center bg-gradient-to-b from-sky-50/20 to-sky-100 border-l-2 border-sky-100">
         <div className="w-[600px] h-[500px] rounded-lg flex items-center justify-center">
           {isAccessibilityEnabled && isMicrophoneEnabled ? (
-            <Lock style={{ width: 220, height: 220, color: '#c4b5fd' }} />
+            <HugeiconsIcon icon={LockIcon} strokeWidth={1.5} className="w-[220px] h-[220px] text-sky-400" />
           ) : !isAccessibilityEnabled ? (
             <video
               src={accessibilityVideo}

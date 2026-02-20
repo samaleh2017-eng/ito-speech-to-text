@@ -1,5 +1,10 @@
 import { useMemo, useState } from 'react'
 import { Button } from '@/app/components/ui/button'
+import { Input } from '@/app/components/ui/input'
+import { Label } from '@/app/components/ui/label'
+import { Card, CardContent } from '@/app/components/ui/card'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { ArrowLeft01Icon } from '@hugeicons/core-free-icons'
 import { AppOrbitImage } from '@/app/components/ui/app-orbit-image'
 import { isValidEmail, isStrongPassword } from '@/app/utils/utils'
 import { useAuth } from '@/app/components/auth/useAuth'
@@ -58,17 +63,17 @@ export default function EmailSignupContent({
 
   return (
     <div className="flex h-full w-full bg-background">
-      {/* Left: form */}
       <div className="flex w-1/2 flex-col justify-center px-16">
-        {/* Back */}
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
+          className="mb-6 w-fit gap-1 text-muted-foreground"
           onClick={onBack}
-          className="mb-6 w-fit text-sm text-muted-foreground hover:underline"
         >
+          <HugeiconsIcon icon={ArrowLeft01Icon} strokeWidth={2} className="w-4 h-4" />
           Back
-        </button>
+        </Button>
 
-        {/* Heading */}
         <div className="mb-8">
           <h1 className="text-3xl font-semibold text-foreground">
             Create your account
@@ -78,88 +83,90 @@ export default function EmailSignupContent({
           </p>
         </div>
 
-        {/* Fields */}
-        <div className="space-y-5">
-          <div className="flex flex-col gap-2">
-            <label className="text-sm text-foreground">Email</label>
-            <div className="h-10 w-full rounded-md border border-border bg-muted px-3 text-foreground flex items-center">
-              <span className="truncate" title={email}>
-                {email}
-              </span>
+        <Card>
+          <CardContent className="space-y-5">
+            <div className="flex flex-col gap-2">
+              <Label>Email</Label>
+              <div className="h-10 w-full rounded-md border border-border bg-muted px-3 text-foreground flex items-center">
+                <span className="truncate" title={email}>
+                  {email}
+                </span>
+              </div>
             </div>
-          </div>
 
-          <div className="flex flex-col gap-2">
-            <label className="text-sm text-foreground">Full name</label>
-            <input
-              type="text"
-              placeholder="Enter your Full name"
-              value={fullName}
-              onChange={e => setFullName(e.target.value)}
-              className="h-10 w-full rounded-md border border-border bg-background px-3 text-foreground placeholder:text-muted-foreground"
-            />
-          </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="signup-fullname">Full name</Label>
+              <Input
+                id="signup-fullname"
+                type="text"
+                placeholder="Enter your Full name"
+                className="h-10"
+                value={fullName}
+                onChange={e => setFullName(e.target.value)}
+              />
+            </div>
 
-          <div className="flex flex-col gap-2">
-            <label className="text-sm text-foreground">Password</label>
-            <input
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onKeyDown={e => {
-                if (e.key === 'Enter') {
-                  e.preventDefault()
-                  handleCreate()
-                }
-              }}
-              onChange={e => setPassword(e.target.value)}
-              className="h-10 w-full rounded-md border border-border bg-background px-3 text-foreground placeholder:text-muted-foreground"
-            />
-            <p className="text-xs text-muted-foreground">
-              Must be 8+ chars, include upper, lower, and number
-            </p>
-          </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="signup-password">Password</Label>
+              <Input
+                id="signup-password"
+                type="password"
+                placeholder="Enter your password"
+                className="h-10"
+                value={password}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    handleCreate()
+                  }
+                }}
+                onChange={e => setPassword(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Must be 8+ chars, include upper, lower, and number
+              </p>
+            </div>
 
-          <Button
-            className="h-10 w-full"
-            disabled={!isValid || isCreating}
-            aria-busy={isCreating}
-            onClick={handleCreateSafe}
-          >
-            {isCreating && (
-              <span className="mr-2 inline-block size-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
+            <Button
+              className="h-10 w-full"
+              disabled={!isValid || isCreating}
+              aria-busy={isCreating}
+              onClick={handleCreateSafe}
+            >
+              {isCreating && (
+                <span className="mr-2 inline-block size-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
+              )}
+              {isCreating ? 'Creating…' : 'Create Account'}
+            </Button>
+
+            {errorMessage && (
+              <p className="mt-2 text-sm text-destructive">{errorMessage}</p>
             )}
-            {isCreating ? 'Creating…' : 'Create Account'}
-          </Button>
 
-          {errorMessage && (
-            <p className="mt-2 text-sm text-destructive">{errorMessage}</p>
-          )}
-
-          <p className="text-center text-xs text-muted-foreground">
-            By continuing, you agree to our{' '}
-            <a
-              href={EXTERNAL_LINKS.WEBSITE}
-              target="_blank"
-              rel="noreferrer"
-              className="underline"
-            >
-              Terms
-            </a>{' '}
-            and{' '}
-            <a
-              href={EXTERNAL_LINKS.PRIVACY_POLICY}
-              target="_blank"
-              rel="noreferrer"
-              className="underline"
-            >
-              Privacy Policy
-            </a>
-          </p>
-        </div>
+            <p className="text-center text-xs text-muted-foreground">
+              By continuing, you agree to our{' '}
+              <a
+                href={EXTERNAL_LINKS.WEBSITE}
+                target="_blank"
+                rel="noreferrer"
+                className="underline"
+              >
+                Terms
+              </a>{' '}
+              and{' '}
+              <a
+                href={EXTERNAL_LINKS.PRIVACY_POLICY}
+                target="_blank"
+                rel="noreferrer"
+                className="underline"
+              >
+                Privacy Policy
+              </a>
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Right: orbit illustration */}
       <div className="flex w-1/2 items-center justify-center border-l border-border bg-muted/20">
         <AppOrbitImage />
       </div>

@@ -1,5 +1,10 @@
 import { useMemo, useState } from 'react'
 import { Button } from '@/app/components/ui/button'
+import { Input } from '@/app/components/ui/input'
+import { Label } from '@/app/components/ui/label'
+import { Card, CardContent } from '@/app/components/ui/card'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { ArrowLeft01Icon } from '@hugeicons/core-free-icons'
 import { AppOrbitImage } from '@/app/components/ui/app-orbit-image'
 import { isValidEmail, isStrongPassword } from '@/app/utils/utils'
 import { useAuth } from '@/app/components/auth/useAuth'
@@ -45,17 +50,17 @@ export default function EmailLoginContent({
 
   return (
     <div className="flex h-full w-full bg-background">
-      {/* Left: form */}
       <div className="flex w-1/2 flex-col justify-center px-16">
-        {/* Back */}
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
+          className="mb-6 w-fit gap-1 text-muted-foreground"
           onClick={onBack}
-          className="mb-6 w-fit text-sm text-muted-foreground hover:underline"
         >
+          <HugeiconsIcon icon={ArrowLeft01Icon} strokeWidth={2} className="w-4 h-4" />
           Back
-        </button>
+        </Button>
 
-        {/* Heading */}
         <div className="mb-8">
           <h1 className="text-3xl font-semibold text-foreground">
             Welcome back!
@@ -65,64 +70,66 @@ export default function EmailLoginContent({
           </p>
         </div>
 
-        {/* Fields */}
-        <div className="space-y-5">
-          <div className="flex flex-col gap-2">
-            <label className="text-sm text-foreground">Email</label>
-            <input
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              className="h-10 w-full rounded-md border border-border bg-background px-3 text-foreground placeholder:text-muted-foreground"
-            />
-          </div>
+        <Card>
+          <CardContent className="space-y-5">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="login-email">Email</Label>
+              <Input
+                id="login-email"
+                type="email"
+                placeholder="Enter your email"
+                className="h-10"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+              />
+            </div>
 
-          <div className="flex flex-col gap-2">
-            <label className="text-sm text-foreground">Password</label>
-            <input
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onKeyDown={e => {
-                if (e.key === 'Enter') {
-                  e.preventDefault()
-                  handleLogin()
-                }
-              }}
-              onChange={e => setPassword(e.target.value)}
-              className="h-10 w-full rounded-md border border-border bg-background px-3 text-foreground placeholder:text-muted-foreground"
-            />
-          </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="login-password">Password</Label>
+              <Input
+                id="login-password"
+                type="password"
+                placeholder="Enter your password"
+                className="h-10"
+                value={password}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    handleLogin()
+                  }
+                }}
+                onChange={e => setPassword(e.target.value)}
+              />
+            </div>
 
-          <Button
-            className="h-10 w-full"
-            disabled={!isValid || isLoggingIn}
-            aria-busy={isLoggingIn}
-            onClick={handleLogin}
-          >
-            {isLoggingIn && (
-              <span className="mr-2 inline-block size-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
+            <Button
+              className="h-10 w-full"
+              disabled={!isValid || isLoggingIn}
+              aria-busy={isLoggingIn}
+              onClick={handleLogin}
+            >
+              {isLoggingIn && (
+                <span className="mr-2 inline-block size-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
+              )}
+              {isLoggingIn ? 'Logging in…' : 'Log In'}
+            </Button>
+
+            {errorMessage && (
+              <p className="mt-2 text-sm text-destructive">{errorMessage}</p>
             )}
-            {isLoggingIn ? 'Logging in…' : 'Log In'}
-          </Button>
 
-          {errorMessage && (
-            <p className="mt-2 text-sm text-destructive">{errorMessage}</p>
-          )}
-
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <button className="hover:underline" onClick={onBack}>
-              Log in with a different email
-            </button>
-            <span className="hover:underline cursor-default">
-              Forgot password?
-            </span>
-          </div>
-        </div>
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <button className="hover:underline" onClick={onBack}>
+                Log in with a different email
+              </button>
+              <span className="hover:underline cursor-default">
+                Forgot password?
+              </span>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Right: orbit illustration */}
       <div className="flex w-1/2 items-center justify-center border-l border-border bg-muted/20">
         <AppOrbitImage />
       </div>

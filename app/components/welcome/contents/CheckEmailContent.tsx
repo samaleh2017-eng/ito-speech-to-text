@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Button } from '@/app/components/ui/button'
+import { Card, CardContent } from '@/app/components/ui/card'
 import { AppOrbitImage } from '@/app/components/ui/app-orbit-image'
 import { supabase } from '@/app/components/auth/supabaseClient'
 
@@ -56,46 +57,50 @@ export default function CheckEmailContent({
           </p>
         </div>
 
-        <ol className="mb-6 list-decimal space-y-3 pl-5 text-sm text-foreground">
-          <li>
-            Open the email and click{' '}
-            <span className="font-medium">Confirm email</span> to activate your
-            account.
-          </li>
-          <li>
-            Once verified, return here and sign in with your email and password.
-          </li>
-        </ol>
+        <Card>
+          <CardContent>
+            <ol className="mb-6 list-decimal space-y-3 pl-5 text-sm text-foreground">
+              <li>
+                Open the email and click{' '}
+                <span className="font-medium">Confirm email</span> to activate your
+                account.
+              </li>
+              <li>
+                Once verified, return here and sign in with your email and password.
+              </li>
+            </ol>
 
-        <div className="mb-4">
-          <Button
-            variant="outline"
-            disabled={seconds > 0 || isResending}
-            onClick={handleResend}
-            className="h-10 w-full justify-center"
-          >
-            {seconds > 0
-              ? `Resend email (${seconds} Sec)`
-              : isResending
-                ? 'Resending…'
-                : 'Resend email'}
-          </Button>
-          {resendError && (
-            <p className="mt-2 text-xs text-destructive">{resendError}</p>
-          )}
-        </div>
+            <div className="mb-4">
+              <Button
+                variant="outline"
+                disabled={seconds > 0 || isResending}
+                onClick={handleResend}
+                className="h-10 w-full justify-center"
+              >
+                {seconds > 0
+                  ? `Resend email (${seconds} Sec)`
+                  : isResending
+                    ? 'Resending…'
+                    : 'Resend email'}
+              </Button>
+              {resendError && (
+                <p className="mt-2 text-xs text-destructive">{resendError}</p>
+              )}
+            </div>
 
-        <button
-          className="text-sm text-foreground underline"
-          onClick={onUseAnotherEmail}
-        >
-          Use another email
-        </button>
+            <button
+              className="text-sm text-foreground underline"
+              onClick={onUseAnotherEmail}
+            >
+              Use another email
+            </button>
 
-        <p className="mt-6 max-w-sm text-center text-xs text-muted-foreground">
-          If you don't see it, check your Spam or Promotions folder for a
-          message from support@ito.ai
-        </p>
+            <p className="mt-6 max-w-sm text-center text-xs text-muted-foreground">
+              If you don't see it, check your Spam or Promotions folder for a
+              message from support@ito.ai
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="flex w-1/2 items-center justify-center border-l border-border bg-muted/20">

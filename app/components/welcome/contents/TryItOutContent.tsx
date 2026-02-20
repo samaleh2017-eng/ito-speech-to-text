@@ -7,7 +7,8 @@ import ChatGPTIcon from '../../icons/ChatGPTIcon'
 import NotionIcon from '../../icons/NotionIcon'
 import CursorIcon from '../../icons/CursorIcon'
 import { useState } from 'react'
-import { ArrowUp } from '@mynaui/icons-react'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { ArrowUp01Icon, ArrowLeft01Icon } from '@hugeicons/core-free-icons'
 import React from 'react'
 import { ItoMode } from '@/app/generated/ito_pb'
 import { getKeyDisplay } from '@/app/utils/keyboard'
@@ -28,10 +29,10 @@ export default function TryItOut() {
   function renderDemo() {
     if (selectedApp === 'slack') {
       return (
-        <div className="w-[475px] rounded-2xl bg-white shadow-lg flex flex-col gap-4">
-          <div className="flex items-center gap-2 mb-2 bg-neutral-100 py-4 px-4 rounded-t-2xl">
+        <div className="w-[475px] rounded-2xl bg-card shadow-lg flex flex-col gap-4">
+          <div className="flex items-center gap-2 mb-2 bg-muted py-4 px-4 rounded-t-2xl">
             <div
-              className="bg-white rounded-md p-1"
+              className="bg-background rounded-md p-1"
               style={{ width: 24, height: 24 }}
             >
               <SlackIcon />
@@ -51,7 +52,7 @@ export default function TryItOut() {
             <input
               type="text"
               placeholder={`Hold down on the hotkey(s) and start speaking...`}
-              className="w-full h-12 border border-neutral-500 rounded-md px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-0"
+              className="w-full h-12 border border-border rounded-md px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-0"
             />
           </div>
         </div>
@@ -59,10 +60,10 @@ export default function TryItOut() {
     }
     if (selectedApp === 'gmail') {
       return (
-        <div className="w-[475px] rounded-2xl bg-white shadow-lg flex flex-col gap-4">
-          <div className="flex items-center gap-2 mb-2 py-4 px-4 rounded-t-2xl border-b border-neutral-200 bg-neutral-100">
+        <div className="w-[475px] rounded-2xl bg-card shadow-lg flex flex-col gap-4">
+          <div className="flex items-center gap-2 mb-2 py-4 px-4 rounded-t-2xl border-b border-border bg-muted">
             <div
-              className="bg-white rounded-md p-1"
+              className="bg-background rounded-md p-1"
               style={{ width: 24, height: 24 }}
             >
               <GmailIcon />
@@ -72,9 +73,9 @@ export default function TryItOut() {
           <div className="flex flex-col gap-2 px-6 pb-6">
             <div className="text-sm text-muted-foreground">
               Subject:{' '}
-              <span className="font-medium text-black">Quick update</span>
+              <span className="font-medium text-foreground">Quick update</span>
             </div>
-            <div className="border-t border-neutral-200 my-2" />
+            <div className="border-t border-border my-2" />
             <textarea
               placeholder={`Try saying:\n\n"Hi Jordan, wonderful meeting with you today. Do you have any time Monday to follow up on the project? Thanks, Taylor"`}
               className="w-full resize-none bg-transparent border-none focus:outline-none focus:ring-0 text-sm placeholder:text-muted-foreground"
@@ -87,12 +88,12 @@ export default function TryItOut() {
     if (selectedApp === 'notion') {
       return (
         <div
-          className="w-[475px] rounded-2xl bg-white shadow-lg flex flex-col"
+          className="w-[475px] rounded-2xl bg-card shadow-lg flex flex-col"
           style={{ minHeight: 280 }}
         >
-          <div className="flex items-center gap-2 mb-2 py-4 px-4 rounded-t-2xl border-b border-neutral-200 bg-neutral-100">
+          <div className="flex items-center gap-2 mb-2 py-4 px-4 rounded-t-2xl border-b border-border bg-muted">
             <div
-              className="bg-white rounded-md p-1"
+              className="bg-background rounded-md p-1"
               style={{ width: 24, height: 24 }}
             >
               <NotionIcon />
@@ -113,12 +114,12 @@ export default function TryItOut() {
     if (selectedApp === 'chatgpt') {
       return (
         <div
-          className="w-[475px] rounded-2xl bg-white shadow-lg flex flex-col"
+          className="w-[475px] rounded-2xl bg-card shadow-lg flex flex-col"
           style={{ minHeight: 280 }}
         >
-          <div className="flex items-center gap-2 mb-2 py-4 px-4 rounded-t-2xl border-b border-neutral-200 bg-neutral-100">
+          <div className="flex items-center gap-2 mb-2 py-4 px-4 rounded-t-2xl border-b border-border bg-muted">
             <div
-              className="bg-white rounded-md p-1"
+              className="bg-background rounded-md p-1"
               style={{ width: 24, height: 24 }}
             >
               <ChatGPTIcon />
@@ -127,7 +128,7 @@ export default function TryItOut() {
           </div>
           <div className="flex-1 flex flex-col justify-end px-4 gap-2">
             <div className="flex-1 flex flex-col justify-end px-6 py-8 gap-2"></div>
-            <div className="flex items-center mb-4 bg-neutral-100 rounded-2xl">
+            <div className="flex items-center mb-4 bg-muted rounded-2xl">
               <input
                 type="text"
                 placeholder="Ask AI to generate a React component"
@@ -148,7 +149,7 @@ export default function TryItOut() {
             <div>
               <div className="flex items-center gap-2 mb-4 rounded-t-2xl">
                 <div
-                  className="bg-neutral-100 rounded-md p-1"
+                  className="bg-muted rounded-md p-1"
                   style={{ width: 24, height: 24 }}
                 >
                   <CursorIcon />
@@ -157,7 +158,7 @@ export default function TryItOut() {
               </div>
               <div className="flex items-center gap-2 mb-2">
                 <span className="bg-[#23272e] border border-[#3a3f4b] text-xs text-white px-2 py-0.5 rounded font-mono flex items-center gap-1">
-                  <span className="text-[#7dd3fc]">@</span> TryItOut.tsx
+                  <span className="text-sky-300">@</span> TryItOut.tsx
                 </span>
               </div>
               <textarea
@@ -169,7 +170,7 @@ export default function TryItOut() {
             <div className="flex justify-between gap-2 mt-2">
               <div className="flex items-center gap-2">
                 <span className="bg-[#23272e] border border-[#3a3f4b] text-xs text-white px-2 py-0.5 rounded flex items-center gap-1">
-                  <span className="text-[#a78bfa]">∞</span> Agent{' '}
+                  <span className="text-sky-400">∞</span> Agent{' '}
                   <span className="text-[#a3a3a3]">⌘I</span>
                 </span>
                 <span className="bg-[#23272e] border border-[#3a3f4b] text-xs text-white px-2 py-0.5 rounded ml-2">
@@ -178,7 +179,7 @@ export default function TryItOut() {
               </div>
               <div className="flex">
                 <span className="text-[#23272e] p-1 text-lg cursor-pointer rounded-full bg-[#a3a3a3]">
-                  <ArrowUp size={16} />
+                  <HugeiconsIcon icon={ArrowUp01Icon} strokeWidth={2} className="w-4 h-4" />
                 </span>
               </div>
             </div>
@@ -202,13 +203,15 @@ export default function TryItOut() {
       <div className="flex flex-col w-[45%] justify-center items-start px-24">
         <div className="flex flex-col h-full min-h-[400px] justify-between py-12">
           <div className="mt-8">
-            <button
-              className="mb-4 text-sm text-muted-foreground hover:underline"
-              type="button"
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mb-4 gap-1 text-muted-foreground"
               onClick={decrementOnboardingStep}
             >
-              &lt; Back
-            </button>
+              <HugeiconsIcon icon={ArrowLeft01Icon} strokeWidth={2} className="w-4 h-4" />
+              Back
+            </Button>
             <h1 className="text-3xl mb-4 mt-12">
               Use Ito with the keyboard shortcut.
             </h1>
@@ -216,7 +219,7 @@ export default function TryItOut() {
               Hold down on the{' '}
               {keyboardShortcut.map((key, idx) => (
                 <React.Fragment key={`keyboard-shortcut-${idx}`}>
-                  <span className="inline-flex items-center px-2 py-0.5 bg-neutral-100 border rounded text-xs font-mono mx-1">
+                  <span className="inline-flex items-center px-2 py-0.5 bg-muted border rounded text-xs font-mono mx-1">
                     {getKeyDisplay(key, platform, {
                       showDirectionalText: false,
                       format: 'label',
@@ -238,7 +241,7 @@ export default function TryItOut() {
           </div>
         </div>
       </div>
-      <div className="flex w-[55%] items-center justify-center bg-gradient-to-b from-purple-50/10 to-purple-100 border-l-2 border-purple-100">
+      <div className="flex w-[55%] items-center justify-center bg-gradient-to-b from-sky-50/20 to-sky-100 border-l-2 border-sky-100">
         <div className="flex flex-col items-center h-full justify-between pt-36 pb-24">
           {renderDemo()}
           <div className="flex flex-col">
@@ -246,13 +249,13 @@ export default function TryItOut() {
               {apps.map(app => (
                 <div
                   key={app.key}
-                  className="relative bg-white p-2 rounded-md shadow-md cursor-pointer flex items-center justify-center"
+                  className="relative bg-card p-2 rounded-md shadow-md cursor-pointer flex items-center justify-center"
                   style={{ width: 48, height: 48 }}
                   onClick={() => setSelectedApp(app.key as typeof selectedApp)}
                 >
                   {app.icon}
                   {selectedApp === app.key && (
-                    <span className="absolute left-1/2 -translate-x-1/2 -bottom-3 w-2 h-2 rounded-full bg-white shadow" />
+                    <span className="absolute left-1/2 -translate-x-1/2 -bottom-3 w-2 h-2 rounded-full bg-card shadow" />
                   )}
                 </div>
               ))}

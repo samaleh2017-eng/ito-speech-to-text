@@ -1,8 +1,11 @@
 import { Button } from '@/app/components/ui/button'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { ArrowLeft01Icon } from '@hugeicons/core-free-icons'
 import { useEffect, useState } from 'react'
 import { useOnboardingStore } from '@/app/store/useOnboardingStore'
 import { useSettingsStore } from '@/app/store/useSettingsStore'
 import { MicrophoneSelector } from '@/app/components/ui/microphone-selector'
+import { Card, CardContent } from '@/app/components/ui/card'
 
 function MicrophoneBars({ volume }: { volume: number }) {
   const minHeight = 0.2
@@ -16,13 +19,13 @@ function MicrophoneBars({ volume }: { volume: number }) {
 
   return (
     <div
-      className="flex gap-1 py-4 px-4 items-end bg-neutral-100 rounded-md"
+      className="flex gap-1 py-4 px-4 items-end bg-muted rounded-md"
       style={{ height: 120 }}
     >
       {levels.map((level, i) => (
         <div
           key={i}
-          className={`mx-2 h-full ${level > minHeight ? 'bg-purple-300' : 'bg-neutral-300'}`}
+          className={`mx-2 h-full ${level > minHeight ? 'bg-sky-300' : 'bg-muted-foreground/30'}`}
           style={{
             width: 18,
             borderRadius: 6,
@@ -43,42 +46,32 @@ export default function MicrophoneTestContent() {
   const [volume, setVolume] = useState(0)
   const [smoothedVolume, setSmoothedVolume] = useState(0)
 
-  // This effect listens for volume updates from the main process
   useEffect(() => {
     const unsubscribe = window.api.on('volume-update', (newVolume: number) => {
       setVolume(newVolume)
     })
 
-    // Cleanup the listener when the component unmounts
     return () => {
       unsubscribe()
     }
-  }, []) // Runs only once on mount
+  }, [])
 
-  // This effect manages the "test" recording lifecycle.
-  // It starts recording when a device is selected and stops when the component unmounts.
   useEffect(() => {
     if (microphoneDeviceId) {
       window.api.send('start-native-recording-test')
     }
 
-    // Cleanup function: stop recording when the component unmounts or device changes
     return () => {
-      // Use the test-specific stop handler that only stops audio recording
       window.api.send('stop-native-recording-test')
     }
-  }, [microphoneDeviceId]) // Re-runs whenever the selected microphone changes
+  }, [microphoneDeviceId])
 
-  // Smooth the volume updates to reduce flicker
   useEffect(() => {
-    const smoothing = 0.4 // Lower = smoother, higher = more responsive
+    const smoothing = 0.4
     setSmoothedVolume(prev => prev * (1 - smoothing) + volume * smoothing)
   }, [volume])
 
-  // Handles changing the microphone
   const handleMicrophoneChange = async (deviceId: string, name: string) => {
-    // The useEffect hook above will automatically handle stopping the old
-    // stream and starting the new one when the deviceId changes.
     setMicrophoneDeviceId(deviceId, name)
   }
 
@@ -87,13 +80,15 @@ export default function MicrophoneTestContent() {
       <div className="flex flex-col w-[45%] justify-center items-start px-24">
         <div className="flex flex-col h-full min-h-[400px] justify-between py-12 overflow-hidden">
           <div className="mt-8">
-            <button
-              className="mb-4 text-sm text-muted-foreground hover:underline"
-              type="button"
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mb-4 gap-1 text-muted-foreground"
               onClick={decrementOnboardingStep}
             >
-              &lt; Back
-            </button>
+              <HugeiconsIcon icon={ArrowLeft01Icon} strokeWidth={2} className="w-4 h-4" />
+              Back
+            </Button>
             <h1 className="text-3xl mb-4 mt-12">
               Speak to test your microphone.
             </h1>
@@ -104,33 +99,32 @@ export default function MicrophoneTestContent() {
           </div>
         </div>
       </div>
-      <div className="flex w-[55%] items-center justify-center bg-gradient-to-b from-purple-50/10 to-purple-100 border-l-2 border-purple-100">
-        <div
-          className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center"
-          style={{ minWidth: 500, maxHeight: 280 }}
-        >
-          <div className="text-lg font-medium mb-6 text-center">
-            Do you see purple bars moving while you speak?
-          </div>
-          <MicrophoneBars volume={smoothedVolume} />
-          <div className="flex gap-2 mt-6 w-full justify-end">
-            <MicrophoneSelector
-              selectedDeviceId={microphoneDeviceId}
-              selectedMicrophoneName={microphoneName}
-              onSelectionChange={handleMicrophoneChange}
-              triggerButtonText="No, change microphone"
-              triggerButtonVariant="outline"
-              triggerButtonClassName="w-44"
-            />
-            <Button
-              className="w-16"
-              type="button"
-              onClick={incrementOnboardingStep}
-            >
-              Yes
-            </Button>
-          </div>
-        </div>
+      <div className="flex w-[55%] items-center justify-center bg-gradient-to-b from-sky-50/20 to-sky-100 border-l-2 border-sky-100">
+        <Card className="min-w-[500px] max-h-[280px] shadow-lg">
+          <CardContent className="flex flex-col items-center">
+            <div className="text-lg font-medium mb-6 text-center">
+              Do you see sky bars moving while you speak?
+            </div>
+            <MicrophoneBars volume={smoothedVolume} />
+            <div className="flex gap-2 mt-6 w-full justify-end">
+              <MicrophoneSelector
+                selectedDeviceId={microphoneDeviceId}
+                selectedMicrophoneName={microphoneName}
+                onSelectionChange={handleMicrophoneChange}
+                triggerButtonText="No, change microphone"
+                triggerButtonVariant="outline"
+                triggerButtonClassName="w-44"
+              />
+              <Button
+                className="w-16"
+                type="button"
+                onClick={incrementOnboardingStep}
+              >
+                Yes
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
