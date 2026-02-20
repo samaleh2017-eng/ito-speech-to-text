@@ -1,7 +1,8 @@
 import React from 'react'
 import { cn } from '@/lib/utils'
 import { VariantProps, cva } from 'class-variance-authority'
-import { Spinner as SpinnerIcon } from '@mynaui/icons-react'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { Loading03Icon } from '@hugeicons/core-free-icons'
 
 const spinnerVariants = cva('flex-col items-center justify-center', {
   variants: {
@@ -43,7 +44,7 @@ export function Spinner({
 }: SpinnerContentProps) {
   return (
     <span className={spinnerVariants({ show })}>
-      <SpinnerIcon className={cn(loaderVariants({ size }), className)} />
+      <HugeiconsIcon icon={Loading03Icon} strokeWidth={2} className={cn(loaderVariants({ size }), className)} />
       {children}
     </span>
   )

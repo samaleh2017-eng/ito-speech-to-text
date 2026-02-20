@@ -1,14 +1,17 @@
 {
   "$schema": "https://ui.shadcn.com/schema.json",
-  "style": "new-york",
+  "style": "radix-mira",
   "rsc": false,
   "tsx": true,
   "tailwind": {
     "config": "",
     "css": "app/styles/globals.css",
     "baseColor": "neutral",
-    "cssVariables": true
+    "cssVariables": true,
+    "prefix": ""
   },
+  "iconLibrary": "hugeicons",
+  "rtl": false,
   "aliases": {
     "components": "@/app/components",
     "utils": "@/lib/utils",
@@ -16,5 +19,7 @@
     "lib": "@/lib",
     "hooks": "@/lib/hooks"
   },
-  "iconLibrary": "none"
+  "menuColor": "inverted",
+  "menuAccent": "subtle",
+  "registries": {}
 }

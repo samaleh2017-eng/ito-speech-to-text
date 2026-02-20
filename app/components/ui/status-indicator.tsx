@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Check, X } from '@mynaui/icons-react'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { Tick02Icon, Cancel01Icon } from '@hugeicons/core-free-icons'
 import { usePerformanceStore } from '../../store/usePerformanceStore'
 
 interface StatusIndicatorProps {
@@ -50,12 +51,12 @@ export function StatusIndicator({
       <div className="px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 bg-black text-white">
         {status === 'success' ? (
           <>
-            <Check className="w-4 h-4 text-green-400" />
+            <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} className="w-4 h-4 text-green-400" />
             <span className="font-medium">{successMessage}</span>
           </>
         ) : (
           <>
-            <X className="w-4 h-4 text-red-400" />
+            <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} className="w-4 h-4 text-red-400" />
             <span className="font-medium">{errorMessage}</span>
           </>
         )}

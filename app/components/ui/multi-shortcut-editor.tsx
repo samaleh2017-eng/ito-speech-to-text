@@ -4,7 +4,8 @@ import { ShortcutError } from '@/app/utils/keyboard'
 import { keyNameMap } from '@/lib/types/keyboard'
 import { ItoMode } from '@/app/generated/ito_pb'
 import { useSettingsStore } from '@/app/store/useSettingsStore'
-import { Check, Pencil } from '@mynaui/icons-react'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { Tick02Icon, PencilEdit01Icon } from '@hugeicons/core-free-icons'
 import { cx } from 'class-variance-authority'
 import { KeyName } from '@/lib/types/keyboard'
 import { useShortcutEditingStore } from '@/app/store/useShortcutEditingStore'
@@ -247,7 +248,7 @@ export default function MultiShortcutEditor({
                     onClick={() => saveEdit(row)}
                     className={base}
                   >
-                    <Check className="h-4 w-4" />
+                    <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} className="h-4 w-4" />
                   </button>
                 ) : (
                   <button
@@ -258,7 +259,7 @@ export default function MultiShortcutEditor({
                     }
                     disabled={isLockedByOther}
                   >
-                    <Pencil className="h-4 w-4" />
+                    <HugeiconsIcon icon={PencilEdit01Icon} strokeWidth={2} className="h-4 w-4" />
                   </button>
                 )}
               </div>

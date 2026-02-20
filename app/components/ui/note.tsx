@@ -1,5 +1,6 @@
 import React from 'react'
-import { Pencil, Copy, Trash, Dots } from '@mynaui/icons-react'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { PencilEdit01Icon, Copy01Icon, Delete01Icon, MoreHorizontalIcon } from '@hugeicons/core-free-icons'
 import type { Note } from '../../store/useNotesStore'
 
 interface NoteProps {
@@ -76,14 +77,14 @@ export function Note({
           }}
           className="p-1.5 hover:bg-[var(--color-muted-bg)] transition-colors border-r border-[var(--border)] rounded-l-md cursor-pointer "
         >
-          <Pencil className="w-4 h-4 text-[var(--color-subtext)]" />
+          <HugeiconsIcon icon={PencilEdit01Icon} strokeWidth={2} className="w-4 h-4 text-[var(--color-subtext)]" />
         </button>
         <div className="relative">
           <button
             onClick={e => onToggleDropdown(index, e)}
             className="p-1.5 hover:bg-[var(--color-muted-bg)] transition-colors rounded-r-md cursor-pointer"
           >
-            <Dots className="w-4 h-4 text-foreground" />
+            <HugeiconsIcon icon={MoreHorizontalIcon} strokeWidth={2} className="w-4 h-4 text-foreground" />
           </button>
 
           {/* Dropdown Menu */}
@@ -96,7 +97,7 @@ export function Note({
                 }}
                 className="w-full px-4 py-2 text-left text-sm text-[var(--color-text)] hover:bg-[var(--color-muted-bg)] flex items-center gap-2 rounded-t-[var(--radius-lg)] cursor-pointer"
               >
-                <Copy className="w-4 h-4" />
+                <HugeiconsIcon icon={Copy01Icon} strokeWidth={2} className="w-4 h-4" />
                 Copy to clipboard
               </button>
               <button
@@ -106,7 +107,7 @@ export function Note({
                 }}
                 className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 rounded-b-[var(--radius-lg)] cursor-pointer"
               >
-                <Trash className="w-4 h-4" />
+                <HugeiconsIcon icon={Delete01Icon} strokeWidth={2} className="w-4 h-4" />
                 Delete note
               </button>
             </div>

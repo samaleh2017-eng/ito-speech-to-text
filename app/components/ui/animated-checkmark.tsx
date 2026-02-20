@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Check } from '@mynaui/icons-react'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { Tick02Icon } from '@hugeicons/core-free-icons'
 
 // AnimatedCheck component for check mark animation
 const AnimatedCheck = React.memo(function AnimatedCheck({ trigger }: { trigger: boolean }) {
@@ -36,7 +37,9 @@ const AnimatedCheck = React.memo(function AnimatedCheck({ trigger }: { trigger: 
         verticalAlign: 'middle',
       }}
     >
-      <Check
+      <HugeiconsIcon
+        icon={Tick02Icon}
+        strokeWidth={2}
         className="mr-1"
         style={{
           color: '#22c55e',
