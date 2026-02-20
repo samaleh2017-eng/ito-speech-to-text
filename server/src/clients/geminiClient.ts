@@ -43,9 +43,13 @@ class GeminiClient implements LlmProvider {
         'Transcris ce fichier audio en français, mot à mot, fidèlement. Retourne UNIQUEMENT le texte transcrit, sans formatage, sans commentaire, sans explication. Conserve les noms propres (Ito, Arka) tels quels. Si tu ne détectes pas de parole, retourne une chaîne vide.'
 
       const vocabulary = options?.vocabulary
-      if (vocabulary && vocabulary.length > 0) {
-        promptText += `\nMots importants à reconnaître dans l'audio: ${vocabulary.join(', ')}`
-      }
+      const systemInstruction = [
+        'Tu es un système de transcription audio. Ta SEULE tâche est de transcrire fidèlement les paroles prononcées dans l\'audio.',
+        'RÈGLE CRITIQUE : Si l\'audio ne contient PAS de parole humaine claire (silence, bruit de fond, souffle, clics), tu DOIS retourner EXACTEMENT une chaîne vide. Ne génère AUCUN texte.',
+        vocabulary && vocabulary.length > 0
+          ? `AIDE ORTHOGRAPHIQUE (NE PAS AJOUTER AU TEXTE) : Les mots suivants peuvent apparaître dans l'audio. Si tu entends un son qui correspond, utilise cette orthographe : ${vocabulary.join(', ')}. Ces mots sont UNIQUEMENT des indices — ne les insère JAMAIS dans la transcription s'ils ne sont pas clairement prononcés.`
+          : '',
+      ].filter(Boolean).join('\n')
 
       const response = await this._client.models.generateContent({
         model: options?.asrModel || this._defaultModel,
@@ -65,6 +69,9 @@ class GeminiClient implements LlmProvider {
             ],
           },
         ],
+        config: {
+          systemInstruction,
+        },
       })
 
       return response.text?.trim() || ''

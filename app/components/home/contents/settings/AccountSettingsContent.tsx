@@ -33,56 +33,42 @@ export default function AccountSettingsContent() {
 
   const handleDeleteAccount = async () => {
     try {
-      // Delete user data from both local and server databases
-      // Server now extracts userId from authenticated user's token
       await window.api.deleteUserData()
 
-      // Clear KV-backed app state
       window.electron?.store?.set('settings', {})
       window.electron?.store?.set('main', {})
       window.electron?.store?.set('onboarding', {})
       window.electron?.store?.set('auth', {})
 
-      // Clear auth state
       clearAuth(false)
 
-      // Reset all stores to their initial state
       resetOnboarding()
       loadNotes()
       loadEntries()
 
-      // Close the dialog
       setShowDeleteDialog(false)
-
-      // Note: The app will automatically navigate to onboarding since user is no longer authenticated
     } catch (error) {
       console.error('Failed to delete account data:', error)
-      // Still proceed with local cleanup even if server deletion fails
-      // Clear KV-backed app state
       window.electron?.store?.set('settings', {})
       window.electron?.store?.set('main', {})
       window.electron?.store?.set('onboarding', {})
       window.electron?.store?.set('auth', {})
 
-      // Clear auth state
       clearAuth(false)
 
-      // Reset all stores to their initial state
       resetOnboarding()
       loadNotes()
       loadEntries()
 
-      // Close the dialog
       setShowDeleteDialog(false)
     }
   }
 
   return (
     <div className="h-full justify-between">
-      <div className="space-y-6">
-        {/* First name */}
-        <div className="flex items-center justify-between">
-          <label className="text-sm font-medium text-foreground">Name</label>
+      <div className="rounded-xl bg-[#F2F2F2]">
+        <div className="flex items-center justify-between py-4 px-5 border-b border-[#EBEBEB]">
+          <label className="text-sm font-medium text-[#1f1f1f]">Name</label>
           <input
             type="text"
             value={user?.name}
@@ -90,37 +76,29 @@ export default function AccountSettingsContent() {
             className="w-80 bg-white border border-[var(--border)] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
           />
         </div>
-
-        {/* Email */}
-        <div className="flex items-center justify-between py-3 my-1">
-          <label className="text-sm font-medium text-foreground">Email</label>
-          <div className="w-80 text-sm text-[var(--color-subtext)] px-4">{user?.email}</div>
+        <div className="flex items-center justify-between py-4 px-5">
+          <label className="text-sm font-medium text-[#1f1f1f]">Email</label>
+          <div className="w-80 text-sm text-[#888] px-4">{user?.email}</div>
         </div>
       </div>
 
-      {/* Action buttons */}
       <div className="flex pt-8 w-full justify-center">
-        <Button
-          variant="outline"
-          size="lg"
+        <button
           onClick={handleSignOut}
-          className="px-6 py-3 bg-[var(--color-muted-bg)] text-[var(--color-text)] hover:bg-warm-200"
+          className="bg-[#D9D9DE] border-0 text-[#1f1f1f] hover:bg-[#CDCDD2] rounded-lg text-sm px-8 py-2.5 cursor-pointer"
         >
           Sign out
-        </Button>
+        </button>
       </div>
       <div className="flex pt-12 w-full justify-center">
-        <Button
-          variant="ghost"
-          size="lg"
+        <button
           onClick={() => setShowDeleteDialog(true)}
-          className="px-6 py-3 text-red-400 hover:text-red-200"
+          className="text-sm text-red-400 hover:text-red-500 bg-transparent border-0 cursor-pointer"
         >
           Delete account
-        </Button>
+        </button>
       </div>
 
-      {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>

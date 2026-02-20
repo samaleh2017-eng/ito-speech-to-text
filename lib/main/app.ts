@@ -24,6 +24,8 @@ export function createAppWindow(): BrowserWindow {
   mainWindow = new BrowserWindow({
     width: 1270,
     height: 800,
+    minWidth: 900,
+    minHeight: 600,
     show: false,
     backgroundColor: '#ffffff',
     icon: appIcon,
@@ -31,8 +33,8 @@ export function createAppWindow(): BrowserWindow {
     titleBarStyle: 'hiddenInset',
     trafficLightPosition: { x: 20, y: 17 },
     title: 'Ito',
-    maximizable: false,
-    resizable: false,
+    maximizable: true,
+    resizable: true,
     webPreferences: {
       preload: join(__dirname, '../preload/preload.js'),
       sandbox: false,
@@ -66,6 +68,13 @@ export function createAppWindow(): BrowserWindow {
       })
     },
   )
+
+  mainWindow.on('maximize', () => {
+    mainWindow?.webContents.send('window-maximized-changed', true)
+  })
+  mainWindow.on('unmaximize', () => {
+    mainWindow?.webContents.send('window-maximized-changed', false)
+  })
 
   // Intercept the close event to hide the window instead of closing it
   // This allows the app to stay running in the system tray
