@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/app/components/ui/button'
-import { Check } from '@mynaui/icons-react'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { Tick01Icon } from '@hugeicons/core-free-icons'
 import { useBilling } from '@/app/contexts/BillingContext'
 
 type BillingPeriod = 'monthly' | 'annual'
@@ -152,7 +153,7 @@ export default function PricingBillingSettingsContent() {
       {/* Billing Period Toggle */}
       {/* <div className="flex items-center justify-center gap-3">
         <span
-          className={`text-sm font-medium ${billingPeriod === 'monthly' ? 'text-gray-900' : 'text-gray-500'}`}
+          className={`text-sm font-medium ${billingPeriod === 'monthly' ? 'text-foreground' : 'text-muted-foreground'}`}
         >
           Monthly
         </span>
@@ -163,7 +164,7 @@ export default function PricingBillingSettingsContent() {
           }
         />
         <span
-          className={`text-sm font-medium ${billingPeriod === 'annual' ? 'text-gray-900' : 'text-gray-500'}`}
+          className={`text-sm font-medium ${billingPeriod === 'annual' ? 'text-foreground' : 'text-muted-foreground'}`}
         >
           Annual
         </span>
@@ -265,7 +266,7 @@ export default function PricingBillingSettingsContent() {
             <Button
               variant="outline"
               size="lg"
-              className="w-full rounded-xl border-[var(--border)]"
+              className="w-full rounded-xl border-border"
               onClick={handleContactUs}
             >
               Contact Us
@@ -296,14 +297,14 @@ function PricingCard({
 }: PricingCardProps) {
   return (
     <div
-      className={`rounded-[var(--radius-lg)] border-2 p-6 flex flex-col ${
+      className={`rounded-lg border-2 p-6 flex flex-col ${
         isHighlighted
           ? 'border-purple-500 bg-gradient-to-br from-purple-50/30 to-pink-50/30'
-          : 'border-[var(--border)] bg-[var(--color-surface)]'
+          : 'border-border bg-card'
       }`}
     >
       {/* Title */}
-      <div className="text-sm font-medium text-[var(--color-text)] mb-2">
+      <div className="text-sm font-medium text-foreground mb-2">
         {title}
       </div>
 
@@ -319,7 +320,7 @@ function PricingCard({
           {price}
         </span>
         {priceSubtext && (
-          <span className="text-[var(--color-subtext)] ml-1">
+          <span className="text-muted-foreground ml-1">
             {priceSubtext}
           </span>
         )}
@@ -330,7 +331,7 @@ function PricingCard({
         {features.map((feature, index) => (
           <div key={index} className="flex items-start gap-3">
             <div className="flex-shrink-0 mt-0.5">
-              <Check className="w-5 h-5" strokeWidth={3} />
+              <HugeiconsIcon icon={Tick01Icon} strokeWidth={3} className="w-5 h-5" />
             </div>
             <span className="text-sm text-foreground">{feature}</span>
           </div>

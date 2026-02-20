@@ -2,7 +2,8 @@ import { useWindowContext } from './WindowContext'
 import React, { useState, useEffect } from 'react'
 import { OnboardingTitlebar } from './OnboardingTitlebar'
 import { useOnboardingStore } from '@/app/store/useOnboardingStore'
-import { UserCircle, CogFour, Logout, Bell } from '@mynaui/icons-react'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { UserCircleIcon, Settings01Icon, Logout01Icon, Notification01Icon } from '@hugeicons/core-free-icons'
 import { useMainStore } from '@/app/store/useMainStore'
 import { useAuthStore } from '@/app/store/useAuthStore'
 import { useAuth } from '@/app/components/auth/useAuth'
@@ -110,7 +111,7 @@ export const Titlebar = () => {
 
           <div className="relative ml-2">
             <div
-              className="titlebar-action-btn hover:bg-warm-200"
+              className="titlebar-action-btn hover:bg-muted"
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -126,23 +127,23 @@ export const Titlebar = () => {
               tabIndex={0}
               onClick={toggleUserDropdown}
             >
-              <UserCircle style={{ width: 20, height: 20 }} />
+              <HugeiconsIcon icon={UserCircleIcon} strokeWidth={2} style={{ width: 20, height: 20 }} />
             </div>
 
             {showUserDropdown && (
-              <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-[var(--card)] border border-warm-100 dark:border-warm-800 rounded-lg shadow-lg z-20">
+              <div className="absolute top-full left-0 mt-1 w-48 bg-popover border border-border rounded-lg shadow-lg z-20">
                 <button
                   onClick={handleSettingsClick}
-                  className="w-full px-2 py-2 text-left text-sm text-warm-700 hover:bg-warm-50 flex items-center gap-2 rounded-t-lg cursor-pointer"
+                  className="w-full px-2 py-2 text-left text-sm text-foreground hover:bg-accent flex items-center gap-2 rounded-t-lg cursor-pointer"
                 >
-                  <CogFour className="w-4 h-4" />
+                  <HugeiconsIcon icon={Settings01Icon} strokeWidth={2} className="w-4 h-4" />
                   Settings
                 </button>
                 <button
                   onClick={handleSignOutClick}
-                  className="w-full px-2 py-2 text-left text-sm text-warm-700 hover:bg-warm-50 flex items-center gap-2 rounded-b-lg cursor-pointer"
+                  className="w-full px-2 py-2 text-left text-sm text-foreground hover:bg-accent flex items-center gap-2 rounded-b-lg cursor-pointer"
                 >
-                  <Logout className="w-4 h-4" />
+                  <HugeiconsIcon icon={Logout01Icon} strokeWidth={2} className="w-4 h-4" />
                   Sign Out
                 </button>
               </div>
@@ -190,11 +191,11 @@ export const Titlebar = () => {
           )}
 
           <button
-            className="titlebar-action-btn flex items-center justify-center w-8 h-8 rounded-lg hover:bg-warm-100 transition-colors"
+            className="titlebar-action-btn flex items-center justify-center w-8 h-8 rounded-lg hover:bg-accent transition-colors"
             title="Notifications"
             onClick={() => {}}
           >
-            <Bell className="w-4 h-4 text-warm-600" />
+            <HugeiconsIcon icon={Notification01Icon} strokeWidth={2} className="w-4 h-4 text-muted-foreground" />
           </button>
 
           {wcontext?.platform === 'win32' && <TitlebarControls />}

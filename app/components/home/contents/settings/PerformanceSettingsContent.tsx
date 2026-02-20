@@ -54,7 +54,7 @@ export default function PerformanceSettingsContent() {
         <div className="space-y-6">
           <div>
             <div className="text-sm font-medium mb-1">Performance Mode</div>
-            <div className="text-xs text-[var(--color-subtext)] mb-3">
+            <div className="text-xs text-muted-foreground mb-3">
               Choose how Ito manages visual effects and animations. Auto mode adapts to your hardware automatically.
             </div>
             <div className="flex flex-wrap gap-2">
@@ -70,7 +70,7 @@ export default function PerformanceSettingsContent() {
               ))}
             </div>
             {pendingTier === 'auto' && (
-              <div className="text-xs text-[var(--color-subtext)] mt-3">
+              <div className="text-xs text-muted-foreground mt-3">
                 Mode automatically selected based on your hardware:{' '}
                 <span className="font-semibold uppercase text-foreground">{detectedTier}</span>
               </div>
@@ -80,18 +80,18 @@ export default function PerformanceSettingsContent() {
           <div className="flex items-center justify-between">
             <div>
               <div className="text-sm font-medium">Active Mode</div>
-              <div className="text-xs text-[var(--color-subtext)] mt-1">
+              <div className="text-xs text-muted-foreground mt-1">
                 {TIER_OPTIONS.find(t => t.id === activeTier)?.description}
               </div>
             </div>
-            <span className="text-sm font-semibold uppercase px-3 py-1 rounded-md bg-[var(--color-muted-bg)]">
+            <span className="text-sm font-semibold uppercase px-3 py-1 rounded-md bg-muted">
               {activeTier}
             </span>
           </div>
         </div>
       </div>
 
-      <div className="border-t border-[var(--border)]" />
+      <div className="border-t border-border" />
       <div className="flex items-center gap-3">
         <Button onClick={handleSave} disabled={!isDirty}>
           Save
@@ -100,7 +100,7 @@ export default function PerformanceSettingsContent() {
           <span className="text-sm text-green-600 font-medium">&check; Saved</span>
         )}
         {isDirty && (
-          <span className="text-xs text-[var(--color-subtext)]">
+          <span className="text-xs text-muted-foreground">
             Unsaved changes — click Save to apply.
           </span>
         )}
@@ -113,23 +113,23 @@ export default function PerformanceSettingsContent() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-sm font-medium">RAM</div>
-                <div className="text-xs text-[var(--color-subtext)] mt-1">System memory detected.</div>
+                <div className="text-xs text-muted-foreground mt-1">System memory detected.</div>
               </div>
-              <span className="text-sm text-[var(--color-subtext)]">{hardwareInfo.ramGB} GB</span>
+              <span className="text-sm text-muted-foreground">{hardwareInfo.ramGB} GB</span>
             </div>
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-sm font-medium">CPU Cores</div>
-                <div className="text-xs text-[var(--color-subtext)] mt-1">Logical processor count.</div>
+                <div className="text-xs text-muted-foreground mt-1">Logical processor count.</div>
               </div>
-              <span className="text-sm text-[var(--color-subtext)]">{hardwareInfo.cpuCores}</span>
+              <span className="text-sm text-muted-foreground">{hardwareInfo.cpuCores}</span>
             </div>
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-sm font-medium">GPU Score</div>
-                <div className="text-xs text-[var(--color-subtext)] mt-1">Graphics capability (0–100).</div>
+                <div className="text-xs text-muted-foreground mt-1">Graphics capability (0–100).</div>
               </div>
-              <span className="text-sm text-[var(--color-subtext)]">{hardwareInfo.gpuScore} / 100</span>
+              <span className="text-sm text-muted-foreground">{hardwareInfo.gpuScore} / 100</span>
             </div>
           </div>
         </div>
@@ -142,7 +142,7 @@ export default function PerformanceSettingsContent() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-sm font-medium">FPS</div>
-                <div className="text-xs text-[var(--color-subtext)] mt-1">Current frames per second.</div>
+                <div className="text-xs text-muted-foreground mt-1">Current frames per second.</div>
               </div>
               <span className={`text-sm font-semibold ${
                 metrics.fps >= 50 ? 'text-green-500' :
@@ -156,9 +156,9 @@ export default function PerformanceSettingsContent() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-sm font-medium">Memory Usage</div>
-                  <div className="text-xs text-[var(--color-subtext)] mt-1">JavaScript heap usage.</div>
+                  <div className="text-xs text-muted-foreground mt-1">JavaScript heap usage.</div>
                 </div>
-                <span className="text-sm text-[var(--color-subtext)]">{metrics.memoryUsageMB} MB</span>
+                <span className="text-sm text-muted-foreground">{metrics.memoryUsageMB} MB</span>
               </div>
             )}
           </div>
@@ -173,14 +173,14 @@ export default function PerformanceSettingsContent() {
               key={opt.id}
               className={`flex items-start gap-4 p-3 rounded-lg ${
                 activeTier === opt.id
-                  ? 'bg-[var(--color-muted-bg)] border border-[var(--border)]'
+                  ? 'bg-muted border border-border'
                   : ''
               }`}
             >
               <div className="text-sm font-medium w-20 flex-shrink-0 capitalize">
                 {opt.label}
               </div>
-              <div className="text-xs text-[var(--color-subtext)]">
+              <div className="text-xs text-muted-foreground">
                 {opt.description}
               </div>
             </div>

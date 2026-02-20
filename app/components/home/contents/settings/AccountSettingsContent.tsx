@@ -3,6 +3,8 @@ import { useNotesStore } from '../../../../store/useNotesStore'
 import { useDictionaryStore } from '../../../../store/useDictionaryStore'
 import { useOnboardingStore } from '../../../../store/useOnboardingStore'
 import { Button } from '../../../ui/button'
+import { Input } from '../../../ui/input'
+import { Label } from '../../../ui/label'
 import {
   Dialog,
   DialogContent,
@@ -66,44 +68,45 @@ export default function AccountSettingsContent() {
 
   return (
     <div className="h-full justify-between">
-      <div className="rounded-xl bg-[#F2F2F2]">
-        <div className="flex items-center justify-between py-4 px-5 border-b border-[#EBEBEB]">
-          <label className="text-sm font-medium text-[#1f1f1f]">Name</label>
-          <input
+      <div className="rounded-xl bg-muted">
+        <div className="flex items-center justify-between py-4 px-5 border-b border-border">
+          <Label className="text-sm font-medium text-foreground">Name</Label>
+          <Input
             type="text"
             value={user?.name}
             onChange={e => setName(e.target.value)}
-            className="w-80 bg-white border border-[var(--border)] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
+            className="w-80"
           />
         </div>
         <div className="flex items-center justify-between py-4 px-5">
-          <label className="text-sm font-medium text-[#1f1f1f]">Email</label>
-          <div className="w-80 text-sm text-[#888] px-4">{user?.email}</div>
+          <Label className="text-sm font-medium text-foreground">Email</Label>
+          <div className="w-80 text-sm text-muted-foreground px-4">{user?.email}</div>
         </div>
       </div>
 
       <div className="flex pt-8 w-full justify-center">
-        <button
+        <Button
+          variant="secondary"
           onClick={handleSignOut}
-          className="bg-[#D9D9DE] border-0 text-[#1f1f1f] hover:bg-[#CDCDD2] rounded-lg text-sm px-8 py-2.5 cursor-pointer"
         >
           Sign out
-        </button>
+        </Button>
       </div>
       <div className="flex pt-12 w-full justify-center">
-        <button
+        <Button
+          variant="destructive"
           onClick={() => setShowDeleteDialog(true)}
-          className="text-sm text-red-400 hover:text-red-500 bg-transparent border-0 cursor-pointer"
+          className="bg-transparent text-red-400 hover:text-red-500 hover:bg-transparent"
         >
           Delete account
-        </button>
+        </Button>
       </div>
 
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-red-600">Delete Account</DialogTitle>
-            <DialogDescription className="text-[var(--color-subtext)]">
+            <DialogDescription className="text-muted-foreground">
               Are you absolutely sure you want to delete your account? This
               action cannot be undone and will permanently remove:
               <br />

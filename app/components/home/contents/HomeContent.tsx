@@ -1,12 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { HugeiconsIcon } from '@hugeicons/react'
 import {
-  InfoCircle,
-  Play,
-  Stop,
-  Copy,
-  Check,
-  Download,
-} from '@mynaui/icons-react'
+  InformationCircleIcon,
+  PlayIcon,
+  StopIcon,
+  Copy01Icon,
+  Tick01Icon,
+  Download01Icon,
+} from '@hugeicons/core-free-icons'
 import { EXTERNAL_LINKS } from '@/lib/constants/external-links'
 import { useSettingsStore } from '../../../store/useSettingsStore'
 import { Tooltip, TooltipTrigger, TooltipContent } from '../../ui/tooltip'
@@ -45,7 +46,7 @@ const _StatCard = ({
   icon: React.ReactNode
 }) => {
   return (
-    <div className="flex flex-col p-4 w-1/3 border border-[var(--border)] rounded-[var(--radius-lg)] gap-4">
+    <div className="flex flex-col p-4 w-1/3 border border-border rounded-lg gap-4">
       <div className="flex flex-row items-center">
         <div className="flex flex-col gap-1">
           <div>{title}</div>
@@ -53,7 +54,7 @@ const _StatCard = ({
         </div>
         <div className="flex flex-col items-end flex-1">{icon}</div>
       </div>
-      <div className="w-full text-[var(--color-subtext)]">{description}</div>
+      <div className="w-full text-muted-foreground">{description}</div>
     </div>
   )
 }
@@ -628,26 +629,26 @@ export default function HomeContent({
             Welcome back{firstName ? `, ${firstName}` : ''}
           </h1>
           <div
-            className="flex items-center gap-5 text-[13px] bg-[var(--color-surface)] border border-[var(--border)] rounded-[var(--radius-lg)] px-6 py-3 shadow-card cursor-pointer hover:shadow-soft hover:-translate-y-0.5 transition-all duration-180"
+            className="flex items-center gap-5 text-[13px] bg-card border border-border rounded-lg px-6 py-3 shadow-md cursor-pointer hover:shadow-sm hover:-translate-y-0.5 transition-all duration-180"
             onClick={() => setShowStatsDialog(true)}
           >
             <div className="flex items-center gap-2">
               <span>🔥</span>
-              <span className="font-medium text-[var(--color-text)]">
+              <span className="font-medium text-foreground">
                 {formatStreakText(stats.streakDays)}
               </span>
             </div>
-            <div className="h-5 w-px bg-warm-200" />
+            <div className="h-5 w-px bg-border" />
             <div className="flex items-center gap-2">
               <span>🚀</span>
-              <span className="font-medium text-[var(--color-text)]">
+              <span className="font-medium text-foreground">
                 {stats.totalWords.toLocaleString()} words
               </span>
             </div>
-            <div className="h-5 w-px bg-warm-200" />
+            <div className="h-5 w-px bg-border" />
             <div className="flex items-center gap-2">
               <span>🏆</span>
-              <span className="font-medium text-[var(--color-text)]">
+              <span className="font-medium text-foreground">
                 {stats.averageWPM} WPM
               </span>
             </div>
@@ -655,16 +656,16 @@ export default function HomeContent({
         </div>
 
         {/* Dictation Info Box */}
-        <div className="bg-[var(--color-surface)] border border-[var(--border)] rounded-[var(--radius-lg)] p-7 flex items-center justify-between mb-10 shadow-[var(--shadow-soft)]">
+        <div className="bg-card border border-border rounded-lg p-7 flex items-center justify-between mb-10 shadow-sm">
           <div>
             <div className="text-lg font-sans font-medium mb-1">
               Voice dictation in any app
             </div>
-            <div className="text-sm text-[var(--color-subtext)]">
+            <div className="text-sm text-muted-foreground">
               <span key="hold-down">Hold down the trigger key </span>
               {keyboardShortcut.map((key, index) => (
                 <React.Fragment key={index}>
-                  <span className="bg-white border border-[var(--border)] px-1.5 py-0.5 rounded text-xs font-mono shadow-sm">
+                  <span className="bg-background border border-border px-1.5 py-0.5 rounded text-xs font-mono shadow-sm">
                     {getKeyDisplay(key as KeyName, platform, {
                       showDirectionalText: false,
                       format: 'label',
@@ -677,7 +678,7 @@ export default function HomeContent({
             </div>
           </div>
           <button
-            className="bg-[var(--primary)] text-[var(--primary-foreground)] px-6 py-3 rounded-[var(--radius-lg)] font-semibold hover:opacity-90 cursor-pointer transition-opacity"
+            className="bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90 cursor-pointer transition-opacity"
             onClick={() =>
               window.api?.invoke('web-open-url', EXTERNAL_LINKS.WEBSITE)
             }
@@ -687,7 +688,7 @@ export default function HomeContent({
         </div>
 
         {/* Recent Activity Header */}
-        <div className="text-xs font-semibold tracking-[1px] uppercase text-[var(--color-subtext)] mb-6">
+        <div className="text-xs font-semibold tracking-[1px] uppercase text-muted-foreground mb-6">
           Recent activity
         </div>
       </div>
@@ -695,11 +696,11 @@ export default function HomeContent({
       {/* Scrollable Recent Activity Section */}
       <div className="flex-1 px-12 max-w-4xl mx-auto w-full overflow-y-auto scrollbar-hide">
         {loading ? (
-          <div className="bg-white dark:bg-[var(--card)] rounded-[var(--radius-lg)] border border-[var(--border)] p-8 text-center text-[var(--color-subtext)]">
+          <div className="bg-card rounded-lg border border-border p-8 text-center text-muted-foreground">
             Loading recent activity...
           </div>
         ) : interactions.length === 0 ? (
-          <div className="bg-white dark:bg-[var(--card)] rounded-[var(--radius-lg)] border border-[var(--border)] p-8 text-center text-[var(--color-subtext)]">
+          <div className="bg-card rounded-lg border border-border p-8 text-center text-muted-foreground">
             <p className="text-sm">No interactions yet</p>
             <p className="text-xs mt-1">
               Try using voice dictation by pressing{' '}
@@ -711,30 +712,30 @@ export default function HomeContent({
             {Object.entries(groupedInteractions).map(
               ([dateLabel, dateInteractions]) => (
                 <div key={dateLabel} className="mb-6">
-                  <div className="text-xs font-semibold tracking-[1px] uppercase text-[var(--color-subtext)] mb-4">
+                  <div className="text-xs font-semibold tracking-[1px] uppercase text-muted-foreground mb-4">
                     {dateLabel}
                   </div>
-                  <div className="bg-white dark:bg-[var(--card)] rounded-[var(--radius-lg)] border border-[var(--border)] shadow-[var(--shadow-card)] divide-y divide-[var(--border)]">
+                  <div className="bg-card rounded-lg border border-border shadow-md divide-y divide-border">
                     {dateInteractions.map(interaction => {
                       const displayInfo = getDisplayText(interaction)
 
                       return (
                         <div
                           key={interaction.id}
-                          className="flex items-center justify-between px-4 py-4 gap-10 hover:bg-[var(--color-muted-bg)] transition-colors duration-200 group"
+                          className="flex items-center justify-between px-4 py-4 gap-10 hover:bg-muted transition-colors duration-200 group"
                         >
                           <div className="flex items-center gap-10">
-                            <div className="text-[var(--color-subtext)] text-[13px] min-w-[60px]">
+                            <div className="text-muted-foreground text-[13px] min-w-[60px]">
                               {formatTime(interaction.created_at)}
                             </div>
                             <div
-                              className={`${displayInfo.isError ? 'text-[var(--color-subtext)]' : 'text-foreground'} flex items-center gap-1`}
+                              className={`${displayInfo.isError ? 'text-muted-foreground' : 'text-foreground'} flex items-center gap-1`}
                             >
                               {displayInfo.text}
                               {displayInfo.tooltip && (
                                 <Tooltip>
                                   <TooltipTrigger>
-                                    <InfoCircle className="w-4 h-4 text-[var(--color-subtext)]" />
+                                    <HugeiconsIcon icon={InformationCircleIcon} strokeWidth={2} className="w-4 h-4 text-muted-foreground" />
                                   </TooltipTrigger>
                                   <TooltipContent>
                                     {displayInfo.tooltip}
@@ -770,10 +771,10 @@ export default function HomeContent({
                               >
                                 <TooltipTrigger asChild>
                                   <button
-                                    className={`p-1.5 hover:bg-warm-200 rounded transition-colors cursor-pointer ${
+                                    className={`p-1.5 hover:bg-muted rounded transition-colors cursor-pointer ${
                                       copiedItems.has(interaction.id)
                                         ? 'text-green-600'
-                                        : 'text-[var(--color-subtext)]'
+                                        : 'text-muted-foreground'
                                     }`}
                                     onClick={() =>
                                       copyToClipboard(
@@ -783,9 +784,9 @@ export default function HomeContent({
                                     }
                                   >
                                     {copiedItems.has(interaction.id) ? (
-                                      <Check className="w-4 h-4" />
+                                      <HugeiconsIcon icon={Tick01Icon} strokeWidth={2} className="w-4 h-4" />
                                     ) : (
-                                      <Copy className="w-4 h-4" />
+                                      <HugeiconsIcon icon={Copy01Icon} strokeWidth={2} className="w-4 h-4" />
                                     )}
                                   </button>
                                 </TooltipTrigger>
@@ -812,12 +813,12 @@ export default function HomeContent({
                               >
                                 <TooltipTrigger asChild>
                                   <button
-                                    className="p-1.5 hover:bg-warm-200 rounded transition-colors cursor-pointer text-[var(--color-subtext)]"
+                                    className="p-1.5 hover:bg-muted rounded transition-colors cursor-pointer text-muted-foreground"
                                     onClick={() =>
                                       handleAudioDownload(interaction)
                                     }
                                   >
-                                    <Download className="w-4 h-4" />
+                                    <HugeiconsIcon icon={Download01Icon} strokeWidth={2} className="w-4 h-4" />
                                   </button>
                                 </TooltipTrigger>
                                 <TooltipContent side="top" sideOffset={5}>
@@ -837,10 +838,10 @@ export default function HomeContent({
                             >
                               <TooltipTrigger asChild>
                                 <button
-                                  className={`p-1.5 hover:bg-warm-200 rounded transition-colors cursor-pointer ${
+                                  className={`p-1.5 hover:bg-muted rounded transition-colors cursor-pointer ${
                                     playingAudio === interaction.id
                                       ? 'bg-blue-50 text-blue-600'
-                                      : 'text-[var(--color-subtext)]'
+                                      : 'text-muted-foreground'
                                   }`}
                                   onClick={() =>
                                     handleAudioPlayStop(interaction)
@@ -848,9 +849,9 @@ export default function HomeContent({
                                   disabled={!interaction.has_raw_audio}
                                 >
                                   {playingAudio === interaction.id ? (
-                                    <Stop className="w-4 h-4" />
+                                    <HugeiconsIcon icon={StopIcon} strokeWidth={2} className="w-4 h-4" />
                                   ) : (
-                                    <Play className="w-4 h-4" />
+                                    <HugeiconsIcon icon={PlayIcon} strokeWidth={2} className="w-4 h-4" />
                                   )}
                                 </button>
                               </TooltipTrigger>
@@ -875,7 +876,7 @@ export default function HomeContent({
                 onClick={() =>
                   setVisibleCount(prev => prev + INTERACTIONS_PAGE_SIZE)
                 }
-                className="w-full py-3 text-sm text-[var(--color-subtext)] hover:text-foreground transition-colors duration-200"
+                className="w-full py-3 text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
               >
                 Show more ({interactions.length - visibleCount} remaining)
               </button>
@@ -897,20 +898,20 @@ export default function HomeContent({
             <h2 className="text-xl font-bold text-center mb-1">
               You've been Flowing. Hard.
             </h2>
-            <p className="text-sm text-[var(--color-subtext)] text-center mb-8">
+            <p className="text-sm text-muted-foreground text-center mb-8">
               Here's a personal snapshot of your productivity with Ito.
             </p>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-[var(--color-surface)] rounded-[var(--radius-lg)] p-5">
-                <div className="text-xs font-semibold tracking-wider text-[var(--color-subtext)] uppercase mb-3">
+              <div className="bg-card rounded-lg p-5">
+                <div className="text-xs font-semibold tracking-wider text-muted-foreground uppercase mb-3">
                   Daily Streak
                 </div>
                 <div className="text-2xl font-bold mb-1">
                   {stats.streakDays} {stats.streakDays === 1 ? 'day' : 'days'}{' '}
                   🔥
                 </div>
-                <div className="text-sm text-[var(--color-subtext)]">
+                <div className="text-sm text-muted-foreground">
                   {stats.streakDays === 0
                     ? 'Start your streak today!'
                     : stats.streakDays === 1
@@ -921,26 +922,26 @@ export default function HomeContent({
                 </div>
               </div>
 
-              <div className="bg-[var(--color-surface)] rounded-[var(--radius-lg)] p-5">
-                <div className="text-xs font-semibold tracking-wider text-[var(--color-subtext)] uppercase mb-3">
+              <div className="bg-card rounded-lg p-5">
+                <div className="text-xs font-semibold tracking-wider text-muted-foreground uppercase mb-3">
                   Average Speed
                 </div>
                 <div className="text-2xl font-bold mb-1">
                   {stats.averageWPM} WPM 🏆
                 </div>
-                <div className="text-sm text-[var(--color-subtext)]">
+                <div className="text-sm text-muted-foreground">
                   Top performer!
                 </div>
               </div>
 
-              <div className="bg-[var(--color-surface)] rounded-[var(--radius-lg)] p-5">
-                <div className="text-xs font-semibold tracking-wider text-[var(--color-subtext)] uppercase mb-3">
+              <div className="bg-card rounded-lg p-5">
+                <div className="text-xs font-semibold tracking-wider text-muted-foreground uppercase mb-3">
                   Total Words Dictated
                 </div>
                 <div className="text-2xl font-bold mb-1">
                   {stats.totalWords.toLocaleString()} 🚀
                 </div>
-                <div className="text-sm text-[var(--color-subtext)]">
+                <div className="text-sm text-muted-foreground">
                   {stats.totalWords < 1000
                     ? 'Getting warmed up!'
                     : stats.totalWords < 5000
@@ -949,14 +950,14 @@ export default function HomeContent({
                 </div>
               </div>
 
-              <div className="bg-[var(--color-surface)] rounded-[var(--radius-lg)] p-5">
-                <div className="text-xs font-semibold tracking-wider text-[var(--color-subtext)] uppercase mb-3">
+              <div className="bg-card rounded-lg p-5">
+                <div className="text-xs font-semibold tracking-wider text-muted-foreground uppercase mb-3">
                   Total Interactions
                 </div>
                 <div className="text-2xl font-bold mb-1">
                   {interactions.length} ⭐
                 </div>
-                <div className="text-sm text-[var(--color-subtext)]">
+                <div className="text-sm text-muted-foreground">
                   {interactions.length < 10
                     ? 'Keep using Ito!'
                     : 'You are almost at flow mastery!'}

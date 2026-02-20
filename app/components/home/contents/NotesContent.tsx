@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useNotesStore } from '../../../store/useNotesStore'
 import { useSettingsStore } from '../../../store/useSettingsStore'
 import Masonry from '@mui/lab/Masonry'
-import { ArrowUp, Grid, Rows, Search, X, Microphone, Refresh } from '@mynaui/icons-react'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { ArrowUp01Icon, GridIcon, Menu01Icon, Search01Icon, Cancel01Icon, Mic01Icon, RefreshIcon } from '@hugeicons/core-free-icons'
 import { Note } from '../../ui/note'
 import { StatusIndicator } from '../../ui/status-indicator'
 import {
@@ -322,22 +323,22 @@ export default function NotesContent() {
     >
       {/* Header */}
       {showSearch ? (
-        <div className="flex items-center gap-4 mb-8 px-4 py-2 bg-[var(--color-surface)] border border-[var(--border)] rounded-xl">
-          <Search className="w-5 h-5 text-[var(--color-subtext)] flex-shrink-0" />
+        <div className="flex items-center gap-4 mb-8 px-4 py-2 bg-card border border-border rounded-xl">
+          <HugeiconsIcon icon={Search01Icon} strokeWidth={2} className="w-5 h-5 text-muted-foreground flex-shrink-0" />
           <input
             ref={searchInputRef}
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search your notes"
-            className="flex-1 text-sm outline-none placeholder-warm-400 bg-transparent"
+            className="flex-1 text-sm outline-none placeholder-muted-foreground bg-transparent"
           />
           <button
             onClick={closeSearch}
-            className="p-1 hover:bg-[var(--color-muted-bg)] rounded transition-colors flex-shrink-0"
+            className="p-1 hover:bg-muted rounded transition-colors flex-shrink-0"
             title="Close search"
           >
-            <X className="w-5 h-5 text-[var(--color-subtext)]" />
+            <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} className="w-5 h-5 text-muted-foreground" />
           </button>
         </div>
       ) : (
@@ -355,20 +356,20 @@ export default function NotesContent() {
             setCreatingNote(true)
           }}
         >
-          <div className="flex items-center justify-between p-5 rounded-[var(--radius-lg)] bg-[var(--color-surface)] border border-[var(--border)] shadow-[var(--shadow-soft)] hover:shadow-soft transition-shadow">
-            <span className="text-[var(--color-subtext)] text-sm">Take a quick note with your voice</span>
+          <div className="flex items-center justify-between p-5 rounded-lg bg-card border border-border shadow-sm hover:shadow-soft transition-shadow">
+            <span className="text-muted-foreground text-sm">Take a quick note with your voice</span>
             <div
-              className="w-12 h-12 rounded-full bg-[var(--primary)] text-white flex items-center justify-center shadow-[0_6px_14px_rgba(31,31,31,0.08)] hover:-translate-y-0.5 hover:shadow-[0_8px_18px_rgba(31,31,31,0.12)] transition-all duration-180 focus:outline-none focus:ring-3 focus:ring-[rgba(31,31,31,0.12)]"
+              className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center shadow-md hover:-translate-y-0.5 hover:shadow-lg transition-all duration-180 focus:outline-none focus:ring-3 focus:ring-ring"
               aria-label="Start voice note"
             >
-              <Microphone className="w-5 h-5 text-white" />
+              <HugeiconsIcon icon={Mic01Icon} strokeWidth={2} className="w-5 h-5 text-white" />
             </div>
           </div>
         </div>
       )}
       {!showSearch && creatingNote && (
         <div
-          className="shadow-lg rounded-[var(--radius-lg)] mb-8 border border-[var(--border)] w-3/5 mx-auto transition-all duration-200 ease-in-out relative"
+          className="shadow-lg rounded-lg mb-8 border border-border w-3/5 mx-auto transition-all duration-200 ease-in-out relative"
           style={{ height: `${containerHeight}px` }}
         >
           <textarea
@@ -384,7 +385,7 @@ export default function NotesContent() {
             <div className="absolute bottom-3 right-3">
               <button
                 onClick={handleAddNote}
-                className="bg-[var(--color-muted-bg)] px-4 py-2 rounded-lg font-semibold hover:bg-warm-200 cursor-pointer"
+                className="bg-muted px-4 py-2 rounded-lg font-semibold hover:bg-muted cursor-pointer"
               >
                 Add note
               </button>
@@ -396,46 +397,46 @@ export default function NotesContent() {
         className={`${viewMode === 'grid' || showSearch ? '' : 'm-auto w-3/5'}`}
       >
         <div className="flex items-center justify-between mb-1">
-          <h2 className="text-xs font-semibold tracking-[1px] uppercase text-[var(--color-subtext)]">
+          <h2 className="text-xs font-semibold tracking-[1px] uppercase text-muted-foreground">
             {showSearch
               ? `Search Results (${filteredNotes.length})`
               : 'Recents'}
           </h2>
           <div className="flex items-center gap-1">
             <button
-              className="p-2 hover:bg-[var(--color-muted-bg)] rounded-lg transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2"
+              className="p-2 hover:bg-muted rounded-lg transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               title="Search"
               aria-label="Search notes"
               onClick={openSearch}
             >
-              <Search className="w-5 h-5 text-[var(--color-subtext)] hover:text-[var(--color-text)]" />
+              <HugeiconsIcon icon={Search01Icon} strokeWidth={2} className="w-5 h-5 text-muted-foreground hover:text-foreground" />
             </button>
             <button
-              className="p-2 hover:bg-[var(--color-muted-bg)] rounded-lg transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2"
+              className="p-2 hover:bg-muted rounded-lg transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               title="List view"
               aria-label="Grid view"
               onClick={toggleViewMode}
             >
               {viewMode === 'grid' ? (
-                <Rows className="w-5 h-5 text-[var(--color-subtext)] hover:text-[var(--color-text)]" />
+                <HugeiconsIcon icon={Menu01Icon} strokeWidth={2} className="w-5 h-5 text-muted-foreground hover:text-foreground" />
               ) : (
-                <Grid className="w-5 h-5 text-[var(--color-subtext)] hover:text-[var(--color-text)]" />
+                <HugeiconsIcon icon={GridIcon} strokeWidth={2} className="w-5 h-5 text-muted-foreground hover:text-foreground" />
               )}
             </button>
             <button
-              className="p-2 hover:bg-[var(--color-muted-bg)] rounded-lg transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2"
+              className="p-2 hover:bg-muted rounded-lg transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               title="Refresh"
               aria-label="Refresh"
               onClick={loadNotes}
             >
-              <Refresh className="w-5 h-5 text-[var(--color-subtext)] hover:text-[var(--color-text)]" />
+              <HugeiconsIcon icon={RefreshIcon} strokeWidth={2} className="w-5 h-5 text-muted-foreground hover:text-foreground" />
             </button>
           </div>
         </div>
-        <div className="w-full h-[1px] bg-[var(--border)] mb-4"></div>
+        <div className="w-full h-[1px] bg-border mb-4"></div>
         {/* Notes Masonry Layout */}
         {(showSearch ? filteredNotes.length === 0 : notes.length === 0) ? (
-          <div className="py-4 text-[var(--color-subtext)]">
+          <div className="py-4 text-muted-foreground">
             {showSearch ? (
               <>
                 <p className="text-sm">No notes found</p>
@@ -500,7 +501,7 @@ export default function NotesContent() {
           className="fixed bottom-8 bg-black text-white right-8 w-8 h-8 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-200 flex items-center justify-center group z-50 cursor-pointer"
           aria-label="Scroll to top"
         >
-          <ArrowUp className="w-4 h-4 font-bold" />
+          <HugeiconsIcon icon={ArrowUp01Icon} strokeWidth={2} className="w-4 h-4 font-bold" />
         </button>
       )}
 
@@ -529,7 +530,7 @@ export default function NotesContent() {
           </div>
           <DialogFooter className="p-4">
             <Button
-              className="bg-[var(--color-muted-bg)] hover:bg-warm-200 text-[var(--color-text)] cursor-pointer"
+              className="bg-muted hover:bg-muted text-foreground cursor-pointer"
               onClick={handleCancelEdit}
             >
               Cancel

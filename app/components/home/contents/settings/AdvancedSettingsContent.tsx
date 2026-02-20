@@ -177,7 +177,7 @@ const SettingInput = memo(function SettingInput({
     <div className="mb-5">
       <label
         htmlFor={config.name}
-        className="block text-sm font-medium text-[var(--color-text)] mb-1 ml-1"
+        className="block text-sm font-medium text-foreground mb-1 ml-1"
       >
         {config.label}
       </label>
@@ -186,7 +186,7 @@ const SettingInput = memo(function SettingInput({
           id={config.name}
           value={value ?? ''}
           onChange={handleChange}
-          className="w-3/4 ml-1 px-3 py-2 border border-[var(--border)] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
+          className="w-3/4 ml-1 px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
           disabled={config.readOnly}
         >
           {config.options?.map(option => (
@@ -202,13 +202,13 @@ const SettingInput = memo(function SettingInput({
           onChange={handleChange}
           onFocus={handleFocus}
           onBlur={handleBlur}
-          className="w-3/4 ml-1 px-3 py-2 border border-[var(--border)] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
+          className="w-3/4 ml-1 px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
           placeholder={config.placeholder}
           maxLength={config.maxLength}
           readOnly={config.readOnly}
         />
       )}
-      <p className="w-3/4 text-[13px] text-[var(--color-subtext)] mt-1 ml-1">
+      <p className="w-3/4 text-[13px] text-muted-foreground mt-1 ml-1">
         {config.description}
       </p>
     </div>
@@ -383,7 +383,7 @@ export default function AdvancedSettingsContent() {
   ])
 
   return (
-    <div className="max-h-[70vh] overflow-y-auto scrollbar-thin scrollbar-thumb-warm-500 scrollbar-track-transparent">
+    <div className="max-h-[70vh] overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent">
       {/* LLM Settings Section */}
       <div className="space-y-6">
         <div>
@@ -391,7 +391,7 @@ export default function AdvancedSettingsContent() {
             <h3 className="text-md font-sans font-normal text-foreground">LLM Settings</h3>
             <button
               onClick={handleRestoreDefaults}
-              className="px-3 py-1 text-sm text-[var(--color-subtext)] hover:text-foreground border border-[var(--border)] rounded-md hover:bg-[var(--color-surface)] transition-colors"
+              className="px-3 py-1 text-sm text-muted-foreground hover:text-foreground border border-border rounded-md hover:bg-card transition-colors"
             >
               Restore Defaults
             </button>
@@ -417,13 +417,13 @@ export default function AdvancedSettingsContent() {
               type="checkbox"
               checked={grammarServiceEnabled}
               onChange={handleGrammarServiceToggle}
-              className="mt-1 h-4 w-4 rounded border-[var(--border)] text-blue-600 focus:ring-blue-500"
+              className="mt-1 h-4 w-4 rounded border-border text-blue-600 focus:ring-blue-500"
             />
             <span>
-              <span className="block text-sm font-medium text-[var(--color-text)]">
+              <span className="block text-sm font-medium text-foreground">
                 Enable Grammar Service
               </span>
-              <span className="block text-[13px] text-[var(--color-subtext)] mt-1">
+              <span className="block text-[13px] text-muted-foreground mt-1">
                 Apply Ito's local grammar adjustments before inserting text.
               </span>
             </span>
@@ -440,13 +440,13 @@ export default function AdvancedSettingsContent() {
                 type="checkbox"
                 checked={macosAccessibilityContextEnabled}
                 onChange={handleMacosAccessibilityContextToggle}
-                className="mt-1 h-4 w-4 rounded border-[var(--border)] text-blue-600 focus:ring-blue-500"
+                className="mt-1 h-4 w-4 rounded border-border text-blue-600 focus:ring-blue-500"
               />
               <span>
-                <span className="block text-sm font-medium text-[var(--color-text)]">
+                <span className="block text-sm font-medium text-foreground">
                   Use Accessibility Context
                 </span>
-                <span className="block text-[13px] text-[var(--color-subtext)] mt-1">
+                <span className="block text-[13px] text-muted-foreground mt-1">
                   Use Accessibility APIs to capture text context around the
                   cursor for improved accuracy.
                 </span>

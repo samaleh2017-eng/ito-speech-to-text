@@ -1,15 +1,15 @@
+import { HugeiconsIcon } from '@hugeicons/react'
 import {
-  Home,
-  BookOpen,
-  FileText,
-  Sparkles,
-  CogFour,
-  InfoCircle,
-  PanelLeft,
-} from '@mynaui/icons-react'
+  Home01Icon,
+  BookOpen01Icon,
+  File01Icon,
+  SparklesIcon,
+  Settings01Icon,
+  InformationCircleIcon,
+  SidebarLeftIcon,
+} from '@hugeicons/core-free-icons'
 import { ItoIcon } from '../icons/ItoIcon'
 import { useMainStore } from '@/app/store/useMainStore'
-import { Dialog, DialogContent } from '../ui/dialog'
 import { useUserMetadataStore } from '@/app/store/useUserMetadataStore'
 import { useOnboardingStore } from '@/app/store/useOnboardingStore'
 import { useAuth } from '@/app/components/auth/useAuth'
@@ -177,13 +177,12 @@ export default function HomeKit() {
   }, [navExpanded])
 
   // Render the appropriate content based on current page
-  const isSettingsOpen = currentPage === 'settings'
-
   const renderContent = () => {
     switch (currentPage) {
       case 'home':
-      case 'settings':
         return <HomeContent isStartingTrial={isStartingTrial} />
+      case 'settings':
+        return <SettingsContent />
       case 'dictionary':
         return <DictionaryContent />
       case 'notes':
@@ -198,7 +197,7 @@ export default function HomeKit() {
   }
 
   return (
-    <div className="flex h-full bg-[var(--background)]">
+    <div className="flex h-full bg-background">
       {/* Sidebar */}
       <div
         className={`${navExpanded ? 'w-56' : 'w-[72px]'} flex flex-col justify-between py-5 px-3 transition-all duration-200 ease-in-out flex-shrink-0`}
@@ -229,42 +228,42 @@ export default function HomeKit() {
           {/* Nav */}
           <div className="flex flex-col gap-1 text-sm">
             <NavItem
-              icon={<Home className="w-5 h-5" />}
+              icon={<HugeiconsIcon icon={Home01Icon} strokeWidth={2} className="w-5 h-5" />}
               label="Home"
               isActive={currentPage === 'home'}
               showText={showText}
               onClick={() => setCurrentPage('home')}
             />
             <NavItem
-              icon={<BookOpen className="w-5 h-5" />}
+              icon={<HugeiconsIcon icon={BookOpen01Icon} strokeWidth={2} className="w-5 h-5" />}
               label="Dictionary"
               isActive={currentPage === 'dictionary'}
               showText={showText}
               onClick={() => setCurrentPage('dictionary')}
             />
             <NavItem
-              icon={<FileText className="w-5 h-5" />}
+              icon={<HugeiconsIcon icon={File01Icon} strokeWidth={2} className="w-5 h-5" />}
               label="Notes"
               isActive={currentPage === 'notes'}
               showText={showText}
               onClick={() => setCurrentPage('notes')}
             />
             <NavItem
-              icon={<Sparkles className="w-5 h-5" />}
+              icon={<HugeiconsIcon icon={SparklesIcon} strokeWidth={2} className="w-5 h-5" />}
               label="App Styling"
               isActive={currentPage === 'app-styling'}
               showText={showText}
               onClick={() => setCurrentPage('app-styling')}
             />
             <NavItem
-              icon={<CogFour className="w-5 h-5" />}
+              icon={<HugeiconsIcon icon={Settings01Icon} strokeWidth={2} className="w-5 h-5" />}
               label="Settings"
               isActive={currentPage === 'settings'}
               showText={showText}
               onClick={() => setCurrentPage('settings')}
             />
             <NavItem
-              icon={<InfoCircle className="w-5 h-5" />}
+              icon={<HugeiconsIcon icon={InformationCircleIcon} strokeWidth={2} className="w-5 h-5" />}
               label="About"
               isActive={currentPage === 'about'}
               showText={showText}
@@ -275,7 +274,7 @@ export default function HomeKit() {
 
         <div className="text-sm">
           <NavItem
-            icon={<PanelLeft className="w-5 h-5" />}
+            icon={<HugeiconsIcon icon={SidebarLeftIcon} strokeWidth={2} className="w-5 h-5" />}
             label={navExpanded ? 'Collapse' : 'Expand'}
             showText={showText}
             onClick={toggleNavExpanded}
@@ -284,21 +283,9 @@ export default function HomeKit() {
       </div>
 
       {/* Main Content - White card with "page in page" effect */}
-      <div className="flex-1 bg-[var(--color-surface)] rounded-[var(--radius-lg)] my-2 mr-2 shadow-[var(--shadow-soft)] overflow-hidden flex flex-col border border-[var(--border)]">
+      <div className="flex-1 bg-card rounded-lg my-2 mr-2 shadow-sm overflow-hidden flex flex-col border border-border">
         <div className="flex-1 overflow-y-auto pt-10">{renderContent()}</div>
       </div>
-
-      <Dialog
-        open={isSettingsOpen}
-        onOpenChange={(open) => { if (!open) setCurrentPage('home') }}
-      >
-        <DialogContent
-          showCloseButton={false}
-          className="max-w-[1100px] w-[95vw] h-[85vh] p-0 overflow-hidden rounded-2xl border border-[#E8E8E8] bg-white shadow-[0_24px_80px_rgba(0,0,0,0.12)]"
-        >
-          <SettingsContent />
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }

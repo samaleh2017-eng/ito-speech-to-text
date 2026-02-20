@@ -5,7 +5,8 @@ import {
 } from '@/app/components/ui/dialog'
 import { Button } from '@/app/components/ui/button'
 import { useAppStylingStore, type MatchType } from '@/app/store/useAppStylingStore'
-import { Globe, Check, Refresh, Search } from '@mynaui/icons-react'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { GlobeIcon, Tick01Icon, RefreshIcon, Search01Icon } from '@hugeicons/core-free-icons'
 import AppWindowIcon from '@/app/components/icons/AppWindowIcon'
 
 function extractDomainFromInput(input: string): string | null {
@@ -114,18 +115,18 @@ export function ManualAddDialog({ open, onOpenChange }: Props) {
               className={`flex-1 flex items-center gap-3 p-3 rounded-lg border-2 transition-all text-left ${
                 selectedType === 'app'
                   ? 'border-blue-500 bg-blue-50'
-                  : 'border-[var(--border)] hover:border-warm-200'
+                  : 'border-border hover:border-muted-foreground/30'
               }`}
             >
-              <div className={`p-2 rounded-lg ${selectedType === 'app' ? 'bg-blue-500 text-white' : 'bg-[var(--color-muted-bg)]'}`}>
+              <div className={`p-2 rounded-lg ${selectedType === 'app' ? 'bg-blue-500 text-white' : 'bg-muted'}`}>
                 <AppWindowIcon className="h-4 w-4" />
               </div>
               <div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-sm font-medium">Application</span>
-                  {selectedType === 'app' && <Check className="h-3.5 w-3.5 text-blue-500" />}
+                  {selectedType === 'app' && <HugeiconsIcon icon={Tick01Icon} strokeWidth={2} className="h-3.5 w-3.5 text-blue-500" />}
                 </div>
-                <p className="text-xs text-[var(--color-subtext)]">Match by app name</p>
+                <p className="text-xs text-muted-foreground">Match by app name</p>
               </div>
             </button>
 
@@ -135,18 +136,18 @@ export function ManualAddDialog({ open, onOpenChange }: Props) {
               className={`flex-1 flex items-center gap-3 p-3 rounded-lg border-2 transition-all text-left ${
                 selectedType === 'domain'
                   ? 'border-blue-500 bg-blue-50'
-                  : 'border-[var(--border)] hover:border-warm-200'
+                  : 'border-border hover:border-muted-foreground/30'
               }`}
             >
-              <div className={`p-2 rounded-lg ${selectedType === 'domain' ? 'bg-blue-500 text-white' : 'bg-[var(--color-muted-bg)]'}`}>
-                <Globe className="h-4 w-4" />
+              <div className={`p-2 rounded-lg ${selectedType === 'domain' ? 'bg-blue-500 text-white' : 'bg-muted'}`}>
+                <HugeiconsIcon icon={GlobeIcon} strokeWidth={2} className="h-4 w-4" />
               </div>
               <div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-sm font-medium">Domain</span>
-                  {selectedType === 'domain' && <Check className="h-3.5 w-3.5 text-blue-500" />}
+                  {selectedType === 'domain' && <HugeiconsIcon icon={Tick01Icon} strokeWidth={2} className="h-3.5 w-3.5 text-blue-500" />}
                 </div>
-                <p className="text-xs text-[var(--color-subtext)]">Match by website</p>
+                <p className="text-xs text-muted-foreground">Match by website</p>
               </div>
             </button>
           </div>
@@ -154,10 +155,10 @@ export function ManualAddDialog({ open, onOpenChange }: Props) {
           {selectedType === 'app' ? (
             <div className="space-y-2">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--color-subtext)]" />
+                <HugeiconsIcon icon={Search01Icon} strokeWidth={2} className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <input
                   type="text"
-                  className="w-full bg-white border border-[var(--border)] rounded-lg pl-9 pr-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
+                  className="w-full bg-background border border-border rounded-lg pl-9 pr-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
                   placeholder="Filter apps..."
                   value={appFilter}
                   onChange={e => setAppFilter(e.target.value)}
@@ -165,21 +166,21 @@ export function ManualAddDialog({ open, onOpenChange }: Props) {
                 <button
                   type="button"
                   onClick={() => fetchInstalledApps()}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-[var(--color-muted-bg)] transition-colors"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-muted transition-colors"
                   title="Refresh app list"
                 >
-                  <Refresh className={`h-3.5 w-3.5 text-[var(--color-subtext)] ${isLoadingApps ? 'animate-spin' : ''}`} />
+                  <HugeiconsIcon icon={RefreshIcon} strokeWidth={2} className={`h-3.5 w-3.5 text-muted-foreground ${isLoadingApps ? 'animate-spin' : ''}`} />
                 </button>
               </div>
 
-              <div className="max-h-48 overflow-y-auto rounded-lg border border-[var(--border)] divide-y divide-[var(--border)]">
+              <div className="max-h-48 overflow-y-auto rounded-lg border border-border divide-y divide-border">
                 {isLoadingApps ? (
-                  <div className="flex items-center justify-center gap-2 py-6 text-[var(--color-subtext)]">
-                    <div className="w-4 h-4 border-2 border-warm-300 border-t-warm-600 rounded-full animate-spin" />
+                  <div className="flex items-center justify-center gap-2 py-6 text-muted-foreground">
+                    <div className="w-4 h-4 border-2 border-muted-foreground/30 border-t-muted-foreground rounded-full animate-spin" />
                     <span className="text-sm">Loading apps...</span>
                   </div>
                 ) : filteredApps.length === 0 ? (
-                  <div className="py-6 text-center text-sm text-[var(--color-subtext)]">
+                  <div className="py-6 text-center text-sm text-muted-foreground">
                     {appFilter ? 'No apps match your filter' : 'No apps found'}
                   </div>
                 ) : (
@@ -191,7 +192,7 @@ export function ManualAddDialog({ open, onOpenChange }: Props) {
                       className={`w-full text-left px-3 py-2 text-sm transition-colors ${
                         selectedApp === appName
                           ? 'bg-blue-50 text-blue-700 font-medium'
-                          : 'hover:bg-[var(--color-surface)]'
+                          : 'hover:bg-card'
                       }`}
                     >
                       {appName}
@@ -199,13 +200,13 @@ export function ManualAddDialog({ open, onOpenChange }: Props) {
                   ))
                 )}
               </div>
-              <p className="text-xs text-[var(--color-subtext)]">Apps installed on your computer</p>
+              <p className="text-xs text-muted-foreground">Apps installed on your computer</p>
             </div>
           ) : (
             <div className="space-y-1.5">
               <input
                 type="text"
-                className="w-full bg-white border border-[var(--border)] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent"
+                className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
                 placeholder="e.g. docs.google.com or paste a full URL"
                 value={domainInput}
                 onChange={e => setDomainInput(e.target.value)}
@@ -213,7 +214,7 @@ export function ManualAddDialog({ open, onOpenChange }: Props) {
               {domainInput.trim() && (
                 extractedDomain ? (
                   <p className="text-xs text-green-600 flex items-center gap-1">
-                    <Check className="h-3 w-3" />
+                    <HugeiconsIcon icon={Tick01Icon} strokeWidth={2} className="h-3 w-3" />
                     Will match: <span className="font-medium">{extractedDomain}</span>
                   </p>
                 ) : (

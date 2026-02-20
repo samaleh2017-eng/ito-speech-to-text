@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowUp, Pencil, Trash, Search, Sort, Refresh } from '@mynaui/icons-react'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { ArrowUp01Icon, Edit01Icon, Delete01Icon, Search01Icon, SortByDown01Icon, RefreshIcon } from '@hugeicons/core-free-icons'
 import { Tooltip, TooltipTrigger, TooltipContent } from '../../ui/tooltip'
 import { Switch } from '../../ui/switch'
 import { StatusIndicator } from '../../ui/status-indicator'
@@ -305,16 +306,16 @@ export default function DictionaryContent() {
         <h1 className="text-[30px] font-semibold tracking-tight font-sans">Dictionary</h1>
         <button
           onClick={handleAddNew}
-          className="bg-foreground text-white px-5 py-2.5 rounded-[var(--radius-lg)] text-sm font-medium hover:bg-warm-800 transition-colors cursor-pointer"
+          className="bg-foreground text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-foreground/90 transition-colors cursor-pointer"
         >
           Add new
         </button>
       </div>
 
-      <div className="flex items-center justify-end mt-6 mb-4 border-b border-[var(--border)] pb-3">
+      <div className="flex items-center justify-end mt-6 mb-4 border-b border-border pb-3">
         <div className="flex items-center gap-3">
           <button
-            className="text-[var(--color-subtext)] hover:text-[var(--color-text)] transition-colors cursor-pointer"
+            className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             title="Search"
             aria-label="Search dictionary"
             onClick={() => {
@@ -322,23 +323,23 @@ export default function DictionaryContent() {
               setShowSearch(!showSearch)
             }}
           >
-            <Search className="w-4 h-4" />
+            <HugeiconsIcon icon={Search01Icon} strokeWidth={2} className="w-4 h-4" />
           </button>
           <button
-            className="text-[var(--color-subtext)] hover:text-[var(--color-text)] transition-colors cursor-pointer"
+            className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             title="Sort"
             aria-label="Sort entries"
             onClick={toggleSort}
           >
-            <Sort className="w-4 h-4" />
+            <HugeiconsIcon icon={SortByDown01Icon} strokeWidth={2} className="w-4 h-4" />
           </button>
           <button
-            className="text-[var(--color-subtext)] hover:text-[var(--color-text)] transition-colors cursor-pointer"
+            className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             title="Refresh"
             aria-label="Refresh entries"
             onClick={refreshEntries}
           >
-            <Refresh className="w-4 h-4" />
+            <HugeiconsIcon icon={RefreshIcon} strokeWidth={2} className="w-4 h-4" />
           </button>
         </div>
       </div>
@@ -350,14 +351,14 @@ export default function DictionaryContent() {
             placeholder="Search dictionary..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-2.5 border border-[var(--border)] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)] bg-transparent placeholder-warm-400"
+            className="w-full px-4 py-2.5 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-transparent placeholder-muted-foreground"
             autoFocus
           />
         </div>
       )}
 
       {noEntries && (
-        <div className="text-[var(--color-subtext)]">
+        <div className="text-muted-foreground">
           <p className="text-sm">No entries yet</p>
           <p className="text-xs mt-1">
             Dictionary entries make the transcription more accurate
@@ -365,16 +366,16 @@ export default function DictionaryContent() {
         </div>
       )}
       {!noEntries && filteredEntries.length === 0 && (
-        <div className="text-[var(--color-subtext)]">
+        <div className="text-muted-foreground">
           <p className="text-sm">No matching entries</p>
         </div>
       )}
       {!noEntries && filteredEntries.length > 0 && (
-        <div className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-white overflow-hidden divide-y divide-[var(--border)] shadow-[var(--shadow-card)]">
+        <div className="rounded-lg border border-border bg-background overflow-hidden divide-y divide-border shadow-md">
           {filteredEntries.map((entry, index) => (
             <div
               key={entry.id}
-              className="flex items-center justify-between px-4 py-4 gap-10 hover:bg-[var(--color-muted-bg)] transition-colors duration-200 group"
+              className="flex items-center justify-between px-4 py-4 gap-10 hover:bg-muted transition-colors duration-200 group"
               onMouseEnter={() => setHoveredRow(index)}
               onMouseLeave={() => setHoveredRow(null)}
             >
@@ -392,10 +393,10 @@ export default function DictionaryContent() {
                   <TooltipTrigger asChild>
                     <button
                       onClick={() => handleEdit(entry.id)}
-                      className="p-1.5 hover:bg-[var(--color-muted-bg)] rounded transition-colors cursor-pointer"
+                      className="p-1.5 hover:bg-muted rounded transition-colors cursor-pointer"
                       aria-label="Edit entry"
                     >
-                      <Pencil className="w-4 h-4 text-[var(--color-text)]" />
+                      <HugeiconsIcon icon={Edit01Icon} strokeWidth={2} className="w-4 h-4 text-foreground" />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="top" sideOffset={5}>
@@ -410,7 +411,7 @@ export default function DictionaryContent() {
                       className="p-1.5 hover:bg-red-100 rounded transition-colors cursor-pointer"
                       aria-label="Delete entry"
                     >
-                      <Trash className="w-4 h-4 text-[var(--color-text)] hover:text-red-600" />
+                      <HugeiconsIcon icon={Delete01Icon} strokeWidth={2} className="w-4 h-4 text-foreground hover:text-red-600" />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="top" sideOffset={5}>
@@ -430,7 +431,7 @@ export default function DictionaryContent() {
           className="fixed bottom-8 bg-black text-white right-8 w-8 h-8 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-200 flex items-center justify-center group z-50 cursor-pointer"
           aria-label="Scroll to top"
         >
-          <ArrowUp className="w-4 h-4 font-bold" />
+          <HugeiconsIcon icon={ArrowUp01Icon} strokeWidth={2} className="w-4 h-4 font-bold" />
         </button>
       )}
 
@@ -476,7 +477,7 @@ export default function DictionaryContent() {
                 value={editContent}
                 onChange={e => setEditContent(e.target.value)}
                 onKeyDown={handleEditKeyDown}
-                className="w-full p-4 rounded-xl resize-none focus:outline-none border border-[var(--border)] focus:ring-2 focus:ring-[var(--ring)]"
+                className="w-full p-4 rounded-xl resize-none focus:outline-none border border-border focus:ring-2 focus:ring-ring"
                 placeholder="Enter dictionary entry..."
               />
             ) : (
@@ -488,16 +489,16 @@ export default function DictionaryContent() {
                     value={editFrom}
                     onChange={e => setEditFrom(e.target.value)}
                     onKeyDown={handleEditKeyDown}
-                    className="flex-1 p-4 rounded-xl resize-none focus:outline-none border border-[var(--border)] focus:ring-2 focus:ring-[var(--ring)]"
+                    className="flex-1 p-4 rounded-xl resize-none focus:outline-none border border-border focus:ring-2 focus:ring-ring"
                     placeholder="Misspelling"
                   />
-                  <span className="text-[var(--color-subtext)]">→</span>
+                  <span className="text-muted-foreground">→</span>
                   <input
                     type="text"
                     value={editTo}
                     onChange={e => setEditTo(e.target.value)}
                     onKeyDown={handleEditKeyDown}
-                    className="flex-1 p-4 rounded-xl resize-none focus:outline-none border border-[var(--border)] focus:ring-2 focus:ring-[var(--ring)]"
+                    className="flex-1 p-4 rounded-xl resize-none focus:outline-none border border-border focus:ring-2 focus:ring-ring"
                     placeholder="Correct spelling"
                   />
                 </div>
@@ -506,7 +507,7 @@ export default function DictionaryContent() {
           </div>
           <DialogFooter className="p-4">
             <Button
-              className="bg-[var(--color-muted-bg)] hover:bg-warm-200 text-[var(--color-text)] cursor-pointer"
+              className="bg-muted hover:bg-muted text-foreground cursor-pointer"
               onClick={handleCancelEdit}
             >
               Cancel
@@ -556,7 +557,7 @@ export default function DictionaryContent() {
                 value={newEntryContent}
                 onChange={e => setNewEntryContent(e.target.value)}
                 onKeyDown={handleAddKeyDown}
-                className="w-full p-4 rounded-xl resize-none focus:outline-none border border-[var(--border)] focus:ring-2 focus:ring-[var(--ring)]"
+                className="w-full p-4 rounded-xl resize-none focus:outline-none border border-border focus:ring-2 focus:ring-ring"
                 placeholder="Enter dictionary entry..."
               />
             ) : (
@@ -568,16 +569,16 @@ export default function DictionaryContent() {
                     value={newFrom}
                     onChange={e => setNewFrom(e.target.value)}
                     onKeyDown={handleAddKeyDown}
-                    className="flex-1 p-4 rounded-xl resize-none focus:outline-none border border-[var(--border)] focus:ring-2 focus:ring-[var(--ring)]"
+                    className="flex-1 p-4 rounded-xl resize-none focus:outline-none border border-border focus:ring-2 focus:ring-ring"
                     placeholder="Misspelling"
                   />
-                  <span className="text-[var(--color-subtext)]">→</span>
+                  <span className="text-muted-foreground">→</span>
                   <input
                     type="text"
                     value={newTo}
                     onChange={e => setNewTo(e.target.value)}
                     onKeyDown={handleAddKeyDown}
-                    className="flex-1 p-4 rounded-xl resize-none focus:outline-none border border-[var(--border)] focus:ring-2 focus:ring-[var(--ring)]"
+                    className="flex-1 p-4 rounded-xl resize-none focus:outline-none border border-border focus:ring-2 focus:ring-ring"
                     placeholder="Correct spelling"
                   />
                 </div>
@@ -586,7 +587,7 @@ export default function DictionaryContent() {
           </div>
           <DialogFooter className="p-4">
             <Button
-              className="bg-[var(--color-muted-bg)] hover:bg-warm-200 text-[var(--color-text)] cursor-pointer"
+              className="bg-muted hover:bg-muted text-foreground cursor-pointer"
               onClick={handleCancelNew}
             >
               Cancel

@@ -1,11 +1,12 @@
 import { ReactNode, useState } from 'react'
 import { Switch } from '@/app/components/ui/switch'
+import { Button } from '@/app/components/ui/button'
 import { useSettingsStore } from '@/app/store/useSettingsStore'
 import { useWindowContext } from '@/app/components/window/WindowContext'
 
 function SettingRow({ children, last }: { children: ReactNode; last?: boolean }) {
   return (
-    <div className={`flex items-center justify-between py-4 px-5 ${!last ? 'border-b border-[#EBEBEB]' : ''}`}>
+    <div className={`flex items-center justify-between py-4 px-5 ${!last ? 'border-b border-border' : ''}`}>
       {children}
     </div>
   )
@@ -72,11 +73,11 @@ export default function GeneralSettingsContent() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl bg-[#F2F2F2]">
+      <div className="rounded-xl bg-muted">
         <SettingRow>
           <div>
-            <div className="text-sm font-medium text-[#1f1f1f]">Share analytics</div>
-            <div className="text-[13px] text-[#888]">
+            <div className="text-sm font-medium text-foreground">Share analytics</div>
+            <div className="text-[13px] text-muted-foreground">
               Share anonymous usage data to help us improve Ito.
             </div>
           </div>
@@ -87,8 +88,8 @@ export default function GeneralSettingsContent() {
         </SettingRow>
         <SettingRow>
           <div>
-            <div className="text-sm font-medium text-[#1f1f1f]">Launch at Login</div>
-            <div className="text-[13px] text-[#888]">
+            <div className="text-sm font-medium text-foreground">Launch at Login</div>
+            <div className="text-[13px] text-muted-foreground">
               Open Ito automatically when your computer starts.
             </div>
           </div>
@@ -99,10 +100,10 @@ export default function GeneralSettingsContent() {
         </SettingRow>
         <SettingRow last={!isDarwin}>
           <div>
-            <div className="text-sm font-medium text-[#1f1f1f]">
+            <div className="text-sm font-medium text-foreground">
               Show Ito bar at all times
             </div>
-            <div className="text-[13px] text-[#888]">
+            <div className="text-[13px] text-muted-foreground">
               Show the Ito bar at all times.
             </div>
           </div>
@@ -114,8 +115,8 @@ export default function GeneralSettingsContent() {
         {isDarwin && (
           <SettingRow last>
             <div>
-              <div className="text-sm font-medium text-[#1f1f1f]">Show app in dock</div>
-              <div className="text-[13px] text-[#888]">
+              <div className="text-sm font-medium text-foreground">Show app in dock</div>
+              <div className="text-[13px] text-muted-foreground">
                 Show the Ito app in the dock for quick access.
               </div>
             </div>
@@ -127,39 +128,39 @@ export default function GeneralSettingsContent() {
         )}
       </div>
 
-      <div className="text-xs font-semibold tracking-[1.5px] text-[#999] uppercase">
+      <div className="text-xs font-semibold tracking-[1.5px] text-muted-foreground uppercase">
         Log Management
       </div>
-      <div className="rounded-xl bg-[#F2F2F2]">
+      <div className="rounded-xl bg-muted">
         <SettingRow>
           <div>
-            <div className="text-sm font-medium text-[#1f1f1f]">Download Logs</div>
-            <div className="text-[13px] text-[#888]">
+            <div className="text-sm font-medium text-foreground">Download Logs</div>
+            <div className="text-[13px] text-muted-foreground">
               Export your local logs to a file for troubleshooting.
             </div>
           </div>
-          <button
-            className="bg-[#D9D9DE] border-0 text-[#1f1f1f] hover:bg-[#CDCDD2] rounded-lg text-sm px-5 py-2.5 cursor-pointer"
+          <Button
+            variant="secondary"
             onClick={handleDownloadLogs}
             disabled={isDownloading}
           >
             {isDownloading ? 'Downloading...' : 'Download'}
-          </button>
+          </Button>
         </SettingRow>
         <SettingRow last>
           <div>
-            <div className="text-sm font-medium text-[#1f1f1f]">Clear Logs</div>
-            <div className="text-[13px] text-[#888]">
+            <div className="text-sm font-medium text-foreground">Clear Logs</div>
+            <div className="text-[13px] text-muted-foreground">
               Permanently delete all local logs from your device.
             </div>
           </div>
-          <button
-            className="bg-[#D9D9DE] border-0 text-[#1f1f1f] hover:bg-[#CDCDD2] rounded-lg text-sm px-5 py-2.5 cursor-pointer"
+          <Button
+            variant="secondary"
             onClick={handleClearLogs}
             disabled={isClearing}
           >
             {isClearing ? 'Clearing...' : 'Clear'}
-          </button>
+          </Button>
         </SettingRow>
       </div>
     </div>

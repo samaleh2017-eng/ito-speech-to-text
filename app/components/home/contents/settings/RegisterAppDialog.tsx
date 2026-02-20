@@ -13,7 +13,8 @@ import {
   type MatchType,
   type DetectedContext,
 } from '@/app/store/useAppStylingStore'
-import { Globe, Check } from '@mynaui/icons-react'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { GlobeIcon, Tick01Icon } from '@hugeicons/core-free-icons'
 import AppWindowIcon from '@/app/components/icons/AppWindowIcon'
 
 type Props = {
@@ -74,12 +75,12 @@ export function RegisterAppDialog({ open, onOpenChange, context }: Props) {
             className={`w-full flex items-start gap-3 p-4 rounded-lg border-2 transition-all text-left ${
               selectedType === 'app'
                 ? 'border-blue-500 bg-blue-50'
-                : 'border-[var(--border)] hover:border-warm-200'
+                : 'border-border hover:border-muted-foreground/30'
             }`}
           >
             <div
               className={`mt-0.5 p-2 rounded-lg ${
-                selectedType === 'app' ? 'bg-blue-500 text-white' : 'bg-[var(--color-muted-bg)]'
+                selectedType === 'app' ? 'bg-blue-500 text-white' : 'bg-muted'
               }`}
             >
               <AppWindowIcon className="h-5 w-5" />
@@ -88,10 +89,10 @@ export function RegisterAppDialog({ open, onOpenChange, context }: Props) {
               <div className="flex items-center gap-2">
                 <span className="font-medium">Application</span>
                 {selectedType === 'app' && (
-                  <Check className="h-4 w-4 text-blue-500" />
+                  <HugeiconsIcon icon={Tick01Icon} strokeWidth={2} className="h-4 w-4 text-blue-500" />
                 )}
               </div>
-              <p className="text-sm text-[var(--color-subtext)] mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 Match any window from this app
               </p>
               <p className="text-sm font-medium text-foreground mt-2 truncate">
@@ -106,29 +107,29 @@ export function RegisterAppDialog({ open, onOpenChange, context }: Props) {
             disabled={!hasDomain}
             className={`w-full flex items-start gap-3 p-4 rounded-lg border-2 transition-all text-left ${
               !hasDomain
-                ? 'border-[var(--border)] bg-[var(--color-surface)] opacity-50 cursor-not-allowed'
+                ? 'border-border bg-card opacity-50 cursor-not-allowed'
                 : selectedType === 'domain'
                   ? 'border-blue-500 bg-blue-50'
-                  : 'border-[var(--border)] hover:border-warm-200'
+                  : 'border-border hover:border-muted-foreground/30'
             }`}
           >
             <div
               className={`mt-0.5 p-2 rounded-lg ${
                 selectedType === 'domain' && hasDomain
                   ? 'bg-blue-500 text-white'
-                  : 'bg-[var(--color-muted-bg)]'
+                  : 'bg-muted'
               }`}
             >
-              <Globe className="h-5 w-5" />
+              <HugeiconsIcon icon={GlobeIcon} strokeWidth={2} className="h-5 w-5" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <span className="font-medium">Domain</span>
                 {selectedType === 'domain' && hasDomain && (
-                  <Check className="h-4 w-4 text-blue-500" />
+                  <HugeiconsIcon icon={Tick01Icon} strokeWidth={2} className="h-4 w-4 text-blue-500" />
                 )}
               </div>
-              <p className="text-sm text-[var(--color-subtext)] mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 {hasDomain
                   ? 'Match when browsing this website'
                   : 'Not available - no browser URL detected'}

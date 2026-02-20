@@ -8,11 +8,11 @@ export default function KeyboardSettingsContent() {
   const editShortcuts = getItoModeShortcuts(ItoMode.EDIT)
 
   return (
-    <div className="rounded-xl bg-[#F2F2F2]">
-      <div className="flex gap-4 justify-between py-4 px-5 border-b border-[#EBEBEB]">
+    <div className="rounded-xl bg-muted">
+      <div className="flex gap-4 justify-between py-4 px-5 border-b border-border">
         <div className="w-1/3">
-          <div className="text-sm font-medium text-[#1f1f1f] mb-2">Keyboard Shortcut</div>
-          <div className="text-[13px] text-[#888]">
+          <div className="text-sm font-medium text-foreground mb-2">Keyboard Shortcut</div>
+          <div className="text-[13px] text-muted-foreground">
             Set the keyboard shortcut to activate Ito. Press the keys you
             want to use for your shortcut.
           </div>
@@ -24,10 +24,10 @@ export default function KeyboardSettingsContent() {
       </div>
       <div className="flex gap-4 justify-between py-4 px-5">
         <div className="w-1/3">
-          <div className="text-sm font-medium text-[#1f1f1f] mb-2">
+          <div className="text-sm font-medium text-foreground mb-2">
             Intelligent Mode Shortcut
           </div>
-          <div className="text-[13px] text-[#888]">
+          <div className="text-[13px] text-muted-foreground">
             Set the shortcut to activate Intelligent Mode. Press your
             hotkey, speak to Ito, and the LLM's output is pasted into your
             text box.
