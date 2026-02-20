@@ -25,7 +25,8 @@ import AboutContent from './contents/AboutContent'
 import AppStylingContent from './contents/AppStylingContent'
 
 export default function HomeKit() {
-  const { navExpanded, currentPage, setCurrentPage, toggleNavExpanded } = useMainStore()
+  const { navExpanded, currentPage, setCurrentPage, toggleNavExpanded } =
+    useMainStore()
   const { metadata } = useUserMetadataStore()
   const { onboardingCompleted } = useOnboardingStore()
   const { isAuthenticated, user } = useAuth()
@@ -197,94 +198,150 @@ export default function HomeKit() {
   }
 
   return (
-    <div className="flex h-full bg-background">
-      {/* Sidebar */}
+    <div className="relative h-full overflow-hidden bg-background">
       <div
-        className={`${navExpanded ? 'w-56' : 'w-[72px]'} flex flex-col justify-between py-5 px-3 transition-all duration-200 ease-in-out flex-shrink-0`}
-        style={{ willChange: isTransitioning ? 'width' : 'auto' }}
-      >
-        <div>
-          {/* Logo and Plan */}
-          <div className="flex items-center px-3 mb-10">
-            <div className="w-6 flex items-center justify-center flex-shrink-0">
-              <ItoIcon
-                className="w-6 text-foreground"
-                style={{ height: '32px' }}
+        aria-hidden="true"
+        className="pointer-events-none absolute -inset-[160px] opacity-70 dark:opacity-80 [background:radial-gradient(900px_circle_at_20%_0%,rgba(59,130,246,0.22),transparent_55%),radial-gradient(700px_circle_at_90%_10%,rgba(168,85,247,0.18),transparent_60%),radial-gradient(900px_circle_at_55%_110%,rgba(16,185,129,0.14),transparent_55%)]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-[0.35] dark:opacity-[0.22] [background-image:linear-gradient(to_right,rgba(0,0,0,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.06)_1px,transparent_1px)] dark:[background-image:linear-gradient(to_right,rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.06)_1px,transparent_1px)] [background-size:44px_44px] [mask-image:radial-gradient(ellipse_at_center,black_42%,transparent_75%)]"
+      />
+
+      <div className="relative z-10 flex h-full gap-3 p-3">
+        {/* Sidebar */}
+        <div
+          className={`${navExpanded ? 'w-60 px-3' : 'w-[76px] px-2'} flex flex-col justify-between rounded-2xl border border-[color:var(--sidebar-border)] bg-[var(--sidebar-background)] backdrop-blur-xl shadow-soft py-5 transition-all duration-200 ease-in-out flex-shrink-0`}
+          style={{ willChange: isTransitioning ? 'width' : 'auto' }}
+        >
+          <div>
+            {/* Logo and Plan */}
+            <div className="flex items-center px-3 mb-10">
+              <div className="w-6 flex items-center justify-center flex-shrink-0">
+                <ItoIcon
+                  className="w-6 text-[var(--sidebar-foreground)]"
+                  style={{ height: '32px' }}
+                />
+              </div>
+              <span
+                className={`text-2xl font-bold font-sans text-[var(--sidebar-foreground)] transition-opacity duration-100 ${showText ? 'opacity-100' : 'opacity-0'} ${showText ? 'ml-3' : 'w-0 overflow-hidden'}`}
+              >
+                ito
+              </span>
+              {isPro && showText && (
+                <span
+                  className={`text-xs font-semibold px-2 py-0.5 rounded-md bg-[linear-gradient(135deg,var(--sidebar-active-from),var(--sidebar-active-to))] text-[var(--sidebar-active-text)] shadow-sm transition-opacity duration-100 ${showText ? 'opacity-100' : 'opacity-0'} ${showText ? 'ml-2' : 'w-0 overflow-hidden'}`}
+                >
+                  PRO
+                </span>
+              )}
+            </div>
+            {/* Nav */}
+            <div className="flex flex-col gap-1 text-sm">
+              <NavItem
+                icon={
+                  <HugeiconsIcon
+                    icon={Home01Icon}
+                    strokeWidth={2}
+                    className="w-5 h-5"
+                  />
+                }
+                label="Home"
+                isActive={currentPage === 'home'}
+                showText={showText}
+                onClick={() => setCurrentPage('home')}
+              />
+              <NavItem
+                icon={
+                  <HugeiconsIcon
+                    icon={BookOpen01Icon}
+                    strokeWidth={2}
+                    className="w-5 h-5"
+                  />
+                }
+                label="Dictionary"
+                isActive={currentPage === 'dictionary'}
+                showText={showText}
+                onClick={() => setCurrentPage('dictionary')}
+              />
+              <NavItem
+                icon={
+                  <HugeiconsIcon
+                    icon={File01Icon}
+                    strokeWidth={2}
+                    className="w-5 h-5"
+                  />
+                }
+                label="Notes"
+                isActive={currentPage === 'notes'}
+                showText={showText}
+                onClick={() => setCurrentPage('notes')}
+              />
+              <NavItem
+                icon={
+                  <HugeiconsIcon
+                    icon={SparklesIcon}
+                    strokeWidth={2}
+                    className="w-5 h-5"
+                  />
+                }
+                label="App Styling"
+                isActive={currentPage === 'app-styling'}
+                showText={showText}
+                onClick={() => setCurrentPage('app-styling')}
+              />
+              <NavItem
+                icon={
+                  <HugeiconsIcon
+                    icon={Settings01Icon}
+                    strokeWidth={2}
+                    className="w-5 h-5"
+                  />
+                }
+                label="Settings"
+                isActive={currentPage === 'settings'}
+                showText={showText}
+                onClick={() => setCurrentPage('settings')}
+              />
+              <NavItem
+                icon={
+                  <HugeiconsIcon
+                    icon={InformationCircleIcon}
+                    strokeWidth={2}
+                    className="w-5 h-5"
+                  />
+                }
+                label="About"
+                isActive={currentPage === 'about'}
+                showText={showText}
+                onClick={() => setCurrentPage('about')}
               />
             </div>
-            <span
-              className={`text-2xl font-bold font-sans transition-opacity duration-100 ${showText ? 'opacity-100' : 'opacity-0'} ${showText ? 'ml-3' : 'w-0 overflow-hidden'}`}
-            >
-              ito
-            </span>
-            {isPro && showText && (
-              <span
-                className={`text-xs font-semibold px-2 py-0.5 rounded-md bg-gradient-to-r from-purple-500 to-pink-500 text-white transition-opacity duration-100 ${showText ? 'opacity-100' : 'opacity-0'} ${showText ? 'ml-2' : 'w-0 overflow-hidden'}`}
-              >
-                PRO
-              </span>
-            )}
           </div>
-          {/* Nav */}
-          <div className="flex flex-col gap-1 text-sm">
-            <NavItem
-              icon={<HugeiconsIcon icon={Home01Icon} strokeWidth={2} className="w-5 h-5" />}
-              label="Home"
-              isActive={currentPage === 'home'}
-              showText={showText}
-              onClick={() => setCurrentPage('home')}
-            />
-            <NavItem
-              icon={<HugeiconsIcon icon={BookOpen01Icon} strokeWidth={2} className="w-5 h-5" />}
-              label="Dictionary"
-              isActive={currentPage === 'dictionary'}
-              showText={showText}
-              onClick={() => setCurrentPage('dictionary')}
-            />
-            <NavItem
-              icon={<HugeiconsIcon icon={File01Icon} strokeWidth={2} className="w-5 h-5" />}
-              label="Notes"
-              isActive={currentPage === 'notes'}
-              showText={showText}
-              onClick={() => setCurrentPage('notes')}
-            />
-            <NavItem
-              icon={<HugeiconsIcon icon={SparklesIcon} strokeWidth={2} className="w-5 h-5" />}
-              label="App Styling"
-              isActive={currentPage === 'app-styling'}
-              showText={showText}
-              onClick={() => setCurrentPage('app-styling')}
-            />
-            <NavItem
-              icon={<HugeiconsIcon icon={Settings01Icon} strokeWidth={2} className="w-5 h-5" />}
-              label="Settings"
-              isActive={currentPage === 'settings'}
-              showText={showText}
-              onClick={() => setCurrentPage('settings')}
-            />
-            <NavItem
-              icon={<HugeiconsIcon icon={InformationCircleIcon} strokeWidth={2} className="w-5 h-5" />}
-              label="About"
-              isActive={currentPage === 'about'}
-              showText={showText}
-              onClick={() => setCurrentPage('about')}
-            />
+
+          <div>
+            <div className="mx-3 mb-3 h-px bg-[color:var(--sidebar-border)]" />
+            <div className="text-sm">
+              <NavItem
+                icon={
+                  <HugeiconsIcon
+                    icon={SidebarLeftIcon}
+                    strokeWidth={2}
+                    className="w-5 h-5"
+                  />
+                }
+                label={navExpanded ? 'Collapse' : 'Expand'}
+                showText={showText}
+                onClick={toggleNavExpanded}
+              />
+            </div>
           </div>
         </div>
 
-        <div className="text-sm">
-          <NavItem
-            icon={<HugeiconsIcon icon={SidebarLeftIcon} strokeWidth={2} className="w-5 h-5" />}
-            label={navExpanded ? 'Collapse' : 'Expand'}
-            showText={showText}
-            onClick={toggleNavExpanded}
-          />
+        {/* Main Content */}
+        <div className="flex-1 bg-card/90 rounded-2xl shadow-soft overflow-hidden flex flex-col border border-border/60 backdrop-blur-xl">
+          <div className="flex-1 overflow-y-auto pt-10">{renderContent()}</div>
         </div>
-      </div>
-
-      {/* Main Content - White card with "page in page" effect */}
-      <div className="flex-1 bg-card rounded-lg my-2 mr-2 shadow-sm overflow-hidden flex flex-col border border-border">
-        <div className="flex-1 overflow-y-auto pt-10">{renderContent()}</div>
       </div>
     </div>
   )

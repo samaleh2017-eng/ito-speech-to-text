@@ -18,11 +18,13 @@ export const NavItem = React.memo(function NavItem({
   onClick,
 }: NavItemProps) {
   const navContent = (
-    <div
-      className={`flex items-center px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-180 ${
+    <button
+      type="button"
+      aria-current={isActive ? 'page' : undefined}
+      className={`group flex w-full items-center px-3 py-2.5 rounded-xl text-left cursor-pointer transition-all duration-180 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--sidebar-ring)] active:scale-[0.99] ${
         isActive
-          ? 'bg-[var(--sidebar-active)] text-[var(--sidebar-active-text)] font-medium shadow-sm'
-          : 'text-[var(--foreground)] hover:bg-[var(--muted)]'
+          ? 'bg-[linear-gradient(135deg,var(--sidebar-active-from),var(--sidebar-active-to))] text-[var(--sidebar-active-text)] font-medium shadow-sm'
+          : 'text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-hover)]'
       }`}
       onClick={onClick}
     >
@@ -34,7 +36,7 @@ export const NavItem = React.memo(function NavItem({
       >
         {label}
       </span>
-    </div>
+    </button>
   )
 
   if (!showText) {
