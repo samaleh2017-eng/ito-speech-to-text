@@ -14,7 +14,7 @@ export const AsrModelSchema = z
 
 export const AsrProviderSchema = z.preprocess(
   val => (typeof val === 'string' ? val.trim() : val),
-  z.enum([ClientProvider.GROQ, ClientProvider.GEMINI]),
+  z.enum([ClientProvider.GROQ, ClientProvider.GEMINI, ClientProvider.CARTESIA]),
 )
 
 export const AsrPromptSchema = z.string().trim().max(100, 'ASR prompt too long')

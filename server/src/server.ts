@@ -10,6 +10,7 @@ import { createValidationInterceptor } from './services/validationInterceptor.js
 import { renderCallbackPage } from './utils/renderCallback.js'
 import 'dotenv/config'
 import { registerLoggingRoutes } from './services/logging.js'
+import { registerSTTStreamRoute } from './services/stt/sttStreamRoute.js'
 import { IpLinkRepository } from './db/repo.js'
 import { registerTrialRoutes } from './services/trial.js'
 import {
@@ -41,7 +42,8 @@ export const startServer = async () => {
         request.url.startsWith('/stripe/webhook') ||
         request.url.startsWith('/billing/success') ||
         request.url.startsWith('/billing/cancel') ||
-        request.url.startsWith('/link/')
+        request.url.startsWith('/link/') ||
+        request.url.startsWith('/stt/stream')
       ) {
         return
       }
@@ -165,6 +167,7 @@ export const startServer = async () => {
 
     await registerTrialRoutes(fastify, { requireAuth: REQUIRE_AUTH })
     await registerBillingRoutes(fastify, { requireAuth: REQUIRE_AUTH })
+    await registerSTTStreamRoute(fastify, { requireAuth: REQUIRE_AUTH })
   })
 
   connectRpcServer.setErrorHandler((error, _, reply) => {

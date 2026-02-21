@@ -4,6 +4,7 @@ import {
   IPC_EVENTS,
   RecordingStatePayload,
   ProcessingStatePayload,
+  StreamingTextPayload,
 } from '../types/ipc'
 
 /**
@@ -41,9 +42,13 @@ export class RecordingStateNotifier {
     })
   }
 
+  public notifyStreamingText(payload: StreamingTextPayload) {
+    this.sendToWindows(IPC_EVENTS.STREAMING_TEXT_UPDATE, payload)
+  }
+
   private sendToWindows(
     event: string,
-    payload: RecordingStatePayload | ProcessingStatePayload,
+    payload: RecordingStatePayload | ProcessingStatePayload | StreamingTextPayload,
   ) {
     // Send to pill window
     getPillWindow()?.webContents.send(event, payload)

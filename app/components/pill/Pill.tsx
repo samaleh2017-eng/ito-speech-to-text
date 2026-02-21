@@ -15,6 +15,7 @@ import { soundPlayer } from '@/app/utils/soundPlayer'
 import type {
   RecordingStatePayload,
   ProcessingStatePayload,
+  StreamingTextPayload,
 } from '@/lib/types/ipc'
 import type { AppTarget } from '@/app/store/useAppStylingStore'
 
@@ -109,8 +110,11 @@ const Pill = () => {
   const [volumeHistory, setVolumeHistory] = useState<number[]>([])
   const [appTarget, setAppTarget] = useState<AppTarget | null>(null)
   const hasBeenShownRef = useRef(false)
+  const [streamingText, setStreamingText] = useState('')
+  const [streamingPhase, setStreamingPhase] = useState<string | null>(null)
+  const streamingTextRef = useRef('')
+  const lastStreamingUpdateRef = useRef(0)
 
-  const notchPath = useMemo(() => buildNotchPath(PILL_WIDTH, PILL_HEIGHT), [])
   const animDuration = config.animationDurationMultiplier === 0 ? '0s' : '0.25s'
   const animDurationOut = config.animationDurationMultiplier === 0 ? '0s' : '0.2s'
   const currentAudioLevel = volumeHistory[volumeHistory.length - 1] || 0
@@ -178,6 +182,31 @@ const Pill = () => {
       setVolumeHistory(newHistory)
     })
 
+    const unsubStreaming = window.api.on(
+      'streaming-text-update',
+      (payload: StreamingTextPayload) => {
+        if (payload.phase === 'done') {
+          setStreamingText('')
+          setStreamingPhase(null)
+          streamingTextRef.current = ''
+          return
+        }
+
+        const now = Date.now()
+        const currentTier = usePerformanceStore.getState().activeTier
+        const throttleMs = currentTier === 'low' ? 150 : currentTier === 'balanced' ? 80 : 40
+        if (now - lastStreamingUpdateRef.current < throttleMs && payload.phase === 'streaming' && !payload.isFinal) {
+          streamingTextRef.current = payload.text
+          return
+        }
+
+        lastStreamingUpdateRef.current = now
+        setStreamingText(payload.text)
+        setStreamingPhase(payload.phase)
+        streamingTextRef.current = payload.text
+      },
+    )
+
     const unsubSettings = window.api.on('settings-update', (settings: any) => {
       setShowItoBarAlways(settings.showItoBarAlways)
       setInteractionSoundsLocal(settings.interactionSounds)
@@ -212,6 +241,7 @@ const Pill = () => {
       unsubRecording()
       unsubProcessing()
       unsubVolume()
+      unsubStreaming()
       unsubSettings()
       unsubOnboarding()
       unsubUserAuth()
@@ -234,20 +264,35 @@ const Pill = () => {
   }, [isRecording, isManualRecording, isProcessing])
 
   const anyRecording = isRecording || isManualRecording
+  const isStreaming = !!streamingPhase && streamingPhase !== 'done'
+
+  const baseHeight = PILL_HEIGHT
+  const streamingTextLines = streamingText ? Math.ceil(streamingText.length / 35) : 0
+  const expandedHeight = isStreaming
+    ? Math.min(baseHeight + streamingTextLines * 22 + 16, 200)
+    : baseHeight
+
+  const notchPath = useMemo(
+    () => buildNotchPath(PILL_WIDTH, expandedHeight),
+    [expandedHeight],
+  )
+
   const shouldShow =
     (onboardingCategory === ONBOARDING_CATEGORIES.TRY_IT ||
       onboardingCompleted) &&
-    (anyRecording || isProcessing || showItoBarAlways || isHovered)
+    (anyRecording || isProcessing || isStreaming || showItoBarAlways || isHovered)
 
   if (shouldShow) {
     hasBeenShownRef.current = true
   }
 
-  const notchState: 'idle' | 'listening' | 'thinking' = anyRecording
-    ? 'listening'
-    : isProcessing
-      ? 'thinking'
-      : 'idle'
+  const notchState: 'idle' | 'listening' | 'streaming' | 'thinking' = isStreaming
+    ? 'streaming'
+    : anyRecording
+      ? 'listening'
+      : isProcessing
+        ? 'thinking'
+        : 'idle'
 
   const handleMouseEnter = () => {
     setIsHovered(true)
@@ -370,6 +415,13 @@ const Pill = () => {
           from { opacity: 1; transform: translateY(0); }
           to   { opacity: 0; transform: translateY(-8px); }
         }
+        @keyframes streaming-blink {
+          0%, 50% { opacity: 1; }
+          51%, 100% { opacity: 0; }
+        }
+        .streaming-cursor {
+          animation: streaming-blink 0.8s infinite;
+        }
       `}</style>
       <div className="fixed top-0 left-0 w-full flex justify-center z-50 pointer-events-none">
         <svg width={0} height={0} style={{ position: 'absolute' }}>
@@ -382,7 +434,10 @@ const Pill = () => {
         <div
           style={{
             width: PILL_WIDTH,
-            height: PILL_HEIGHT,
+            height: expandedHeight,
+            display: 'flex',
+            flexDirection: 'column' as const,
+            transition: activeTier === 'low' ? 'none' : 'height 0.15s ease-out',
             clipPath: 'url(#notch-clip)',
             WebkitClipPath: 'url(#notch-clip)',
             background: 'rgba(0,0,0,0.95)',
@@ -407,7 +462,8 @@ const Pill = () => {
             alignItems: 'center',
             justifyContent: 'space-between',
             width: '100%',
-            height: '100%',
+            height: PILL_HEIGHT,
+            flexShrink: 0,
             padding: '0 20px',
           }}>
             {!isManualRecording && (
@@ -425,6 +481,35 @@ const Pill = () => {
             )}
             {isManualRecording && renderRightContent()}
           </div>
+          {isStreaming && streamingText && (
+            <div style={{
+              padding: '4px 20px 8px',
+              fontSize: 13,
+              lineHeight: '20px',
+              color: 'rgba(255,255,255,0.9)',
+              fontWeight: 400,
+              overflow: 'hidden',
+              wordBreak: 'break-word',
+              maxHeight: 140,
+            }}>
+              {streamingText}
+              {streamingPhase === 'streaming' && activeTier !== 'low' && (
+                <span style={{
+                  display: 'inline-block',
+                  width: 4,
+                  height: 14,
+                  background: 'rgba(255,255,255,0.7)',
+                  marginLeft: 2,
+                  verticalAlign: 'text-bottom',
+                }} className="streaming-cursor" />
+              )}
+              {streamingPhase === 'llm_processing' && (
+                <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 11, marginLeft: 6 }}>
+                  Reformulating...
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </>

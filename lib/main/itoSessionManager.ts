@@ -9,6 +9,10 @@ import { GrammarRulesService } from './grammar/GrammarRulesService'
 import { getAdvancedSettings } from './store'
 import log from 'electron-log'
 import { timingCollector, TimingEventName } from './timing/TimingCollector'
+import { CartesiaStreamClient, CartesiaStreamConfig } from './cartesiaStreamClient'
+import { audioRecorderService } from '../media/audio'
+import store from './store'
+import { STORE_KEYS } from '../constants/store-keys'
 
 export class ItoSessionManager {
   private readonly MINIMUM_AUDIO_DURATION_MS = 100
@@ -19,6 +23,8 @@ export class ItoSessionManager {
     sampleRate: number
   }> | null = null
   private grammarRulesService = new GrammarRulesService('')
+  private cartesiaClient: CartesiaStreamClient | null = null
+  private audioChunkHandler: ((chunk: Buffer) => void) | null = null
 
   public async startSession(mode: ItoMode) {
     console.log('[itoSessionManager] Starting session with mode:', mode)
@@ -35,6 +41,12 @@ export class ItoSessionManager {
       interactionId = interactionManager.initialize()
     }
 
+    // Branch based on ASR provider
+    if (this.isCartesiaProvider()) {
+      return this.startCartesiaSession(mode, interactionId)
+    }
+
+    // --- Existing V2 flow ---
     // Initialize all necessary components
     const started = await itoStreamController.initialize(mode)
     if (!started) {
@@ -97,6 +109,36 @@ export class ItoSessionManager {
   }
 
   public async cancelSession() {
+    // Clean up Cartesia session if active
+    if (this.cartesiaClient) {
+      this.cartesiaClient.cancel()
+      this.cartesiaClient = null
+      if (this.audioChunkHandler) {
+        audioRecorderService.off('audio-chunk', this.audioChunkHandler)
+        this.audioChunkHandler = null
+      }
+      recordingStateNotifier.notifyStreamingText({
+        text: '',
+        isFinal: true,
+        phase: 'done',
+      })
+
+      const responsePromise = this.streamResponsePromise
+      this.streamResponsePromise = null
+      timingCollector.clearInteraction()
+      interactionManager.clearCurrentInteraction()
+      await voiceInputService.stopAudioRecording()
+      recordingStateNotifier.notifyRecordingStopped()
+      if (responsePromise) {
+        try {
+          await responsePromise
+        } catch (error) {
+          console.log('[itoSessionManager] Cartesia stream cancelled as expected:', error)
+        }
+      }
+      return
+    }
+
     // Capture the promise in a local variable immediately so new sessions can start
     const responsePromise = this.streamResponsePromise
     this.streamResponsePromise = null
@@ -127,6 +169,11 @@ export class ItoSessionManager {
   }
 
   public async completeSession() {
+    // If Cartesia session, handle differently
+    if (this.cartesiaClient) {
+      return this.completeCartesiaSession()
+    }
+
     // Capture the promise in a local variable immediately so new sessions can start
     const responsePromise = this.streamResponsePromise
     this.streamResponsePromise = null
@@ -268,6 +315,138 @@ export class ItoSessionManager {
     // Clear current interaction on error
     interactionManager.clearCurrentInteraction()
     itoStreamController.clearInteractionAudio()
+  }
+
+  private isCartesiaProvider(): boolean {
+    const settings = getAdvancedSettings()
+    return settings.llm?.asrProvider === 'cartesia'
+  }
+
+  private async startCartesiaSession(mode: ItoMode, interactionId: string) {
+    const settings = getAdvancedSettings()
+
+    const baseUrl = import.meta.env.VITE_GRPC_BASE_URL as string
+    const wsUrl = baseUrl.replace(/^http/, 'ws') + '/stt/stream'
+
+    const authToken = store.get(STORE_KEYS.ACCESS_TOKEN) as string | undefined
+
+    const context = await contextGrabber.gatherContext(mode)
+
+    const config: CartesiaStreamConfig = {
+      serverUrl: wsUrl,
+      authToken: authToken || undefined,
+      language: 'fr',
+      asrModel: settings.llm?.asrModel || 'ink-whisper',
+      llmProvider: settings.llm?.llmProvider || undefined,
+      llmModel: settings.llm?.llmModel || undefined,
+      llmTemperature: settings.llm?.llmTemperature ?? undefined,
+      transcriptionPrompt: settings.llm?.transcriptionPrompt || undefined,
+      editingPrompt: settings.llm?.editingPrompt || undefined,
+      context: {
+        windowTitle: context.windowTitle,
+        appName: context.appName,
+        contextText: context.contextText,
+        browserUrl: context.browserUrl ?? undefined,
+        browserDomain: context.browserDomain ?? undefined,
+        tonePrompt: context.tone?.promptTemplate ?? undefined,
+        mode: mode === ItoMode.EDIT ? 1 : 0,
+      },
+      vocabulary: context.vocabularyWords,
+      replacements: context.replacements.map(r => ({ from: r.from, to: r.to })),
+      userDetails: context.userDetails,
+    }
+
+    this.cartesiaClient = new CartesiaStreamClient(config, (result) => {
+      switch (result.type) {
+        case 'partial':
+          recordingStateNotifier.notifyStreamingText({
+            text: result.text || '',
+            isFinal: result.is_final || false,
+            phase: 'streaming',
+          })
+          break
+        case 'asr_final':
+          recordingStateNotifier.notifyStreamingText({
+            text: result.text || '',
+            isFinal: true,
+            phase: 'asr_complete',
+          })
+          break
+        case 'llm_final':
+          recordingStateNotifier.notifyStreamingText({
+            text: result.text || '',
+            isFinal: true,
+            phase: 'llm_complete',
+          })
+          break
+      }
+    })
+
+    const resultPromise = this.cartesiaClient.connect()
+
+    this.streamResponsePromise = resultPromise.then(finalText => ({
+      response: { transcript: finalText },
+      audioBuffer: Buffer.alloc(0),
+      sampleRate: 16000,
+    }))
+
+    voiceInputService.startAudioRecording()
+
+    this.audioChunkHandler = (chunk: Buffer) => {
+      this.cartesiaClient?.sendAudio(chunk)
+    }
+    audioRecorderService.on('audio-chunk', this.audioChunkHandler)
+
+    recordingStateNotifier.notifyRecordingStarted(mode)
+
+    timingCollector.startInteraction()
+    timingCollector.startTiming(TimingEventName.INTERACTION_ACTIVE)
+
+    return interactionId
+  }
+
+  private async completeCartesiaSession() {
+    const responsePromise = this.streamResponsePromise
+    this.streamResponsePromise = null
+
+    timingCollector.endTiming(TimingEventName.INTERACTION_ACTIVE)
+
+    await voiceInputService.stopAudioRecording()
+
+    if (this.audioChunkHandler) {
+      audioRecorderService.off('audio-chunk', this.audioChunkHandler)
+      this.audioChunkHandler = null
+    }
+
+    this.cartesiaClient?.endAudio()
+
+    recordingStateNotifier.notifyRecordingStopped()
+
+    recordingStateNotifier.notifyStreamingText({
+      text: '',
+      isFinal: false,
+      phase: 'llm_processing',
+    })
+
+    recordingStateNotifier.notifyProcessingStarted()
+
+    if (responsePromise) {
+      try {
+        const result = await responsePromise
+        await this.handleTranscriptionResponse(result)
+      } catch (error) {
+        await this.handleTranscriptionError(error)
+      } finally {
+        recordingStateNotifier.notifyStreamingText({
+          text: '',
+          isFinal: true,
+          phase: 'done',
+        })
+        recordingStateNotifier.notifyProcessingStopped()
+      }
+    }
+
+    this.cartesiaClient = null
   }
 }
 
