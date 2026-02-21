@@ -39,6 +39,8 @@ export abstract class ClientError extends Error {
         return ClientProviderPb.GROQ
       case ClientProvider.CEREBRAS:
         return ClientProviderPb.CEREBRAS
+      case ClientProvider.CARTESIA:
+        return ClientProviderPb.GROQ
       default:
         return ClientProviderPb.GROQ
     }

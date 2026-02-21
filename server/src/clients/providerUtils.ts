@@ -3,6 +3,7 @@ import { ClientProvider } from './providers.js'
 import { groqClient } from './groqClient.js'
 import { cerebrasClient } from './cerebrasClient.js'
 import { geminiClient } from './geminiClient.js'
+import { cartesiaClient } from './cartesiaClient.js'
 import { ClientUnavailableError } from './errors.js'
 
 export function getAsrProvider(providerName: string): LlmProvider {
@@ -51,6 +52,9 @@ export function getAvailableAsrProviders(): ClientProvider[] {
   }
   if (geminiClient && geminiClient.isAvailable) {
     providers.push(ClientProvider.GEMINI)
+  }
+  if (cartesiaClient && cartesiaClient.isAvailable) {
+    providers.push(ClientProvider.CARTESIA)
   }
   return providers
 }
