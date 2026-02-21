@@ -9,6 +9,7 @@ export const IPC_EVENTS = {
   SETTINGS_UPDATE: 'settings-update',
   ONBOARDING_UPDATE: 'onboarding-update',
   USER_AUTH_UPDATE: 'user-auth-update',
+  STREAMING_TEXT_UPDATE: 'streaming-text-update',
 } as const
 
 // IPC Payload Types
@@ -24,6 +25,11 @@ export interface ProcessingStatePayload {
 
 export interface VolumeUpdatePayload {
   volume: number
+}
+
+export interface StreamingTextPayload {
+  text: string
+  isFinal: boolean
 }
 
 // Generic IPC Response Types
