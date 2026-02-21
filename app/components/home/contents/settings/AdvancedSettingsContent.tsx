@@ -41,6 +41,9 @@ const DEFAULT_MODELS_BY_PROVIDER: Record<string, { asrModel?: string; llmModel?:
   cerebras: {
     llmModel: 'llama-3.3-70b',
   },
+  cartesia: {
+    asrModel: 'ink-whisper',
+  },
 }
 
 const llmSettingsConfig: LlmSettingConfig[] = [
@@ -51,7 +54,7 @@ const llmSettingsConfig: LlmSettingConfig[] = [
     description: 'Speech-to-text provider for audio transcription',
     maxLength: modelProviderLengthLimit,
     isSelect: true,
-    options: ['gemini', 'groq'],
+    options: ['gemini', 'groq', 'cartesia'],
   },
   {
     name: 'asrModel',

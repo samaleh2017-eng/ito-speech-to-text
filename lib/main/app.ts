@@ -106,7 +106,7 @@ export function createAppWindow(): BrowserWindow {
 }
 
 const PILL_MAX_WIDTH = 400
-const PILL_MAX_HEIGHT = 60
+const PILL_MAX_HEIGHT = 200
 export function createPillWindow(): void {
   pillWindow = new BrowserWindow({
     width: PILL_MAX_WIDTH,

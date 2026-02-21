@@ -5,6 +5,7 @@ export const IPC_EVENTS = {
   RECORDING_STATE_UPDATE: 'recording-state-update',
   PROCESSING_STATE_UPDATE: 'processing-state-update',
   VOLUME_UPDATE: 'volume-update',
+  STREAMING_TEXT_UPDATE: 'streaming-text-update',
   FORCE_DEVICE_LIST_RELOAD: 'force-device-list-reload',
   SETTINGS_UPDATE: 'settings-update',
   ONBOARDING_UPDATE: 'onboarding-update',
@@ -27,6 +28,12 @@ export interface VolumeUpdatePayload {
 }
 
 // Generic IPC Response Types
+export interface StreamingTextPayload {
+  text: string
+  isFinal: boolean
+  phase: 'streaming' | 'asr_complete' | 'llm_processing' | 'llm_complete' | 'done'
+}
+
 export type IpcResult<T> =
   | { success: true; data: T }
   | { success: false; error: string; errorType?: string }
