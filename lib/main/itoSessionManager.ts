@@ -107,6 +107,7 @@ export class ItoSessionManager {
     // Cancel the transcription (will not create interaction)
     itoStreamController.cancelTranscription()
     interactionManager.clearCurrentInteraction()
+    itoStreamController.clearInteractionAudio()
 
     // Stop audio recording
     await voiceInputService.stopAudioRecording()
@@ -144,6 +145,7 @@ export class ItoSessionManager {
         `[itoSessionManager] Audio too short (${audioDurationMs}ms < ${this.MINIMUM_AUDIO_DURATION_MS}ms), cancelling`,
       )
       itoStreamController.cancelTranscription()
+      itoStreamController.clearInteractionAudio()
       recordingStateNotifier.notifyRecordingStopped()
 
       // Wait for the stream promise to reject with cancellation error
@@ -219,6 +221,7 @@ export class ItoSessionManager {
       )
       timingCollector.clearInteraction()
       interactionManager.clearCurrentInteraction()
+      itoStreamController.clearInteractionAudio()
     } else {
       // Handle text insertion with grammar-corrected text
       if (response.transcript && !response.error) {
@@ -264,6 +267,7 @@ export class ItoSessionManager {
 
     // Clear current interaction on error
     interactionManager.clearCurrentInteraction()
+    itoStreamController.clearInteractionAudio()
   }
 }
 

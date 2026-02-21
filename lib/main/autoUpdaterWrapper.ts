@@ -15,6 +15,8 @@ let updateStatus: UpdateStatus = {
   updateDownloaded: false,
 }
 
+let updateCheckTimer: NodeJS.Timeout | null = null
+
 export function getUpdateStatus(): UpdateStatus {
   return { ...updateStatus }
 }
@@ -65,7 +67,7 @@ export function initializeAutoUpdater() {
       autoUpdater.checkForUpdates()
 
       // Poll for updates every 10 minutes
-      setInterval(
+      updateCheckTimer = setInterval(
         () => {
           autoUpdater.checkForUpdates()
         },
@@ -109,6 +111,13 @@ function setupAutoUpdaterEvents() {
     const log_message = `Download speed: ${progressObj.bytesPerSecond} - Downloaded ${progressObj.percent.toFixed(2)}% (${progressObj.transferred}/${progressObj.total})`
     console.log(log_message)
   })
+}
+
+export function stopAutoUpdater() {
+  if (updateCheckTimer) {
+    clearInterval(updateCheckTimer)
+    updateCheckTimer = null
+  }
 }
 
 let installing = false

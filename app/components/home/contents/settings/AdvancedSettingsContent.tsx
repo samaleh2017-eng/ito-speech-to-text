@@ -208,7 +208,7 @@ const SettingInput = memo(function SettingInput({
           readOnly={config.readOnly}
         />
       )}
-      <p className="w-3/4 text-xs text-[var(--color-subtext)] mt-1 ml-1">
+      <p className="w-3/4 text-[13px] text-[var(--color-subtext)] mt-1 ml-1">
         {config.description}
       </p>
     </div>
@@ -423,7 +423,7 @@ export default function AdvancedSettingsContent() {
               <span className="block text-sm font-medium text-[var(--color-text)]">
                 Enable Grammar Service
               </span>
-              <span className="block text-xs text-[var(--color-subtext)] mt-1">
+              <span className="block text-[13px] text-[var(--color-subtext)] mt-1">
                 Apply Ito's local grammar adjustments before inserting text.
               </span>
             </span>
@@ -446,7 +446,7 @@ export default function AdvancedSettingsContent() {
                 <span className="block text-sm font-medium text-[var(--color-text)]">
                   Use Accessibility Context
                 </span>
-                <span className="block text-xs text-[var(--color-subtext)] mt-1">
+                <span className="block text-[13px] text-[var(--color-subtext)] mt-1">
                   Use Accessibility APIs to capture text context around the
                   cursor for improved accuracy.
                 </span>

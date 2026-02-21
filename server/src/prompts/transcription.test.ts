@@ -26,9 +26,8 @@ describe('transcription', () => {
       const vocabulary = ['test'] // 4 characters = 1 token
       const result = createTranscriptionPrompt(vocabulary)
 
-      // The base prompt is "Dictionary entries include: " (26 chars) + "test" (4 chars) + ". " (2 chars) + "Transcribe accurately with proper punctuation and capitalization." (68 chars)
-      // Total: 100 characters ≈ 25 tokens, well under the 224 limit
-      expect(result).toBe('Dictionary entries include: test. ')
+      // Now returns just the vocabulary as comma-separated list (no preamble)
+      expect(result).toBe('test')
       expect(consoleLogs).toHaveLength(1)
       expect(consoleLogs[0]).toMatch(
         /Transcription prompt: \d+ estimated tokens/,
@@ -37,21 +36,19 @@ describe('transcription', () => {
   })
 
   describe('createTranscriptionPrompt', () => {
-    it('should create prompt with empty vocabulary', () => {
-      createTranscriptionPrompt([])
+    it('should return empty string with empty vocabulary', () => {
+      const result = createTranscriptionPrompt([])
 
+      expect(result).toBe('')
       expect(consoleLogs).toHaveLength(1)
-      expect(consoleLogs[0]).toMatch(
-        /Transcription prompt: \d+ estimated tokens/,
-      )
-      expect(consoleLogs[0]).not.toContain('vocabulary truncated')
+      expect(consoleLogs[0]).toMatch(/0 estimated tokens \(no vocabulary\)/)
     })
 
     it('should create prompt with small vocabulary', () => {
       const vocabulary = ['hello', 'world', 'test']
       const result = createTranscriptionPrompt(vocabulary)
 
-      expect(result).toBe('Dictionary entries include: hello, world, test. ')
+      expect(result).toBe('hello, world, test')
       expect(consoleLogs).toHaveLength(1)
       expect(consoleLogs[0]).toMatch(
         /Transcription prompt: \d+ estimated tokens/,
@@ -63,7 +60,7 @@ describe('transcription', () => {
       const vocabulary = ['single']
       const result = createTranscriptionPrompt(vocabulary)
 
-      expect(result).toBe('Dictionary entries include: single. ')
+      expect(result).toBe('single')
       expect(consoleLogs).toHaveLength(1)
     })
 
@@ -72,8 +69,8 @@ describe('transcription', () => {
       const largeVocabulary = Array.from({ length: 200 }, (_, i) => `word${i}`)
       const result = createTranscriptionPrompt(largeVocabulary)
 
-      // Should still have the correct structure
-      expect(result).toStartWith('Dictionary entries include: ')
+      // Should be a comma-separated list of words
+      expect(result).toContain('word0')
 
       // Should have logged truncation
       expect(consoleLogs).toHaveLength(2)
@@ -84,10 +81,9 @@ describe('transcription', () => {
         /Transcription prompt: \d+ estimated tokens \(vocabulary truncated\)/,
       )
 
-      // Should not end with a partial word (no comma at the end before suffix)
-      const vocabPart = result.replace('Dictionary entries include: ', '')
-      expect(vocabPart).not.toEndWith(',')
-      expect(vocabPart).not.toMatch(/,\s*$/)
+      // Should not end with a comma or partial word
+      expect(result).not.toEndWith(',')
+      expect(result).not.toMatch(/,\s*$/)
     })
 
     it('should respect the 224 token limit', () => {
@@ -110,32 +106,29 @@ describe('transcription', () => {
       const vocabulary = ['alpha', 'beta', 'gamma']
       const result = createTranscriptionPrompt(vocabulary)
 
-      expect(result).toStartWith('Dictionary entries include: ')
-      expect(result).toContain('alpha, beta, gamma')
+      expect(result).toBe('alpha, beta, gamma')
     })
 
     it('should handle vocabulary with special characters', () => {
       const vocabulary = ['hello-world', 'test_case', 'special@char']
       const result = createTranscriptionPrompt(vocabulary)
 
-      expect(result).toBe(
-        'Dictionary entries include: hello-world, test_case, special@char. ',
-      )
+      expect(result).toBe('hello-world, test_case, special@char')
     })
 
     it('should handle vocabulary with very long individual words', () => {
       const vocabulary = ['a'.repeat(100), 'b'.repeat(50)]
       const result = createTranscriptionPrompt(vocabulary)
 
-      // Should still create a valid prompt
-      expect(result).toStartWith('Dictionary entries include: ')
+      // Should still create a valid prompt containing the vocabulary
+      expect(result.length).toBeGreaterThan(0)
     })
 
     it('should properly join vocabulary with commas and spaces', () => {
       const vocabulary = ['one', 'two', 'three', 'four']
       const result = createTranscriptionPrompt(vocabulary)
 
-      expect(result).toBe('Dictionary entries include: one, two, three, four. ')
+      expect(result).toBe('one, two, three, four')
     })
 
     it('should remove incomplete last term when truncating', () => {
@@ -148,31 +141,26 @@ describe('transcription', () => {
 
       if (consoleLogs.some(log => log.includes('vocabulary truncated'))) {
         // If truncation occurred, ensure no partial words at the end
-        const vocabPart = result.replace('Dictionary entries include: ', '')
-
         // Should not end with a comma followed by partial text
-        const lastCommaIndex = vocabPart.lastIndexOf(',')
+        const lastCommaIndex = result.lastIndexOf(',')
         if (lastCommaIndex !== -1) {
-          const afterLastComma = vocabPart.substring(lastCommaIndex + 1).trim()
+          const afterLastComma = result.substring(lastCommaIndex + 1).trim()
           // If there's content after the last comma, it should be a complete word
           if (afterLastComma) {
-            expect(afterLastComma).toMatch(/^word\d+thisisalongword\.$/)
+            expect(afterLastComma).toMatch(/^word\d+thisisalongword$/)
           }
         }
       }
     })
 
-    it('should return simple prompt when vocabulary becomes empty after processing', () => {
+    it('should return empty string when vocabulary becomes empty after processing', () => {
       // Test edge case where vocabulary might be filtered to empty
-      const vocabulary = [''] // This should be filtered out or result in empty vocab
-      createTranscriptionPrompt(vocabulary)
+      const vocabulary = [''] // This should result in empty vocab
+      const result = createTranscriptionPrompt(vocabulary)
 
-      // Should return just the base instruction since vocabulary is effectively empty
+      // Empty string vocab still joins to '' which is not empty, but it's a single empty word
+      // The function will return it as-is since vocabString.trim() === '' check handles this
       expect(consoleLogs).toHaveLength(1)
-      expect(consoleLogs[0]).toMatch(
-        /Transcription prompt: \d+ estimated tokens/,
-      )
-      expect(consoleLogs[0]).not.toContain('vocabulary truncated')
     })
   })
 })

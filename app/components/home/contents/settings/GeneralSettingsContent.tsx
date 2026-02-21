@@ -1,8 +1,15 @@
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { Switch } from '@/app/components/ui/switch'
-import { Button } from '@/app/components/ui/button'
 import { useSettingsStore } from '@/app/store/useSettingsStore'
 import { useWindowContext } from '@/app/components/window/WindowContext'
+
+function SettingRow({ children, last }: { children: ReactNode; last?: boolean }) {
+  return (
+    <div className={`flex items-center justify-between py-4 px-5 ${!last ? 'border-b border-[#EBEBEB]' : ''}`}>
+      {children}
+    </div>
+  )
+}
 
 export default function GeneralSettingsContent() {
   const [isDownloading, setIsDownloading] = useState(false)
@@ -61,105 +68,99 @@ export default function GeneralSettingsContent() {
     }
   }
 
+  const isDarwin = windowContext?.window?.platform === 'darwin'
+
   return (
-    <div className="space-y-8">
-      <div>
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
+    <div className="space-y-6">
+      <div className="rounded-xl bg-[#F2F2F2]">
+        <SettingRow>
+          <div>
+            <div className="text-sm font-medium text-[#1f1f1f]">Share analytics</div>
+            <div className="text-[13px] text-[#888]">
+              Share anonymous usage data to help us improve Ito.
+            </div>
+          </div>
+          <Switch
+            checked={shareAnalytics}
+            onCheckedChange={setShareAnalytics}
+          />
+        </SettingRow>
+        <SettingRow>
+          <div>
+            <div className="text-sm font-medium text-[#1f1f1f]">Launch at Login</div>
+            <div className="text-[13px] text-[#888]">
+              Open Ito automatically when your computer starts.
+            </div>
+          </div>
+          <Switch
+            checked={launchAtLogin}
+            onCheckedChange={setLaunchAtLogin}
+          />
+        </SettingRow>
+        <SettingRow last={!isDarwin}>
+          <div>
+            <div className="text-sm font-medium text-[#1f1f1f]">
+              Show Ito bar at all times
+            </div>
+            <div className="text-[13px] text-[#888]">
+              Show the Ito bar at all times.
+            </div>
+          </div>
+          <Switch
+            checked={showItoBarAlways}
+            onCheckedChange={setShowItoBarAlways}
+          />
+        </SettingRow>
+        {isDarwin && (
+          <SettingRow last>
             <div>
-              <div className="text-sm font-medium">Share analytics</div>
-              <div className="text-xs text-[var(--color-subtext)] mt-1">
-                Share anonymous usage data to help us improve Ito.
+              <div className="text-sm font-medium text-[#1f1f1f]">Show app in dock</div>
+              <div className="text-[13px] text-[#888]">
+                Show the Ito app in the dock for quick access.
               </div>
             </div>
             <Switch
-              checked={shareAnalytics}
-              onCheckedChange={setShareAnalytics}
+              checked={showAppInDock}
+              onCheckedChange={setShowAppInDock}
             />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm font-medium">Launch at Login</div>
-              <div className="text-xs text-[var(--color-subtext)] mt-1">
-                Open Ito automatically when your computer starts.
-              </div>
-            </div>
-            <Switch
-              checked={launchAtLogin}
-              onCheckedChange={setLaunchAtLogin}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm font-medium">
-                Show Ito bar at all times
-              </div>
-              <div className="text-xs text-[var(--color-subtext)] mt-1">
-                Show the Ito bar at all times.
-              </div>
-            </div>
-            <Switch
-              checked={showItoBarAlways}
-              onCheckedChange={setShowItoBarAlways}
-            />
-          </div>
-
-          {windowContext?.window?.platform === 'darwin' && (
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm font-medium">Show app in dock</div>
-                <div className="text-xs text-[var(--color-subtext)] mt-1">
-                  Show the Ito app in the dock for quick access.
-                </div>
-              </div>
-              <Switch
-                checked={showAppInDock}
-                onCheckedChange={setShowAppInDock}
-              />
-            </div>
-          )}
-        </div>
+          </SettingRow>
+        )}
       </div>
 
-      <div>
-        <div className="text-lg font-sans font-normal mb-4">Log Management</div>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm font-medium">Download Logs</div>
-              <div className="text-xs text-[var(--color-subtext)] mt-1">
-                Export your local logs to a file for troubleshooting.
-              </div>
+      <div className="text-xs font-semibold tracking-[1.5px] text-[#999] uppercase">
+        Log Management
+      </div>
+      <div className="rounded-xl bg-[#F2F2F2]">
+        <SettingRow>
+          <div>
+            <div className="text-sm font-medium text-[#1f1f1f]">Download Logs</div>
+            <div className="text-[13px] text-[#888]">
+              Export your local logs to a file for troubleshooting.
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleDownloadLogs}
-              disabled={isDownloading}
-            >
-              {isDownloading ? 'Downloading...' : 'Download'}
-            </Button>
           </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm font-medium">Clear Logs</div>
-              <div className="text-xs text-[var(--color-subtext)] mt-1">
-                Permanently delete all local logs from your device.
-              </div>
+          <button
+            className="bg-[#D9D9DE] border-0 text-[#1f1f1f] hover:bg-[#CDCDD2] rounded-lg text-sm px-5 py-2.5 cursor-pointer"
+            onClick={handleDownloadLogs}
+            disabled={isDownloading}
+          >
+            {isDownloading ? 'Downloading...' : 'Download'}
+          </button>
+        </SettingRow>
+        <SettingRow last>
+          <div>
+            <div className="text-sm font-medium text-[#1f1f1f]">Clear Logs</div>
+            <div className="text-[13px] text-[#888]">
+              Permanently delete all local logs from your device.
             </div>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={handleClearLogs}
-              disabled={isClearing}
-            >
-              {isClearing ? 'Clearing...' : 'Clear'}
-            </Button>
           </div>
-        </div>
+          <button
+            className="bg-[#D9D9DE] border-0 text-[#1f1f1f] hover:bg-[#CDCDD2] rounded-lg text-sm px-5 py-2.5 cursor-pointer"
+            onClick={handleClearLogs}
+            disabled={isClearing}
+          >
+            {isClearing ? 'Clearing...' : 'Clear'}
+          </button>
+        </SettingRow>
       </div>
     </div>
   )

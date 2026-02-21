@@ -261,9 +261,16 @@ const api = {
   },
 
   updater: {
-    onUpdateAvailable: callback => ipcRenderer.on('update-available', callback),
-    onUpdateDownloaded: callback =>
-      ipcRenderer.on('update-downloaded', callback),
+    onUpdateAvailable: (callback: () => void): (() => void) => {
+      const handler = () => callback()
+      ipcRenderer.on('update-available', handler)
+      return () => ipcRenderer.removeListener('update-available', handler)
+    },
+    onUpdateDownloaded: (callback: () => void): (() => void) => {
+      const handler = () => callback()
+      ipcRenderer.on('update-downloaded', handler)
+      return () => ipcRenderer.removeListener('update-downloaded', handler)
+    },
     installUpdate: () => ipcRenderer.send('install-update'),
     getUpdateStatus: () => ipcRenderer.invoke('get-update-status'),
     downloadUpdate: () => ipcRenderer.invoke('download-update'),

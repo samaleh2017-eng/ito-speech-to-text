@@ -60,6 +60,7 @@
 .window-frame {
   display: flex;
   flex-direction: column;
+  height: 100%;
   user-select: none;
   background-color: var(--window-c-background);
   transition: background-color var(--window-background-transition-duration) ease;
@@ -197,8 +198,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 30px;
+  width: 46px;
+  height: var(--window-titlebar-height);
   cursor: pointer;
   background-color: transparent;
 }

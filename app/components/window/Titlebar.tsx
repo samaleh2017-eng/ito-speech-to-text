@@ -43,14 +43,19 @@ export const Titlebar = () => {
       }
     })
 
-    window.api.updater.onUpdateAvailable(() => {
+    const cleanupAvailable = window.api.updater.onUpdateAvailable(() => {
       setIsUpdateAvailable(true)
     })
 
-    window.api.updater.onUpdateDownloaded(() => {
+    const cleanupDownloaded = window.api.updater.onUpdateDownloaded(() => {
       setUpdateDownloaded(true)
       setIsDownloading(false)
     })
+
+    return () => {
+      cleanupAvailable()
+      cleanupDownloaded()
+    }
   }, [])
 
   const toggleUserDropdown = (e: React.MouseEvent) => {
@@ -203,8 +208,18 @@ const TitlebarControls = () => {
   const closePath =
     'M 0,0 0,0.7 4.3,5 0,9.3 0,10 0.7,10 5,5.7 9.3,10 10,10 10,9.3 5.7,5 10,0.7 10,0 9.3,0 5,4.3 0.7,0 Z'
   const maximizePath = 'M 0,0 0,10 10,10 10,0 Z M 1,1 9,1 9,9 1,9 Z'
+  const restorePath =
+    'M 2,0 2,2 0,2 0,10 8,10 8,8 10,8 10,0 Z M 1,3 7,3 7,9 1,9 Z M 3,1 9,1 9,7 8,7 8,2 3,2 Z'
   const minimizePath = 'M 0,5 10,5 10,6 0,6 Z'
   const wcontext = useWindowContext().window
+  const [isMaximized, setIsMaximized] = useState(false)
+
+  useEffect(() => {
+    const cleanup = window.api.on('window-maximized-changed', (maximized: boolean) => {
+      setIsMaximized(maximized)
+    })
+    return cleanup
+  }, [])
 
   return (
     <div className="window-titlebar-controls">
@@ -212,7 +227,10 @@ const TitlebarControls = () => {
         <TitlebarControlButton label="minimize" svgPath={minimizePath} />
       )}
       {wcontext?.maximizable && (
-        <TitlebarControlButton label="maximize" svgPath={maximizePath} />
+        <TitlebarControlButton
+          label="maximize"
+          svgPath={isMaximized ? restorePath : maximizePath}
+        />
       )}
       <TitlebarControlButton label="close" svgPath={closePath} />
     </div>

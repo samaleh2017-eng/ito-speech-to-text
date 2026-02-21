@@ -9,6 +9,7 @@ import {
 } from '@mynaui/icons-react'
 import { ItoIcon } from '../icons/ItoIcon'
 import { useMainStore } from '@/app/store/useMainStore'
+import { Dialog, DialogContent } from '../ui/dialog'
 import { useUserMetadataStore } from '@/app/store/useUserMetadataStore'
 import { useOnboardingStore } from '@/app/store/useOnboardingStore'
 import { useAuth } from '@/app/components/auth/useAuth'
@@ -176,9 +177,12 @@ export default function HomeKit() {
   }, [navExpanded])
 
   // Render the appropriate content based on current page
+  const isSettingsOpen = currentPage === 'settings'
+
   const renderContent = () => {
     switch (currentPage) {
       case 'home':
+      case 'settings':
         return <HomeContent isStartingTrial={isStartingTrial} />
       case 'dictionary':
         return <DictionaryContent />
@@ -186,8 +190,6 @@ export default function HomeKit() {
         return <NotesContent />
       case 'app-styling':
         return <AppStylingContent />
-      case 'settings':
-        return <SettingsContent />
       case 'about':
         return <AboutContent />
       default:
@@ -285,6 +287,18 @@ export default function HomeKit() {
       <div className="flex-1 bg-[var(--color-surface)] rounded-[var(--radius-lg)] my-2 mr-2 shadow-[var(--shadow-soft)] overflow-hidden flex flex-col border border-[var(--border)]">
         <div className="flex-1 overflow-y-auto pt-10">{renderContent()}</div>
       </div>
+
+      <Dialog
+        open={isSettingsOpen}
+        onOpenChange={(open) => { if (!open) setCurrentPage('home') }}
+      >
+        <DialogContent
+          showCloseButton={false}
+          className="max-w-[1100px] w-[95vw] h-[85vh] p-0 overflow-hidden rounded-2xl border border-[#E8E8E8] bg-white shadow-[0_24px_80px_rgba(0,0,0,0.12)]"
+        >
+          <SettingsContent />
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

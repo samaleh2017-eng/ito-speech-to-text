@@ -133,7 +133,7 @@ export function initializeLogging() {
   }
 
   // Periodic safety-net persist (every 30s) — limits log loss on crash to ~30s
-  setInterval(() => {
+  const persistTimer = setInterval(() => {
     if (queue.length > 0) {
       persistQueue()
     }
@@ -216,6 +216,11 @@ export function initializeLogging() {
 
   // Best-effort flush when the app is quitting; durability is ensured by persistence
   app.on('before-quit', () => {
+    clearInterval(persistTimer)
+    if (flushTimer) {
+      clearTimeout(flushTimer)
+      flushTimer = null
+    }
     void flush()
   })
 

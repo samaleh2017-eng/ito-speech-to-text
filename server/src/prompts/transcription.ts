@@ -6,34 +6,33 @@ function estimateTokenCount(text: string): number {
 }
 
 /**
- * Creates a transcription prompt that stays within the 224 token limit
+ * Creates a transcription prompt that stays within the 224 token limit.
+ * 
+ * IMPORTANT: The Whisper prompt parameter is conditioning context, not an instruction.
+ * It should look like a natural transcript snippet containing the vocabulary words,
+ * so Whisper is biased to recognize them without hallucinating them.
+ * If vocabulary would exceed the token limit, it is truncated.
+ * An empty prompt is returned when there is no vocabulary.
  */
 export function createTranscriptionPrompt(vocabulary: string[]): string {
-  const suffix = ''
   const maxTokens = 224
-
-  // If no vocabulary, just return the base instruction
+  // No vocabulary → empty prompt (no conditioning bias)
   if (vocabulary.length === 0) {
-    const finalTokenCount = estimateTokenCount(suffix)
-    console.log(`Transcription prompt: ${finalTokenCount} estimated tokens`)
-    return suffix
+    console.log('Transcription prompt: 0 estimated tokens (no vocabulary)')
+    return ''
   }
 
-  const basePrompt = 'Dictionary entries include: '
-
-  // Calculate tokens for base prompt and suffix
-  const baseTokens = estimateTokenCount(basePrompt + '. ' + suffix)
-  const availableTokensForVocab = maxTokens - baseTokens
-
+  // Format vocabulary as a natural comma-separated list
+  // Whisper uses this as context to bias recognition toward these words
   let vocabString = vocabulary.join(', ')
   let wasTruncated = false
 
-  // Truncate vocabulary if it exceeds available tokens
-  if (estimateTokenCount(vocabString) > availableTokensForVocab) {
-    const maxVocabLength = availableTokensForVocab * 4 - 10 // Leave buffer
+  const availableChars = maxTokens * 4 - 10 // rough token estimate with buffer
+
+  if (vocabString.length > availableChars) {
     const originalLength = vocabString.length
     vocabString = vocabString
-      .substring(0, maxVocabLength)
+      .substring(0, availableChars)
       .replace(/,\s*[^,]*$/, '') // Remove incomplete last term
     wasTruncated = true
     console.log(
@@ -41,19 +40,15 @@ export function createTranscriptionPrompt(vocabulary: string[]): string {
     )
   }
 
-  // If vocabulary string is empty after processing, return just the suffix
   if (vocabString.trim() === '') {
-    const finalTokenCount = estimateTokenCount(suffix)
-    console.log(`Transcription prompt: ${finalTokenCount} estimated tokens`)
-    return suffix
+    console.log('Transcription prompt: 0 estimated tokens (vocabulary empty after truncation)')
+    return ''
   }
 
-  const finalPrompt = `${basePrompt}${vocabString}. ${suffix}`
-  const finalTokenCount = estimateTokenCount(finalPrompt)
-
+  const finalTokenCount = estimateTokenCount(vocabString)
   console.log(
     `Transcription prompt: ${finalTokenCount} estimated tokens${wasTruncated ? ' (vocabulary truncated)' : ''}`,
   )
 
-  return finalPrompt
+  return vocabString
 }

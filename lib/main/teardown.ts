@@ -6,8 +6,10 @@ import { allowAppNap } from './appNap'
 import { syncService } from './syncService'
 import { destroyAppTray } from './tray'
 import { timingCollector } from './timing/TimingCollector'
+import { stopAutoUpdater } from './autoUpdaterWrapper'
 
 export const teardown = () => {
+  stopAutoUpdater()
   stopKeyListener()
   audioRecorderService.terminate()
   selectedTextReaderService.terminate()
