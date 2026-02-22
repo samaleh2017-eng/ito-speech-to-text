@@ -55,6 +55,7 @@ const mockInteractionsTable = {
   findById: mock(() => Promise.resolve(undefined)),
   findAll: mock(() => Promise.resolve([] as any)),
   deleteAllUserData: mock(() => Promise.resolve()),
+  getUpdatedAt: mock(() => Promise.resolve(undefined as string | undefined)),
 }
 
 const mockDictionaryTable = {
@@ -295,15 +296,15 @@ describe('SyncService Integration Tests', () => {
       )
     })
 
-    test('should handle interactions with raw audio data', async () => {
-      const audioData = new Uint8Array([1, 2, 3, 4, 5])
+    test('should handle interactions with raw_audio_id from server', async () => {
       const remoteInteraction = {
         id: 'remote-interaction-123',
         userId: 'test-user-123',
         title: 'Remote interaction',
         asrOutput: JSON.stringify({ transcript: 'Hello world' }),
         llmOutput: JSON.stringify({ response: 'Hi there' }),
-        rawAudio: audioData,
+        rawAudio: new Uint8Array([]),
+        rawAudioId: 'audio-id-123',
         durationMs: 1500,
         createdAt: '2024-01-02T00:00:00.000Z',
         updatedAt: '2024-01-02T00:00:00.000Z',
@@ -313,11 +314,18 @@ describe('SyncService Integration Tests', () => {
       mockGrpcClient.listInteractionsSince.mockResolvedValueOnce([
         remoteInteraction,
       ])
+      mockInteractionsTable.getUpdatedAt.mockResolvedValueOnce(undefined)
 
       await syncService.start()
 
-      // Should handle audio buffer conversion and database upsert
-      expect(mockInteractionsTable.upsert).toHaveBeenCalled()
+      // Should upsert with raw_audio: null (audio fetched on-demand) and raw_audio_id set
+      expect(mockInteractionsTable.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'remote-interaction-123',
+          raw_audio: null,
+          raw_audio_id: 'audio-id-123',
+        }),
+      )
     })
 
     test('should handle dictionary items correctly', async () => {
@@ -539,15 +547,15 @@ describe('SyncService Integration Tests', () => {
       expect(mockGrpcClient.listNotesSince).toHaveBeenCalled()
     })
 
-    test('should handle complex raw audio buffer conversion', async () => {
-      const audioData = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
+    test('should skip interactions that are already up to date locally', async () => {
       const interactionWithAudio = {
         id: 'audio-interaction',
         userId: 'test-user-123',
         title: 'Audio test',
         asrOutput: JSON.stringify({ transcript: 'Hello' }),
         llmOutput: null,
-        rawAudio: audioData,
+        rawAudio: new Uint8Array([]),
+        rawAudioId: 'audio-ref-123',
         durationMs: 1500,
         createdAt: '2024-01-02T00:00:00.000Z',
         updatedAt: '2024-01-02T00:00:00.000Z',
@@ -557,26 +565,24 @@ describe('SyncService Integration Tests', () => {
       mockGrpcClient.listInteractionsSince.mockResolvedValueOnce([
         interactionWithAudio,
       ])
+      // Local is already up to date
+      mockInteractionsTable.getUpdatedAt.mockResolvedValueOnce('2024-01-02T00:00:00.000Z')
 
       await syncService.start()
 
-      // Should convert Uint8Array to Buffer and upsert
-      expect(mockInteractionsTable.upsert).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'audio-interaction',
-          raw_audio: expect.any(Buffer),
-        }),
-      )
+      // Should skip upsert since local is already up to date
+      expect(mockInteractionsTable.upsert).not.toHaveBeenCalled()
     })
 
-    test('should handle empty raw audio data correctly', async () => {
+    test('should handle interactions without raw audio data correctly', async () => {
       const interactionWithEmptyAudio = {
         id: 'empty-audio-interaction',
         userId: 'test-user-123',
         title: 'Empty audio test',
         asrOutput: JSON.stringify({ transcript: 'No audio' }),
         llmOutput: null,
-        rawAudio: new Uint8Array([]), // Empty audio
+        rawAudio: new Uint8Array([]),
+        rawAudioId: null,
         durationMs: 0,
         createdAt: '2024-01-02T00:00:00.000Z',
         updatedAt: '2024-01-02T00:00:00.000Z',
@@ -586,14 +592,16 @@ describe('SyncService Integration Tests', () => {
       mockGrpcClient.listInteractionsSince.mockResolvedValueOnce([
         interactionWithEmptyAudio,
       ])
+      mockInteractionsTable.getUpdatedAt.mockResolvedValueOnce(undefined)
 
       await syncService.start()
 
-      // Should handle empty audio buffer gracefully
+      // raw_audio is always null from list sync (on-demand fetch)
       expect(mockInteractionsTable.upsert).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'empty-audio-interaction',
-          raw_audio: null, // Empty audio should become null
+          raw_audio: null,
+          raw_audio_id: null,
         }),
       )
     })

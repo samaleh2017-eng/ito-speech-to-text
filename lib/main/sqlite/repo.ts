@@ -123,7 +123,7 @@ export class InteractionsTable {
   }
 
   static async findAll(user_id?: string): Promise<Interaction[]> {
-    const columns = `id, user_id, title, asr_output, llm_output, raw_audio_id, duration_ms, sample_rate, created_at, updated_at, deleted_at, (raw_audio IS NOT NULL) as has_raw_audio`
+    const columns = `id, user_id, title, asr_output, llm_output, raw_audio_id, duration_ms, sample_rate, created_at, updated_at, deleted_at, (raw_audio IS NOT NULL OR raw_audio_id IS NOT NULL) as has_raw_audio`
     const query = user_id
       ? `SELECT ${columns} FROM interactions WHERE user_id = ? AND deleted_at IS NULL ORDER BY created_at DESC`
       : `SELECT ${columns} FROM interactions WHERE user_id IS NULL AND deleted_at IS NULL ORDER BY created_at DESC`
@@ -153,22 +153,31 @@ export class InteractionsTable {
 
   static async findModifiedSince(timestamp: string): Promise<Interaction[]> {
     const rows = await all<Interaction>(
-      'SELECT * FROM interactions WHERE updated_at > ?',
+      'SELECT id, user_id, title, asr_output, llm_output, raw_audio, raw_audio_id, duration_ms, sample_rate, created_at, updated_at, deleted_at FROM interactions WHERE updated_at > ?',
       [timestamp],
     )
 
     return rows.map(parseInteractionJsonFields)
   }
 
+  static async getUpdatedAt(id: string): Promise<string | undefined> {
+    const row = await get<{ updated_at: string }>(
+      'SELECT updated_at FROM interactions WHERE id = ?',
+      [id],
+    )
+    return row?.updated_at
+  }
+
   static async upsert(interaction: Interaction): Promise<void> {
     const query = `
-      INSERT INTO interactions (id, user_id, title, asr_output, llm_output, raw_audio, duration_ms, sample_rate, created_at, updated_at, deleted_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO interactions (id, user_id, title, asr_output, llm_output, raw_audio, raw_audio_id, duration_ms, sample_rate, created_at, updated_at, deleted_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(id) DO UPDATE SET
         title = excluded.title,
         asr_output = excluded.asr_output,
         llm_output = excluded.llm_output,
-        raw_audio = excluded.raw_audio,
+        raw_audio = COALESCE(excluded.raw_audio, interactions.raw_audio),
+        raw_audio_id = COALESCE(excluded.raw_audio_id, interactions.raw_audio_id),
         duration_ms = excluded.duration_ms,
         sample_rate = excluded.sample_rate,
         updated_at = excluded.updated_at,
@@ -181,6 +190,7 @@ export class InteractionsTable {
       JSON.stringify(interaction.asr_output),
       JSON.stringify(interaction.llm_output),
       interaction.raw_audio,
+      interaction.raw_audio_id,
       interaction.duration_ms,
       interaction.sample_rate,
       interaction.created_at,

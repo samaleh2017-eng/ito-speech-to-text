@@ -163,7 +163,7 @@ const api = {
   interactions: {
     getAll: () => ipcRenderer.invoke('interactions:get-all'),
     getById: (id: string) => ipcRenderer.invoke('interactions:get-by-id', id),
-
+    getRemoteAudio: (id: string) => ipcRenderer.invoke('interactions:get-remote-audio', id),
     delete: (id: string) => ipcRenderer.invoke('interactions:delete', id),
   },
   appTargets: {
