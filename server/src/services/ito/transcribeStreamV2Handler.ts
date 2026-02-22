@@ -19,7 +19,6 @@ import {
   detectItoMode,
   getPromptForMode,
 } from './helpers.js'
-import { SMART_FORMATTER_PROMPT } from './constants.js'
 import type { ItoContext } from './types.js'
 import { applyReplacements as sharedApplyReplacements, filterLeakedContext as sharedFilterLeakedContext } from './llmUtils.js'
 import { isAbortError, createAbortError } from '../../utils/abortUtils.js'
@@ -431,7 +430,7 @@ export class TranscribeStreamV2Handler {
     const basePrompt = getPromptForMode(mode, advancedSettings)
 
     const systemPrompt = hasTonePrompt
-      ? `${windowContext.tonePrompt}\n\n${SMART_FORMATTER_PROMPT}`
+      ? windowContext.tonePrompt
       : basePrompt
 
     const userPrompt = createUserPromptWithContext(transcript, windowContext)

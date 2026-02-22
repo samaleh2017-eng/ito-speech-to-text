@@ -3,7 +3,6 @@ import { sonioxClient } from '../clients/sonioxClient.js'
 import { getLlmProvider } from '../clients/providerUtils.js'
 import { DEFAULT_ADVANCED_SETTINGS } from '../constants/generated-defaults.js'
 import { ItoMode } from '../generated/ito_pb.js'
-import { SMART_FORMATTER_PROMPT } from './ito/constants.js'
 import { getPromptForMode, createUserPromptWithContext } from './ito/helpers.js'
 import { applyReplacements, filterLeakedContext } from './ito/llmUtils.js'
 import type { ItoContext } from './ito/types.js'
@@ -117,7 +116,7 @@ export const registerSonioxRoutes = async (
       const basePrompt = getPromptForMode(mode, advancedSettings)
 
       const systemPrompt = hasTonePrompt
-        ? `${windowContext.tonePrompt}\n\n${SMART_FORMATTER_PROMPT}`
+        ? windowContext.tonePrompt
         : basePrompt
 
       const userPrompt = createUserPromptWithContext(trimmedTranscript, windowContext)

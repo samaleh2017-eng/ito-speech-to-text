@@ -377,7 +377,7 @@ export class ItoSessionManager {
         llmSettings: {
           llmProvider: llm?.llmProvider || undefined,
           llmModel: llm?.llmModel || undefined,
-          llmTemperature: llm?.llmTemperature || undefined,
+          llmTemperature: llm?.llmTemperature ?? undefined,
           transcriptionPrompt: llm?.transcriptionPrompt || undefined,
           editingPrompt: llm?.editingPrompt || undefined,
         },
