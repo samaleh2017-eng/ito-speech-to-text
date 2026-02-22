@@ -295,8 +295,8 @@ export class ItoSessionManager {
     }
 
     itoStreamController.endInteraction()
-    recordingStateNotifier.notifyRecordingStopped()
     recordingStateNotifier.notifyProcessingStarted()
+    recordingStateNotifier.notifyRecordingStopped()
 
     if (responsePromise) {
       console.log(
@@ -342,6 +342,7 @@ export class ItoSessionManager {
       this.sonioxAudioHandler = null
     }
 
+    recordingStateNotifier.notifyProcessingStarted()
     recordingStateNotifier.notifyRecordingStopped()
 
     const service = this.sonioxService
@@ -359,11 +360,10 @@ export class ItoSessionManager {
 
     if (!rawTranscript || rawTranscript.trim().length === 0) {
       console.warn('[itoSessionManager] No speech detected from Soniox')
+      recordingStateNotifier.notifyProcessingStopped()
       this.cleanupSonioxState()
       return
     }
-
-    recordingStateNotifier.notifyProcessingStarted()
 
     const mode = this.currentMode
 
