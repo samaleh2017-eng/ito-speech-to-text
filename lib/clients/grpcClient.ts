@@ -16,6 +16,7 @@ import {
   UpdateInteractionRequestSchema,
   DeleteInteractionRequestSchema,
   ListInteractionsRequestSchema,
+  GetInteractionRequestSchema,
   CreateDictionaryItemRequestSchema,
   DeleteDictionaryItemRequestSchema,
   UpdateDictionaryItemRequestSchema,
@@ -431,6 +432,15 @@ class GrpcClient {
         id: interaction.id,
       })
       return await this.client.deleteInteraction(request, {
+        headers: this.getHeaders(),
+      })
+    })
+  }
+
+  async getInteraction(id: string): Promise<InteractionPb> {
+    return this.withRetry(async () => {
+      const request = create(GetInteractionRequestSchema, { id })
+      return await this.client.getInteraction(request, {
         headers: this.getHeaders(),
       })
     })
