@@ -123,6 +123,14 @@ export class InteractionsRepository {
 
   static async findById(id: string): Promise<Interaction | undefined> {
     const res = await pool.query<Interaction>(
+      'SELECT id, user_id, title, asr_output, llm_output, raw_audio_id, duration_ms, created_at, updated_at, deleted_at FROM interactions WHERE id = $1 AND deleted_at IS NULL',
+      [id],
+    )
+    return res.rows[0]
+  }
+
+  static async findByIdWithAudio(id: string): Promise<Interaction | undefined> {
+    const res = await pool.query<Interaction>(
       'SELECT * FROM interactions WHERE id = $1 AND deleted_at IS NULL',
       [id],
     )
@@ -133,7 +141,8 @@ export class InteractionsRepository {
     userId: string,
     since?: Date,
   ): Promise<Interaction[]> {
-    let query = 'SELECT * FROM interactions WHERE user_id = $1'
+    const columns = 'id, user_id, title, asr_output, llm_output, raw_audio_id, duration_ms, created_at, updated_at, deleted_at'
+    let query = `SELECT ${columns} FROM interactions WHERE user_id = $1`
     const params: any[] = [userId]
 
     if (since) {
