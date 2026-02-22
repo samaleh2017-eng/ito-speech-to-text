@@ -1,6 +1,6 @@
 import './env'
 import './sentry'
-import { app, protocol } from 'electron'
+import { app, dialog, protocol } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import {
   createAppWindow,
@@ -38,6 +38,50 @@ import {
   onAppFocused,
   onAppBlurred,
 } from './serverKeepAlive'
+
+function isSonioxError(error: Error): boolean {
+  const msg = error.message || ''
+  const stack = error.stack || ''
+  const hasSonioxStack =
+    stack.includes('@soniox/node') ||
+    stack.includes('@soniox\\node') ||
+    stack.includes('SonioxStreaming')
+  return (
+    msg.includes('Audio data decode timeout') ||
+    (msg.includes('NetworkError') && hasSonioxStack) ||
+    hasSonioxStack
+  )
+}
+
+process.on('uncaughtException', (error: Error) => {
+  if (isSonioxError(error)) {
+    console.error(
+      '[Main] Caught Soniox uncaught exception (non-fatal):',
+      error.message,
+    )
+    return
+  }
+
+  console.error('[Main] Uncaught exception:', error)
+  dialog.showErrorBox(
+    'A JavaScript error occurred in the main process',
+    `${error.message}\n\n${error.stack}`,
+  )
+})
+
+process.on('unhandledRejection', (reason: unknown) => {
+  const error = reason instanceof Error ? reason : new Error(String(reason))
+
+  if (isSonioxError(error)) {
+    console.error(
+      '[Main] Caught Soniox unhandled rejection (non-fatal):',
+      error.message,
+    )
+    return
+  }
+
+  console.error('[Main] Unhandled rejection:', reason)
+})
 
 protocol.registerSchemesAsPrivileged([
   {

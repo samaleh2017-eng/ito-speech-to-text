@@ -18,6 +18,7 @@ export class SonioxStreamingService extends EventEmitter {
   private session: RealtimeSttSession | null = null
   private isActive = false
   private accumulatedText = ''
+  private hasErrored = false
 
   async start(tempApiKey: string): Promise<void> {
     if (this.isActive) {
@@ -28,6 +29,7 @@ export class SonioxStreamingService extends EventEmitter {
     }
 
     this.accumulatedText = ''
+    this.hasErrored = false
     this.client = new SonioxNodeClient({ api_key: tempApiKey })
 
     this.session = this.client.realtime.stt({
@@ -40,17 +42,21 @@ export class SonioxStreamingService extends EventEmitter {
     })
 
     this.session.on('result', result => {
-      if (result.tokens && result.tokens.length > 0) {
-        for (const token of result.tokens) {
-          this.emit('token', {
-            text: token.text,
-            is_final: token.is_final,
-          })
-          if (token.is_final) {
-            this.accumulatedText += token.text
+      try {
+        if (result.tokens && result.tokens.length > 0) {
+          for (const token of result.tokens) {
+            this.emit('token', {
+              text: token.text,
+              is_final: token.is_final,
+            })
+            if (token.is_final) {
+              this.accumulatedText += token.text
+            }
           }
+          this.emit('final-text', this.accumulatedText)
         }
-        this.emit('final-text', this.accumulatedText)
+      } catch (error) {
+        console.error('[SonioxStreaming] Error processing result:', error)
       }
     })
 
@@ -60,8 +66,10 @@ export class SonioxStreamingService extends EventEmitter {
     })
 
     this.session.on('error', (error: Error) => {
-      console.error('[SonioxStreaming] Error:', error)
-      this.emit('error', error)
+      console.error('[SonioxStreaming] Session error:', error.message)
+      this.hasErrored = true
+      this.isActive = false
+      this.safeEmitError(error)
     })
 
     await this.session.connect()
@@ -69,18 +77,42 @@ export class SonioxStreamingService extends EventEmitter {
     console.log('[SonioxStreaming] Session started')
   }
 
+  private safeEmitError(error: Error): void {
+    if (this.listenerCount('error') > 0) {
+      this.emit('error', error)
+    } else {
+      console.error(
+        '[SonioxStreaming] Unhandled error (no listener):',
+        error.message,
+      )
+    }
+  }
+
   sendAudio(chunk: Buffer): void {
-    if (!this.isActive || !this.session) return
-    this.session.sendAudio(chunk)
+    if (!this.isActive || !this.session || this.hasErrored) return
+    try {
+      this.session.sendAudio(chunk)
+    } catch (error) {
+      console.error('[SonioxStreaming] Error sending audio chunk:', error)
+      this.hasErrored = true
+      this.isActive = false
+      this.safeEmitError(
+        error instanceof Error
+          ? error
+          : new Error('Failed to send audio chunk'),
+      )
+    }
   }
 
   async stop(): Promise<string> {
-    if (!this.isActive || !this.session) {
+    if (!this.session) {
       return this.accumulatedText
     }
 
     try {
-      await this.session.finish()
+      if (this.isActive && !this.hasErrored) {
+        await this.session.finish()
+      }
       this.session.close()
     } catch (error) {
       console.error('[SonioxStreaming] Error during stop:', error)
@@ -106,6 +138,7 @@ export class SonioxStreamingService extends EventEmitter {
       console.error('[SonioxStreaming] Error during cancel:', error)
     }
     this.isActive = false
+    this.hasErrored = false
     this.session = null
     this.client = null
     this.accumulatedText = ''
@@ -117,5 +150,9 @@ export class SonioxStreamingService extends EventEmitter {
 
   isCurrentlyActive(): boolean {
     return this.isActive
+  }
+
+  hasEncounteredError(): boolean {
+    return this.hasErrored
   }
 }

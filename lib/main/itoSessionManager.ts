@@ -33,6 +33,7 @@ export class ItoSessionManager {
   private sonioxAudioHandler: ((chunk: Buffer) => void) | null = null
   private sonioxContext: ContextData | null = null
   private sonioxSessionGeneration = 0
+  private sonioxSessionActive = false
 
   public async startSession(mode: ItoMode) {
     console.log('[itoSessionManager] Starting session with mode:', mode)
@@ -85,6 +86,7 @@ export class ItoSessionManager {
 
   private async startSonioxSession(mode: ItoMode) {
     this.isSonioxMode = true
+    this.sonioxSessionActive = true
     const generation = ++this.sonioxSessionGeneration
 
     const pendingChunks: Buffer[] = []
@@ -116,6 +118,13 @@ export class ItoSessionManager {
         }
 
         this.sonioxService = new SonioxStreamingService()
+        this.sonioxService.on('error', (error: Error) => {
+          console.error(
+            '[itoSessionManager] Soniox streaming error:',
+            error.message,
+          )
+          this.handleSonioxStreamError(error)
+        })
         await this.sonioxService.start(tempKey)
 
         if (generation !== this.sonioxSessionGeneration) {
@@ -213,6 +222,7 @@ export class ItoSessionManager {
 
   public async cancelSession() {
     if (this.isSonioxMode) {
+      this.sonioxSessionActive = false
       this.sonioxSessionGeneration++
 
       this.sonioxService?.cancel()
@@ -317,6 +327,12 @@ export class ItoSessionManager {
   }
 
   private async completeSonioxSession() {
+    if (!this.sonioxSessionActive) {
+      console.warn('[itoSessionManager] completeSonioxSession called but no active session, skipping')
+      return
+    }
+    this.sonioxSessionActive = false
+
     timingCollector.endTiming(TimingEventName.INTERACTION_ACTIVE)
 
     await voiceInputService.stopAudioRecording()
@@ -326,19 +342,27 @@ export class ItoSessionManager {
       this.sonioxAudioHandler = null
     }
 
-    const rawTranscript = this.sonioxService
-      ? await this.sonioxService.stop()
-      : ''
+    recordingStateNotifier.notifyRecordingStopped()
+
+    const service = this.sonioxService
     this.sonioxService = null
+
+    let rawTranscript = ''
+    if (service) {
+      try {
+        rawTranscript = await service.stop()
+      } catch (error) {
+        console.error('[itoSessionManager] Error stopping Soniox service:', error)
+        rawTranscript = service.getAccumulatedText() || ''
+      }
+    }
 
     if (!rawTranscript || rawTranscript.trim().length === 0) {
       console.warn('[itoSessionManager] No speech detected from Soniox')
-      recordingStateNotifier.notifyRecordingStopped()
       this.cleanupSonioxState()
       return
     }
 
-    recordingStateNotifier.notifyRecordingStopped()
     recordingStateNotifier.notifyProcessingStarted()
 
     const mode = this.currentMode
@@ -397,11 +421,11 @@ export class ItoSessionManager {
 
         this.textInserter.insertText(textToInsert)
       } else {
-        log.error('[itoSessionManager] LLM adjustment failed:', response.error)
+        console.error('[itoSessionManager] LLM adjustment failed:', response.error)
         this.textInserter.insertText(rawTranscript)
       }
     } catch (error) {
-      log.error('[itoSessionManager] Error during LLM adjustment:', error)
+      console.error('[itoSessionManager] Error during LLM adjustment:', error)
       this.textInserter.insertText(rawTranscript)
     } finally {
       recordingStateNotifier.notifyProcessingStopped()
@@ -415,7 +439,7 @@ export class ItoSessionManager {
         undefined,
       )
     } catch (error) {
-      log.error('[itoSessionManager] Failed to create interaction:', error)
+      console.error('[itoSessionManager] Failed to create interaction:', error)
     }
 
     this.cleanupSonioxState()
@@ -512,6 +536,41 @@ export class ItoSessionManager {
     timingCollector.clearInteraction()
     interactionManager.clearCurrentInteraction()
     itoStreamController.clearInteractionAudio()
+  }
+
+  private handleSonioxStreamError(error: Error) {
+    if (!this.sonioxSessionActive) {
+      console.warn(
+        '[itoSessionManager] Soniox stream error after session ended, ignoring:',
+        error.message,
+      )
+      return
+    }
+
+    console.error(
+      '[itoSessionManager] Soniox stream error, cleaning up session:',
+      error.message,
+    )
+
+    this.sonioxSessionActive = false
+    this.sonioxSessionGeneration++
+
+    if (this.sonioxAudioHandler) {
+      audioRecorderService.off('audio-chunk', this.sonioxAudioHandler)
+      this.sonioxAudioHandler = null
+    }
+
+    this.sonioxService?.cancel()
+    this.sonioxService = null
+
+    voiceInputService.stopAudioRecording().catch(e => {
+      console.error('[itoSessionManager] Error stopping audio after Soniox error:', e)
+    })
+
+    recordingStateNotifier.notifyRecordingStopped()
+    timingCollector.clearInteraction()
+    interactionManager.clearCurrentInteraction()
+    this.cleanupSonioxState()
   }
 }
 
