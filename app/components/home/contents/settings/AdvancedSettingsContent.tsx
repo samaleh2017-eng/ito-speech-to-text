@@ -29,7 +29,10 @@ const floatLengthLimit = 4
 const asrPromptLengthLimit = 100
 const llmPromptLengthLimit = 1500
 
-const DEFAULT_MODELS_BY_PROVIDER: Record<string, { asrModel?: string; llmModel?: string }> = {
+const DEFAULT_MODELS_BY_PROVIDER: Record<
+  string,
+  { asrModel?: string; llmModel?: string }
+> = {
   groq: {
     asrModel: 'whisper-large-v3-turbo',
     llmModel: 'openai/gpt-oss-120b',
@@ -41,6 +44,9 @@ const DEFAULT_MODELS_BY_PROVIDER: Record<string, { asrModel?: string; llmModel?:
   cerebras: {
     llmModel: 'llama-3.3-70b',
   },
+  soniox: {
+    asrModel: 'stt-rt-v4',
+  },
 }
 
 const llmSettingsConfig: LlmSettingConfig[] = [
@@ -51,7 +57,7 @@ const llmSettingsConfig: LlmSettingConfig[] = [
     description: 'Speech-to-text provider for audio transcription',
     maxLength: modelProviderLengthLimit,
     isSelect: true,
-    options: ['gemini', 'groq'],
+    options: ['gemini', 'groq', 'soniox'],
   },
   {
     name: 'asrModel',
@@ -301,7 +307,10 @@ export default function AdvancedSettingsContent() {
         if (defaultModel) {
           settingsUpdate.asrModel = defaultModel
         }
-      } else if (config.name === 'llmProvider' && typeof newValue === 'string') {
+      } else if (
+        config.name === 'llmProvider' &&
+        typeof newValue === 'string'
+      ) {
         const defaultModel = DEFAULT_MODELS_BY_PROVIDER[newValue]?.llmModel
         if (defaultModel) {
           settingsUpdate.llmModel = defaultModel
@@ -388,7 +397,9 @@ export default function AdvancedSettingsContent() {
       <div className="space-y-6">
         <div>
           <div className="flex items-center justify-between mb-3 ml-1 mr-1">
-            <h3 className="text-md font-sans font-normal text-foreground">LLM Settings</h3>
+            <h3 className="text-md font-sans font-normal text-foreground">
+              LLM Settings
+            </h3>
             <button
               onClick={handleRestoreDefaults}
               className="px-3 py-1 text-sm text-[var(--color-subtext)] hover:text-foreground border border-[var(--border)] rounded-md hover:bg-[var(--color-surface)] transition-colors"

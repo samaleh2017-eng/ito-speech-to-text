@@ -3,6 +3,7 @@ import { ClientProvider } from './providers.js'
 import { groqClient } from './groqClient.js'
 import { cerebrasClient } from './cerebrasClient.js'
 import { geminiClient } from './geminiClient.js'
+import { sonioxClient } from './sonioxClient.js'
 import { ClientUnavailableError } from './errors.js'
 
 export function getAsrProvider(providerName: string): LlmProvider {
@@ -51,6 +52,9 @@ export function getAvailableAsrProviders(): ClientProvider[] {
   }
   if (geminiClient && geminiClient.isAvailable) {
     providers.push(ClientProvider.GEMINI)
+  }
+  if (sonioxClient && sonioxClient.isAvailable) {
+    providers.push(ClientProvider.SONIOX)
   }
   return providers
 }

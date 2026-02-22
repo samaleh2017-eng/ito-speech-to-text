@@ -12,6 +12,7 @@ import 'dotenv/config'
 import { registerLoggingRoutes } from './services/logging.js'
 import { IpLinkRepository } from './db/repo.js'
 import { registerTrialRoutes } from './services/trial.js'
+import { registerSonioxRoutes } from './services/sonioxRoutes.js'
 import {
   registerBillingRoutes,
   registerBillingPublicRoutes,
@@ -165,6 +166,7 @@ export const startServer = async () => {
 
     await registerTrialRoutes(fastify, { requireAuth: REQUIRE_AUTH })
     await registerBillingRoutes(fastify, { requireAuth: REQUIRE_AUTH })
+    await registerSonioxRoutes(fastify, { requireAuth: REQUIRE_AUTH })
   })
 
   connectRpcServer.setErrorHandler((error, _, reply) => {

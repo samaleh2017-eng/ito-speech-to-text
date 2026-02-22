@@ -3056,6 +3056,11 @@
   dependencies:
     "@sinonjs/commons" "^3.0.1"
 
+"@soniox/node@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@soniox/node/-/node-1.1.1.tgz#b21195a4f0c1ae00c8efe0ba6bf947794a085677"
+  integrity sha512-m4SYLSavueqxZqXE90LtaDEo3XJsdxf0iDEB54Scd0yBz4DSj+ElxdmDHaT2B5X0vbHyHXSnHaZ7R9DMAM/GQA==
+
 "@supabase/auth-js@2.95.3":
   version "2.95.3"
   resolved "https://registry.yarnpkg.com/@supabase/auth-js/-/auth-js-2.95.3.tgz#217883fafe10cad57ab3327bff3c0b3381fac5b1"
@@ -7525,11 +7530,6 @@ lru-cache@^7.14.1:
   version "7.18.3"
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-7.18.3.tgz#f793896e0fd0e954a59dfdd82f0773808df6aa89"
   integrity sha512-jumlc0BIUrS3qJGgIkWZsyfAM7NCWiBcCDhnd+3NNM5KbBmLTgHVfWBcg6W+rLUsIpzpERPsvwUP7CckAQSOoA==
-
-lucide-react@^0.511.0:
-  version "0.511.0"
-  resolved "https://registry.yarnpkg.com/lucide-react/-/lucide-react-0.511.0.tgz#1dfef3065c725ac83f5fe0a6f02d1e0b0c36e641"
-  integrity sha512-VK5a2ydJ7xm8GvBeKLS9mu1pVK6ucef9780JVUjw6bAjJL/QXnd4Y0p7SPeOUMC27YhzNCZvm5d/QX0Tp3rc0w==
 
 macos-release@^3.3.0:
   version "3.4.0"
