@@ -326,7 +326,9 @@ export class SyncService {
         processedCount++
       }
     }
-    return processedCount
+    // Return total count (not just processed) so the sync cursor advances
+    // even when all interactions are already up-to-date locally
+    return remoteInteractions.length
   }
 
   private async pullDictionaryItems(lastSyncedAt?: string): Promise<number> {

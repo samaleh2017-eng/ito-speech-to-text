@@ -107,7 +107,7 @@ export class InteractionsRepository {
     const res = await pool.query<Interaction>(
       `INSERT INTO interactions (id, user_id, title, asr_output, llm_output, raw_audio_id, duration_ms)
        VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING *`,
+       RETURNING id, user_id, title, asr_output, llm_output, raw_audio_id, duration_ms, created_at, updated_at, deleted_at`,
       [
         interactionData.id,
         interactionData.userId,
@@ -163,7 +163,7 @@ export class InteractionsRepository {
       `UPDATE interactions
        SET title = $1, updated_at = current_timestamp
        WHERE id = $2 AND deleted_at IS NULL
-       RETURNING *`,
+       RETURNING id, user_id, title, asr_output, llm_output, raw_audio_id, duration_ms, created_at, updated_at, deleted_at`,
       [interactionData.title, interactionData.id],
     )
     return res.rows[0]
