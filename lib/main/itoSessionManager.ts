@@ -16,7 +16,8 @@ import { itoHttpClient } from '../clients/itoHttpClient'
 
 export class ItoSessionManager {
   private readonly MINIMUM_AUDIO_DURATION_MS = 100
-  private readonly INSERTION_DEBOUNCE_MS = 500
+  private readonly SONIOX_CONNECT_TIMEOUT_MS = 10_000
+  private readonly SONIOX_MAX_PENDING_BYTES = 512 * 1024
 
   private textInserter = new TextInserter()
   private streamResponsePromise: Promise<{
@@ -31,8 +32,7 @@ export class ItoSessionManager {
   private currentMode: ItoMode = ItoMode.TRANSCRIBE
   private sonioxAudioHandler: ((chunk: Buffer) => void) | null = null
   private sonioxContext: ContextData | null = null
-  private insertionBuffer = ''
-  private insertionTimer: ReturnType<typeof setTimeout> | null = null
+  private sonioxSessionGeneration = 0
 
   public async startSession(mode: ItoMode) {
     console.log('[itoSessionManager] Starting session with mode:', mode)
@@ -85,43 +85,74 @@ export class ItoSessionManager {
 
   private async startSonioxSession(mode: ItoMode) {
     this.isSonioxMode = true
-    this.insertionBuffer = ''
+    const generation = ++this.sonioxSessionGeneration
 
-    let tempKey: string
-    try {
-      tempKey = await sonioxTempKeyManager.getKey()
-    } catch (error) {
-      log.error('[itoSessionManager] Failed to get Soniox temp key:', error)
-      this.isSonioxMode = false
-      recordingStateNotifier.notifyRecordingStopped()
-      return
-    }
-
-    this.sonioxService = new SonioxStreamingService()
-
-    if (mode === ItoMode.TRANSCRIBE) {
-      let lastInsertedLength = 0
-
-      this.sonioxService.on('final-text', (text: string) => {
-        const newText = text.substring(lastInsertedLength)
-        if (newText.length > 0) {
-          this.insertionBuffer += newText
-          lastInsertedLength = text.length
-          this.scheduleInsertion()
-        }
-        recordingStateNotifier.notifyStreamingText(text)
-      })
-    }
-
-    await this.sonioxService.start(tempKey)
+    const pendingChunks: Buffer[] = []
+    let pendingBytes = 0
+    let sonioxReady = false
 
     this.sonioxAudioHandler = (chunk: Buffer) => {
-      this.sonioxService?.sendAudio(chunk)
+      if (sonioxReady && this.sonioxService) {
+        this.sonioxService.sendAudio(chunk)
+      } else if (pendingBytes < this.SONIOX_MAX_PENDING_BYTES) {
+        pendingChunks.push(chunk)
+        pendingBytes += chunk.length
+      }
     }
     audioRecorderService.on('audio-chunk', this.sonioxAudioHandler)
 
     voiceInputService.startAudioRecording()
     recordingStateNotifier.notifyRecordingStarted(mode)
+
+    try {
+      const connectWithTimeout = async () => {
+        const tempKey = await sonioxTempKeyManager.getKey()
+
+        if (generation !== this.sonioxSessionGeneration) {
+          console.log(
+            '[itoSessionManager] Soniox session was cancelled during key fetch, aborting',
+          )
+          return false
+        }
+
+        this.sonioxService = new SonioxStreamingService()
+        await this.sonioxService.start(tempKey)
+
+        if (generation !== this.sonioxSessionGeneration) {
+          console.log(
+            '[itoSessionManager] Soniox session was cancelled during connect, cleaning up',
+          )
+          this.sonioxService.cancel()
+          this.sonioxService = null
+          return false
+        }
+
+        return true
+      }
+
+      const timeout = new Promise<never>((_, reject) =>
+        setTimeout(
+          () => reject(new Error('Soniox connection timed out')),
+          this.SONIOX_CONNECT_TIMEOUT_MS,
+        ),
+      )
+
+      const connected = await Promise.race([connectWithTimeout(), timeout])
+
+      if (connected) {
+        sonioxReady = true
+        for (const chunk of pendingChunks) {
+          this.sonioxService!.sendAudio(chunk)
+        }
+        pendingChunks.length = 0
+        console.log(
+          '[itoSessionManager] Soniox connected, buffered chunks flushed',
+        )
+      }
+    } catch (error) {
+      log.error('[itoSessionManager] Failed to start Soniox session:', error)
+      this.sonioxService = null
+    }
 
     this.gatherAndCacheContext(mode).catch(error => {
       log.error(
@@ -132,25 +163,6 @@ export class ItoSessionManager {
 
     timingCollector.startInteraction()
     timingCollector.startTiming(TimingEventName.INTERACTION_ACTIVE)
-  }
-
-  private scheduleInsertion() {
-    if (this.insertionTimer) return
-    this.insertionTimer = setTimeout(() => {
-      this.flushInsertionBuffer()
-    }, this.INSERTION_DEBOUNCE_MS)
-  }
-
-  private flushInsertionBuffer() {
-    if (this.insertionTimer) {
-      clearTimeout(this.insertionTimer)
-      this.insertionTimer = null
-    }
-    if (this.insertionBuffer.length > 0) {
-      const textToInsert = this.insertionBuffer
-      this.insertionBuffer = ''
-      this.textInserter.insertText(textToInsert)
-    }
   }
 
   private async gatherAndCacheContext(mode: ItoMode) {
@@ -201,6 +213,8 @@ export class ItoSessionManager {
 
   public async cancelSession() {
     if (this.isSonioxMode) {
+      this.sonioxSessionGeneration++
+
       this.sonioxService?.cancel()
       this.sonioxService = null
       if (this.sonioxAudioHandler) {
@@ -312,8 +326,6 @@ export class ItoSessionManager {
       this.sonioxAudioHandler = null
     }
 
-    this.flushInsertionBuffer()
-
     const rawTranscript = this.sonioxService
       ? await this.sonioxService.stop()
       : ''
@@ -327,88 +339,72 @@ export class ItoSessionManager {
     }
 
     recordingStateNotifier.notifyRecordingStopped()
+    recordingStateNotifier.notifyProcessingStarted()
 
     const mode = this.currentMode
 
-    if (mode === ItoMode.EDIT) {
-      recordingStateNotifier.notifyProcessingStarted()
+    try {
+      const { llm } = getAdvancedSettings()
+      const ctx = this.sonioxContext
 
-      try {
-        const { llm } = getAdvancedSettings()
-        const ctx = this.sonioxContext
+      const requestBody: Record<string, any> = {
+        transcript: rawTranscript,
+        mode: mode === ItoMode.EDIT ? 'edit' : 'transcribe',
+        llmSettings: {
+          llmProvider: llm?.llmProvider || undefined,
+          llmModel: llm?.llmModel || undefined,
+          llmTemperature: llm?.llmTemperature || undefined,
+          transcriptionPrompt: llm?.transcriptionPrompt || undefined,
+          editingPrompt: llm?.editingPrompt || undefined,
+        },
+      }
 
-        const requestBody: Record<string, any> = {
-          transcript: rawTranscript,
-          mode: 'edit',
-          llmSettings: {
-            llmProvider: llm?.llmProvider || undefined,
-            llmModel: llm?.llmModel || undefined,
-            llmTemperature: llm?.llmTemperature || undefined,
-            transcriptionPrompt: llm?.transcriptionPrompt || undefined,
-            editingPrompt: llm?.editingPrompt || undefined,
-          },
+      if (ctx) {
+        requestBody.context = {
+          windowTitle: ctx.windowTitle || '',
+          appName: ctx.appName || '',
+          contextText: ctx.contextText || '',
+          browserUrl: ctx.browserUrl || undefined,
+          browserDomain: ctx.browserDomain || undefined,
+          tonePrompt: ctx.tone?.promptTemplate || undefined,
+          userDetailsContext: ctx.userDetails
+            ? this.buildUserDetailsContextString(ctx.userDetails)
+            : undefined,
+        }
+        if (ctx.replacements && ctx.replacements.length > 0) {
+          requestBody.replacements = ctx.replacements.map(r => ({
+            fromText: r.from,
+            toText: r.to,
+          }))
+        }
+      }
+
+      const response = await itoHttpClient.post(
+        '/adjust-transcript',
+        requestBody,
+        { requireAuth: true },
+      )
+
+      if (response.success && response.transcript) {
+        let textToInsert = response.transcript
+
+        const { grammarServiceEnabled } = getAdvancedSettings()
+        if (grammarServiceEnabled) {
+          textToInsert = this.grammarRulesService.setCaseFirstWord(textToInsert)
+          textToInsert =
+            this.grammarRulesService.addLeadingSpaceIfNeeded(textToInsert)
         }
 
-        if (ctx) {
-          requestBody.context = {
-            windowTitle: ctx.windowTitle || '',
-            appName: ctx.appName || '',
-            contextText: ctx.contextText || '',
-            browserUrl: ctx.browserUrl || undefined,
-            browserDomain: ctx.browserDomain || undefined,
-            tonePrompt: ctx.tone?.promptTemplate || undefined,
-            userDetailsContext: ctx.userDetails
-              ? this.buildUserDetailsContextString(ctx.userDetails)
-              : undefined,
-          }
-          if (ctx.replacements && ctx.replacements.length > 0) {
-            requestBody.replacements = ctx.replacements.map(r => ({
-              fromText: r.from,
-              toText: r.to,
-            }))
-          }
-        }
-
-        const response = await itoHttpClient.post(
-          '/adjust-transcript',
-          requestBody,
-          { requireAuth: true },
-        )
-
-        if (response.success && response.transcript) {
-          let textToInsert = response.transcript
-
-          const { grammarServiceEnabled } = getAdvancedSettings()
-          if (grammarServiceEnabled) {
-            textToInsert =
-              this.grammarRulesService.setCaseFirstWord(textToInsert)
-            textToInsert =
-              this.grammarRulesService.addLeadingSpaceIfNeeded(textToInsert)
-          }
-
-          this.textInserter.insertText(textToInsert)
-        } else {
-          log.error(
-            '[itoSessionManager] LLM adjustment failed:',
-            response.error,
-          )
-          this.textInserter.insertText(rawTranscript)
-        }
-      } catch (error) {
-        log.error('[itoSessionManager] Error during LLM adjustment:', error)
+        this.textInserter.insertText(textToInsert)
+      } else {
+        log.error('[itoSessionManager] LLM adjustment failed:', response.error)
         this.textInserter.insertText(rawTranscript)
-      } finally {
-        recordingStateNotifier.notifyProcessingStopped()
       }
-    } else {
-      if (
-        this.sonioxContext?.replacements &&
-        this.sonioxContext.replacements.length > 0
-      ) {
-        console.log(
-          '[itoSessionManager] Case 1 dictionary replacements available but not applied mid-stream. Use Case 2 for replacement support.',
-        )
-      }
+    } catch (error) {
+      log.error('[itoSessionManager] Error during LLM adjustment:', error)
+      this.textInserter.insertText(rawTranscript)
+    } finally {
+      recordingStateNotifier.notifyProcessingStopped()
     }
 
     try {
@@ -455,11 +451,6 @@ export class ItoSessionManager {
     interactionManager.clearCurrentInteraction()
     this.isSonioxMode = false
     this.sonioxContext = null
-    this.insertionBuffer = ''
-    if (this.insertionTimer) {
-      clearTimeout(this.insertionTimer)
-      this.insertionTimer = null
-    }
   }
 
   private async handleTranscriptionResponse(result: {

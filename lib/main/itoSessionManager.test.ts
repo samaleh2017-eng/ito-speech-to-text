@@ -22,6 +22,7 @@ const mockRecordingStateNotifier = {
   notifyRecordingStopped: mock(),
   notifyProcessingStarted: mock(),
   notifyProcessingStopped: mock(),
+  notifyStreamingText: mock(),
 }
 mock.module('./recordingStateNotifier', () => ({
   recordingStateNotifier: mockRecordingStateNotifier,
@@ -42,6 +43,7 @@ const mockItoStreamController = {
   getAudioDurationMs: mock(() => 1000),
   endInteraction: mock(),
   cancelTranscription: mock(),
+  clearInteractionAudio: mock(),
 }
 mock.module('./itoStreamController', () => ({
   itoStreamController: mockItoStreamController,
@@ -128,6 +130,53 @@ mock.module('electron-log', () => ({
   },
 }))
 
+const mockSonioxTempKeyManager = {
+  getKey: mock(() => Promise.resolve('test-soniox-key')),
+  warmup: mock(() => Promise.resolve()),
+  invalidate: mock(),
+}
+mock.module('./soniox/SonioxTempKeyManager', () => ({
+  sonioxTempKeyManager: mockSonioxTempKeyManager,
+}))
+
+const mockSonioxStreamingService = {
+  start: mock(() => Promise.resolve()),
+  stop: mock(() => Promise.resolve('transcribed text from soniox')),
+  cancel: mock(),
+  sendAudio: mock(),
+  on: mock(),
+  off: mock(),
+  removeAllListeners: mock(),
+}
+mock.module('./soniox/SonioxStreamingService', () => ({
+  SonioxStreamingService: class MockSonioxStreamingService {
+    start = mockSonioxStreamingService.start
+    stop = mockSonioxStreamingService.stop
+    cancel = mockSonioxStreamingService.cancel
+    sendAudio = mockSonioxStreamingService.sendAudio
+    on = mockSonioxStreamingService.on
+    off = mockSonioxStreamingService.off
+    removeAllListeners = mockSonioxStreamingService.removeAllListeners
+  },
+}))
+
+const mockAudioRecorderService = {
+  on: mock(),
+  off: mock(),
+}
+mock.module('../media/audio', () => ({
+  audioRecorderService: mockAudioRecorderService,
+}))
+
+const mockItoHttpClient = {
+  post: mock(() =>
+    Promise.resolve({ success: true, transcript: 'adjusted transcript' }),
+  ),
+}
+mock.module('../clients/itoHttpClient', () => ({
+  itoHttpClient: mockItoHttpClient,
+}))
+
 beforeEach(() => {
   console.log = mock()
   console.error = mock()
@@ -146,6 +195,16 @@ describe('itoSessionManager', () => {
     Object.values(mockContextGrabber).forEach(mockFn => mockFn.mockClear())
     Object.values(mockGrammarRulesService).forEach(mockFn => mockFn.mockClear())
     Object.values(mockTimingCollector).forEach(mockFn => mockFn.mockClear())
+    Object.values(mockSonioxTempKeyManager).forEach(mockFn =>
+      mockFn.mockClear(),
+    )
+    Object.values(mockSonioxStreamingService).forEach(mockFn =>
+      mockFn.mockClear(),
+    )
+    Object.values(mockAudioRecorderService).forEach(mockFn =>
+      mockFn.mockClear(),
+    )
+    Object.values(mockItoHttpClient).forEach(mockFn => mockFn.mockClear())
 
     mockGetAdvancedSettings.mockClear()
 
@@ -162,6 +221,14 @@ describe('itoSessionManager', () => {
     mockInteractionManager.initialize.mockReturnValue('test-interaction-123')
     mockGetAdvancedSettings.mockReturnValue({
       grammarServiceEnabled: false,
+    })
+
+    mockSonioxTempKeyManager.getKey.mockResolvedValue('test-soniox-key')
+    mockSonioxStreamingService.start.mockResolvedValue(undefined)
+    mockSonioxStreamingService.stop.mockResolvedValue('raw soniox text')
+    mockItoHttpClient.post.mockResolvedValue({
+      success: true,
+      transcript: 'adjusted transcript',
     })
   })
 
@@ -451,6 +518,219 @@ describe('itoSessionManager', () => {
     expect(mockVoiceInputService.startAudioRecording).toHaveBeenCalled()
   })
 
+  describe('Soniox mode', () => {
+    beforeEach(() => {
+      mockGetAdvancedSettings.mockReturnValue({
+        grammarServiceEnabled: false,
+        llm: {
+          asrProvider: 'soniox',
+          llmProvider: 'groq',
+          llmModel: 'llama3',
+          llmTemperature: 0.7,
+        },
+      })
+
+      mockSonioxTempKeyManager.getKey.mockResolvedValue('test-key')
+      mockSonioxStreamingService.stop.mockResolvedValue('raw soniox text')
+      mockItoHttpClient.post.mockResolvedValue({
+        success: true,
+        transcript: 'adjusted text',
+      })
+    })
+
+    test('should start recording immediately without waiting for Soniox connection', async () => {
+      let resolveKey: (value: string) => void
+      const keyPromise = new Promise<string>(resolve => {
+        resolveKey = resolve
+      })
+      mockSonioxTempKeyManager.getKey.mockReturnValue(keyPromise)
+
+      const { ItoSessionManager } = await import('./itoSessionManager')
+      const session = new ItoSessionManager()
+
+      const startPromise = session.startSession(ItoMode.TRANSCRIBE)
+
+      // Recording should start immediately, before key resolves
+      await new Promise(resolve => setTimeout(resolve, 10))
+      expect(mockVoiceInputService.startAudioRecording).toHaveBeenCalled()
+      expect(
+        mockRecordingStateNotifier.notifyRecordingStarted,
+      ).toHaveBeenCalledWith(ItoMode.TRANSCRIBE)
+
+      // Audio handler should be registered for buffering
+      expect(mockAudioRecorderService.on).toHaveBeenCalledWith(
+        'audio-chunk',
+        expect.any(Function),
+      )
+
+      // Now resolve the key
+      resolveKey!('test-key')
+      await startPromise
+    })
+
+    test('should complete session with LLM adjustment in TRANSCRIBE mode', async () => {
+      const { ItoSessionManager } = await import('./itoSessionManager')
+      const session = new ItoSessionManager()
+
+      await session.startSession(ItoMode.TRANSCRIBE)
+      await new Promise(resolve => setTimeout(resolve, 10))
+      await session.completeSession()
+
+      expect(mockItoHttpClient.post).toHaveBeenCalledWith(
+        '/adjust-transcript',
+        expect.objectContaining({
+          transcript: 'raw soniox text',
+          mode: 'transcribe',
+        }),
+        { requireAuth: true },
+      )
+      expect(mockTextInserter.insertText).toHaveBeenCalledWith('adjusted text')
+      expect(
+        mockRecordingStateNotifier.notifyProcessingStarted,
+      ).toHaveBeenCalled()
+      expect(
+        mockRecordingStateNotifier.notifyProcessingStopped,
+      ).toHaveBeenCalled()
+    })
+
+    test('should complete session with LLM adjustment in EDIT mode', async () => {
+      const { ItoSessionManager } = await import('./itoSessionManager')
+      const session = new ItoSessionManager()
+
+      await session.startSession(ItoMode.EDIT)
+      await new Promise(resolve => setTimeout(resolve, 10))
+      await session.completeSession()
+
+      expect(mockItoHttpClient.post).toHaveBeenCalledWith(
+        '/adjust-transcript',
+        expect.objectContaining({
+          transcript: 'raw soniox text',
+          mode: 'edit',
+        }),
+        { requireAuth: true },
+      )
+      expect(mockTextInserter.insertText).toHaveBeenCalledWith('adjusted text')
+    })
+
+    test('should fallback to raw transcript when LLM fails', async () => {
+      mockItoHttpClient.post.mockResolvedValue({
+        success: false,
+        error: 'LLM error',
+      })
+
+      const { ItoSessionManager } = await import('./itoSessionManager')
+      const session = new ItoSessionManager()
+
+      await session.startSession(ItoMode.TRANSCRIBE)
+      await new Promise(resolve => setTimeout(resolve, 10))
+      await session.completeSession()
+
+      expect(mockTextInserter.insertText).toHaveBeenCalledWith(
+        'raw soniox text',
+      )
+    })
+
+    test('should handle cancel during Soniox connection', async () => {
+      let resolveKey: (value: string) => void
+      const keyPromise = new Promise<string>(resolve => {
+        resolveKey = resolve
+      })
+      mockSonioxTempKeyManager.getKey.mockReturnValue(keyPromise)
+
+      const { ItoSessionManager } = await import('./itoSessionManager')
+      const session = new ItoSessionManager()
+
+      const startPromise = session.startSession(ItoMode.TRANSCRIBE)
+
+      // Cancel before key resolves
+      await session.cancelSession()
+
+      expect(mockVoiceInputService.stopAudioRecording).toHaveBeenCalled()
+      expect(
+        mockRecordingStateNotifier.notifyRecordingStopped,
+      ).toHaveBeenCalled()
+
+      // Resolve key — should be a no-op due to generation mismatch
+      resolveKey!('test-key')
+      await startPromise
+
+      // SonioxStreamingService.start should NOT have been called
+      expect(mockSonioxStreamingService.start).not.toHaveBeenCalled()
+    })
+
+    test('should not show streaming text in pill during recording', async () => {
+      const { ItoSessionManager } = await import('./itoSessionManager')
+      const session = new ItoSessionManager()
+
+      await session.startSession(ItoMode.TRANSCRIBE)
+      await new Promise(resolve => setTimeout(resolve, 10))
+      await session.completeSession()
+
+      expect(
+        mockRecordingStateNotifier.notifyStreamingText,
+      ).not.toHaveBeenCalled()
+    })
+
+    test('should handle Soniox connection failure gracefully', async () => {
+      mockSonioxTempKeyManager.getKey.mockRejectedValue(
+        new Error('key fetch failed'),
+      )
+
+      const { ItoSessionManager } = await import('./itoSessionManager')
+      const session = new ItoSessionManager()
+
+      await session.startSession(ItoMode.TRANSCRIBE)
+      await new Promise(resolve => setTimeout(resolve, 10))
+      await session.completeSession()
+
+      // No speech detected path — sonioxService is null so rawTranscript is ''
+      expect(mockTextInserter.insertText).not.toHaveBeenCalled()
+      expect(
+        mockRecordingStateNotifier.notifyRecordingStopped,
+      ).toHaveBeenCalled()
+    })
+
+    test('should cap pending buffer and not grow unbounded', async () => {
+      let resolveKey: (value: string) => void
+      const keyPromise = new Promise<string>(resolve => {
+        resolveKey = resolve
+      })
+      mockSonioxTempKeyManager.getKey.mockReturnValue(keyPromise)
+
+      const { ItoSessionManager } = await import('./itoSessionManager')
+      const session = new ItoSessionManager()
+
+      const startPromise = session.startSession(ItoMode.TRANSCRIBE)
+      await new Promise(resolve => setTimeout(resolve, 10))
+
+      // Grab the audio handler that was registered
+      const audioHandler = mockAudioRecorderService.on.mock.calls.find(
+        (c: any[]) => c[0] === 'audio-chunk',
+      )?.[1] as (chunk: Buffer) => void
+      expect(audioHandler).toBeDefined()
+
+      // Send a massive chunk that exceeds the cap (512KB)
+      const hugeChunk = Buffer.alloc(600 * 1024)
+      audioHandler(hugeChunk)
+
+      // Further chunks should be silently dropped
+      const extraChunk = Buffer.alloc(1024)
+      audioHandler(extraChunk)
+
+      // Resolve so the session completes
+      resolveKey!('test-key')
+      await startPromise
+
+      // The service should have received the first chunk (under cap) but not the second
+      expect(mockSonioxStreamingService.sendAudio).toHaveBeenCalledTimes(1)
+      expect(mockSonioxStreamingService.sendAudio).toHaveBeenCalledWith(
+        hugeChunk,
+      )
+
+      await session.cancelSession()
+    })
+  })
+
   test('should handle complete session flow', async () => {
     const { ItoSessionManager } = await import('./itoSessionManager')
     const session = new ItoSessionManager()
@@ -475,5 +755,34 @@ describe('itoSessionManager', () => {
     expect(mockItoStreamController.endInteraction).toHaveBeenCalled()
     expect(mockTextInserter.insertText).toHaveBeenCalledWith(mockTranscript)
     expect(mockRecordingStateNotifier.notifyRecordingStopped).toHaveBeenCalled()
+  })
+
+  test('should guard setMode against Soniox mode', async () => {
+    mockGetAdvancedSettings.mockReturnValue({
+      grammarServiceEnabled: false,
+      llm: {
+        asrProvider: 'soniox',
+        llmProvider: 'groq',
+        llmModel: 'llama3',
+        llmTemperature: 0.7,
+      },
+    })
+
+    const { ItoSessionManager } = await import('./itoSessionManager')
+    const session = new ItoSessionManager()
+
+    await session.startSession(ItoMode.TRANSCRIBE)
+    await new Promise(resolve => setTimeout(resolve, 10))
+
+    mockItoStreamController.setMode.mockClear()
+    session.setMode(ItoMode.EDIT)
+
+    // In Soniox mode, itoStreamController.setMode should NOT be called
+    expect(mockItoStreamController.setMode).not.toHaveBeenCalled()
+    expect(
+      mockRecordingStateNotifier.notifyRecordingStarted,
+    ).toHaveBeenCalledWith(ItoMode.EDIT)
+
+    await session.cancelSession()
   })
 })

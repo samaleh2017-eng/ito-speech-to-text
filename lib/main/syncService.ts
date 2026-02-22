@@ -10,6 +10,7 @@ import mainStore from './store'
 import { STORE_KEYS } from '../constants/store-keys'
 import type { AdvancedSettings } from './store'
 import { mainWindow } from './app'
+import { sonioxTempKeyManager } from './soniox/SonioxTempKeyManager'
 
 /**
  * Execute async tasks with a concurrency limit.
@@ -34,9 +35,8 @@ async function parallelLimit<T>(
     }
   }
 
-  const workers = Array.from(
-    { length: Math.min(limit, tasks.length) },
-    () => runNext(),
+  const workers = Array.from({ length: Math.min(limit, tasks.length) }, () =>
+    runNext(),
   )
   await Promise.all(workers)
   return results
@@ -157,7 +157,7 @@ export class SyncService {
     const modifiedNotes = await NotesTable.findModifiedSince(lastSyncedAt)
     if (modifiedNotes.length === 0) return 0
 
-    const tasks = modifiedNotes.map((note) => () => {
+    const tasks = modifiedNotes.map(note => () => {
       if (new Date(note.created_at) > new Date(lastSyncedAt)) {
         return grpcClient.createNote(note)
       } else if (note.deleted_at) {
@@ -184,7 +184,7 @@ export class SyncService {
       await InteractionsTable.findModifiedSince(lastSyncedAt)
     if (modifiedInteractions.length === 0) return 0
 
-    const tasks = modifiedInteractions.map((interaction) => () => {
+    const tasks = modifiedInteractions.map(interaction => () => {
       if (new Date(interaction.created_at) > new Date(lastSyncedAt)) {
         return grpcClient.createInteraction(interaction)
       } else if (interaction.deleted_at) {
@@ -210,7 +210,7 @@ export class SyncService {
     const modifiedItems = await DictionaryTable.findModifiedSince(lastSyncedAt)
     if (modifiedItems.length === 0) return 0
 
-    const tasks = modifiedItems.map((item) => () => {
+    const tasks = modifiedItems.map(item => () => {
       if (new Date(item.created_at) > new Date(lastSyncedAt)) {
         return grpcClient.createDictionaryItem(item)
       } else if (item.deleted_at) {
@@ -403,6 +403,13 @@ export class SyncService {
       // since advanced settings are typically managed through the UI which
       // directly calls the server API. This sync is primarily for pulling
       // changes made on other devices or through other clients.
+
+      const currentSettings = mainStore.get(
+        STORE_KEYS.ADVANCED_SETTINGS,
+      ) as AdvancedSettings
+      if (currentSettings?.llm?.asrProvider === 'soniox') {
+        sonioxTempKeyManager.warmup().catch(() => {})
+      }
     } catch (error) {
       console.error('Failed to sync advanced settings:', error)
     }

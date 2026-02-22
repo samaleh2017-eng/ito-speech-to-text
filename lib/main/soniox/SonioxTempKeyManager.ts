@@ -39,6 +39,15 @@ export class SonioxTempKeyManager {
     this.cachedKey = null
     this.keyExpiresAt = 0
   }
+
+  async warmup(): Promise<void> {
+    try {
+      await this.getKey()
+      console.log('[SonioxTempKey] Key pre-warmed successfully')
+    } catch (error) {
+      console.warn('[SonioxTempKey] Warmup failed (will retry on use):', error)
+    }
+  }
 }
 
 export const sonioxTempKeyManager = new SonioxTempKeyManager()
