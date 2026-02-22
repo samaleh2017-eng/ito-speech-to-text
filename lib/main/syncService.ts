@@ -65,6 +65,10 @@ export class SyncService {
   private isSyncing = false
   private syncInterval: NodeJS.Timeout | null = null
   private static instance: SyncService
+  private lastActivityTimestamp: number = Date.now()
+  private readonly ACTIVE_SYNC_INTERVAL = 30 * 1000
+  private readonly IDLE_SYNC_INTERVAL = 5 * 60 * 1000
+  private readonly IDLE_THRESHOLD = 2 * 60 * 1000
 
   private constructor() {
     // Private constructor to ensure singleton pattern
@@ -78,14 +82,13 @@ export class SyncService {
   }
 
   public async start() {
-    // Clear any existing interval
     if (this.syncInterval) {
       clearInterval(this.syncInterval)
     }
 
-    // Initial sync on startup, then schedule periodic syncs
     await this.runSync()
-    this.syncInterval = setInterval(() => this.runSync(), 1000 * 30) // Sync every 30 seconds
+    this.lastActivityTimestamp = Date.now()
+    this.syncInterval = setInterval(() => this.runSync(), this.ACTIVE_SYNC_INTERVAL)
   }
 
   public stop() {
@@ -94,6 +97,24 @@ export class SyncService {
       this.syncInterval = null
     }
     this.isSyncing = false
+  }
+
+  /** Call this when the user performs an action (e.g., completes a dictation) */
+  public notifyActivity() {
+    this.lastActivityTimestamp = Date.now()
+    this.restartSyncInterval()
+  }
+
+  private restartSyncInterval() {
+    if (this.syncInterval) {
+      clearInterval(this.syncInterval)
+    }
+    const interval = this.isIdle() ? this.IDLE_SYNC_INTERVAL : this.ACTIVE_SYNC_INTERVAL
+    this.syncInterval = setInterval(() => this.runSync(), interval)
+  }
+
+  private isIdle(): boolean {
+    return (Date.now() - this.lastActivityTimestamp) > this.IDLE_THRESHOLD
   }
 
   private async runSync() {
@@ -149,6 +170,13 @@ export class SyncService {
     } catch (error) {
       console.error('Sync cycle failed:', error)
     } finally {
+      // Adjust sync interval based on activity
+      const nextInterval = this.isIdle() ? this.IDLE_SYNC_INTERVAL : this.ACTIVE_SYNC_INTERVAL
+      if (this.syncInterval) {
+        clearInterval(this.syncInterval)
+        this.syncInterval = setInterval(() => this.runSync(), nextInterval)
+      }
+
       this.isSyncing = false
     }
   }
@@ -258,26 +286,24 @@ export class SyncService {
   private async pullInteractions(lastSyncedAt?: string): Promise<number> {
     const remoteInteractions =
       await grpcClient.listInteractionsSince(lastSyncedAt)
+    let processedCount = 0
     if (remoteInteractions.length > 0) {
       for (const remoteInteraction of remoteInteractions) {
         if (remoteInteraction.deletedAt) {
           await InteractionsTable.softDelete(remoteInteraction.id)
+          processedCount++
           continue
         }
 
-        // Convert Uint8Array back to Buffer
-        let audioBuffer: Buffer | null = null
-        if (
-          remoteInteraction.rawAudio &&
-          remoteInteraction.rawAudio.length > 0
-        ) {
-          audioBuffer = Buffer.from(
-            remoteInteraction.rawAudio.buffer,
-            remoteInteraction.rawAudio.byteOffset,
-            remoteInteraction.rawAudio.byteLength,
-          )
+        // Skip if local interaction exists and is already up to date
+        // Uses lightweight query (no blob loading) to compare timestamps
+        const localUpdatedAt = await InteractionsTable.getUpdatedAt(remoteInteraction.id)
+        if (localUpdatedAt && localUpdatedAt >= remoteInteraction.updatedAt) {
+          continue
         }
 
+        // Server no longer sends rawAudio bytes in listInteractions — only rawAudioId
+        // Audio is fetched on-demand via GetInteraction when user clicks Play/Download
         const localInteraction: Interaction = {
           id: remoteInteraction.id,
           user_id: remoteInteraction.userId || null,
@@ -288,18 +314,19 @@ export class SyncService {
           llm_output: remoteInteraction.llmOutput
             ? JSON.parse(remoteInteraction.llmOutput)
             : null,
-          raw_audio: audioBuffer,
+          raw_audio: null,
           duration_ms: remoteInteraction.durationMs || 0,
           created_at: remoteInteraction.createdAt,
           updated_at: remoteInteraction.updatedAt,
           deleted_at: remoteInteraction.deletedAt || null,
-          raw_audio_id: remoteInteraction.rawAudioId,
+          raw_audio_id: remoteInteraction.rawAudioId || null,
           sample_rate: null,
         }
         await InteractionsTable.upsert(localInteraction)
+        processedCount++
       }
     }
-    return remoteInteractions.length
+    return processedCount
   }
 
   private async pullDictionaryItems(lastSyncedAt?: string): Promise<number> {
