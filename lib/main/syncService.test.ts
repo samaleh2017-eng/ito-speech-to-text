@@ -560,11 +560,11 @@ describe('SyncService Integration Tests', () => {
 
       await syncService.start()
 
-      // Should convert Uint8Array to Buffer and upsert
+      // Audio stays on S3 — raw_audio is null, COALESCE in upsert preserves local audio
       expect(mockInteractionsTable.upsert).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'audio-interaction',
-          raw_audio: expect.any(Buffer),
+          raw_audio: null,
         }),
       )
     })

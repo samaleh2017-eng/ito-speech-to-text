@@ -211,7 +211,7 @@ describe('InteractionManager', () => {
 
       expect(mockDbRun).toHaveBeenCalled()
       const params = mockDbRun.mock.calls[0][1] as unknown as any[]
-      const durationParam = params[6] // duration_ms is at index 6 in upsert
+      const durationParam = params[7] // duration_ms is at index 7 in upsert (after raw_audio_id)
       expect(durationParam).toBeGreaterThan(0)
       expect(durationParam).toBeLessThan(1000) // Should be reasonable
     })
@@ -226,7 +226,7 @@ describe('InteractionManager', () => {
 
       expect(mockDbRun).toHaveBeenCalled()
       const params = mockDbRun.mock.calls[0][1] as unknown as any[]
-      const durationParam = params[6] // duration_ms is at index 6 in upsert
+      const durationParam = params[7] // duration_ms is at index 7 in upsert (after raw_audio_id)
       expect(durationParam).toBe(0)
     })
   })

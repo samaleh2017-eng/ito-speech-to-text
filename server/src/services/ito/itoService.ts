@@ -287,48 +287,12 @@ export default (router: ConnectRouter) => {
         since,
       )
 
-      // Create a map to store audio buffers by interaction ID
-      const rawAudioMap = new Map<string, Buffer>()
-
-      // Fetch all audio files from S3 in parallel
-      const storageClient = getStorageClient()
-      const audioFetchPromises = interactions
-        .filter(
-          interaction => interaction.raw_audio_id && !interaction.raw_audio,
-        )
-        .map(async interaction => {
-          try {
-            const audioKey = createAudioKey(
-              interaction.user_id || userId,
-              interaction.raw_audio_id!,
-            )
-            const { body } = await storageClient.getObject(audioKey)
-            if (body) {
-              // Convert stream to buffer
-              const chunks: Uint8Array[] = []
-              for await (const chunk of body) {
-                chunks.push(chunk as Uint8Array)
-              }
-              const buffer = Buffer.concat(chunks)
-              rawAudioMap.set(interaction.id, buffer)
-            }
-          } catch (error) {
-            console.error(
-              `Failed to fetch audio for interaction ${interaction.id}:`,
-              error,
-            )
-          }
-        })
-
-      // Wait for all audio fetches to complete
-      await Promise.all(audioFetchPromises)
-
+      // Return interactions WITHOUT raw audio blobs — only metadata + raw_audio_id reference.
+      // Audio can be fetched on-demand via getInteraction when the user explicitly needs it.
       return {
-        interactions: interactions.map(dbInteraction => {
-          // Use S3 audio if available
-          const audioBuffer = rawAudioMap.get(dbInteraction.id) || undefined
-          return dbToInteractionPb(dbInteraction, audioBuffer)
-        }),
+        interactions: interactions.map(dbInteraction =>
+          dbToInteractionPb(dbInteraction),
+        ),
       }
     },
 

@@ -85,7 +85,7 @@ export class SyncService {
 
     // Initial sync on startup, then schedule periodic syncs
     await this.runSync()
-    this.syncInterval = setInterval(() => this.runSync(), 1000 * 30) // Sync every 30 seconds
+    this.syncInterval = setInterval(() => this.runSync(), 1000 * 300) // Sync every 5 minutes
   }
 
   public stop() {
@@ -184,8 +184,15 @@ export class SyncService {
       await InteractionsTable.findModifiedSince(lastSyncedAt)
     if (modifiedInteractions.length === 0) return 0
 
-    const tasks = modifiedInteractions.map(interaction => () => {
+    const tasks = modifiedInteractions.map(interaction => async () => {
       if (new Date(interaction.created_at) > new Date(lastSyncedAt)) {
+        // For new interactions that need audio upload, fetch the full record
+        if (!interaction.raw_audio_id && interaction.has_raw_audio) {
+          const fullInteraction = await InteractionsTable.findById(interaction.id)
+          if (fullInteraction) {
+            return grpcClient.createInteraction(fullInteraction)
+          }
+        }
         return grpcClient.createInteraction(interaction)
       } else if (interaction.deleted_at) {
         return grpcClient.deleteInteraction(interaction)
@@ -265,19 +272,6 @@ export class SyncService {
           continue
         }
 
-        // Convert Uint8Array back to Buffer
-        let audioBuffer: Buffer | null = null
-        if (
-          remoteInteraction.rawAudio &&
-          remoteInteraction.rawAudio.length > 0
-        ) {
-          audioBuffer = Buffer.from(
-            remoteInteraction.rawAudio.buffer,
-            remoteInteraction.rawAudio.byteOffset,
-            remoteInteraction.rawAudio.byteLength,
-          )
-        }
-
         const localInteraction: Interaction = {
           id: remoteInteraction.id,
           user_id: remoteInteraction.userId || null,
@@ -288,12 +282,12 @@ export class SyncService {
           llm_output: remoteInteraction.llmOutput
             ? JSON.parse(remoteInteraction.llmOutput)
             : null,
-          raw_audio: audioBuffer,
+          raw_audio: null, // Audio stays on S3 — COALESCE in upsert preserves local audio
           duration_ms: remoteInteraction.durationMs || 0,
           created_at: remoteInteraction.createdAt,
           updated_at: remoteInteraction.updatedAt,
           deleted_at: remoteInteraction.deletedAt || null,
-          raw_audio_id: remoteInteraction.rawAudioId,
+          raw_audio_id: remoteInteraction.rawAudioId || null,
           sample_rate: null,
         }
         await InteractionsTable.upsert(localInteraction)

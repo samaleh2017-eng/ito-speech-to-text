@@ -382,9 +382,9 @@ class GrpcClient {
 
   async createInteraction(interaction: Interaction) {
     return this.withRetry(async () => {
-      // Convert Buffer to Uint8Array for protobuf
+      // Only send raw audio if it hasn't been uploaded to S3 yet (no raw_audio_id)
       let uint8AudioData: Uint8Array
-      if (interaction.raw_audio) {
+      if (interaction.raw_audio && !interaction.raw_audio_id) {
         uint8AudioData = new Uint8Array(interaction.raw_audio)
       } else {
         uint8AudioData = new Uint8Array()
