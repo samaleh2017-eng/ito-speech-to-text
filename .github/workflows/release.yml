@@ -21,7 +21,7 @@ env:
   VITE_GRPC_BASE_URL: ${{ vars.VITE_GRPC_BASE_URL }}
   VITE_POSTHOG_API_KEY: ${{ vars.VITE_POSTHOG_API_KEY || '' }}
   VITE_POSTHOG_HOST: ${{ vars.VITE_POSTHOG_HOST || '' }}
-  VITE_UPDATER_BUCKET: ${{ vars.VITE_UPDATER_BUCKET || '' }}
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   build-mac:
@@ -30,10 +30,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Get version from tag
+      - name: Get version
         id: version
         run: |
-          VERSION="${GITHUB_REF_NAME:-${{ github.event.inputs.version }}}"
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${GITHUB_REF_NAME}"
+          fi
           VERSION_NO_V="${VERSION#v}"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "version_no_v=$VERSION_NO_V" >> $GITHUB_OUTPUT
@@ -66,7 +70,7 @@ jobs:
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
           VITE_ITO_ENV: dev
-        run: bunx electron-builder --config electron-builder.config.js --mac dmg --universal --publish=never
+        run: bunx electron-builder --config electron-builder.config.js --mac dmg zip --universal --publish=never
 
       - name: List output files
         run: ls -la dist/
@@ -75,7 +79,11 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: macos-build
-          path: dist/*.dmg
+          path: |
+            dist/*.dmg
+            dist/*.zip
+            dist/*.blockmap
+            dist/*.yml
           retention-days: 5
 
   build-windows:
@@ -84,11 +92,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Get version from tag
+      - name: Get version
         id: version
         shell: bash
         run: |
-          VERSION="${GITHUB_REF_NAME:-${{ github.event.inputs.version }}}"
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${GITHUB_REF_NAME}"
+          fi
           VERSION_NO_V="${VERSION#v}"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "version_no_v=$VERSION_NO_V" >> $GITHUB_OUTPUT
@@ -132,7 +144,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: windows-build
-          path: dist/*.exe
+          path: |
+            dist/*.exe
+            dist/*.blockmap
+            dist/*.yml
           retention-days: 5
 
   release:
@@ -147,18 +162,32 @@ jobs:
       - name: Display downloaded files
         run: find artifacts -type f -ls
 
+      - name: Determine version
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            echo "tag=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.ref_name || github.event.inputs.version }}
-          name: Release ${{ github.ref_name || github.event.inputs.version }}
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Release ${{ steps.version.outputs.tag }}
           draft: false
           prerelease: false
           files: |
             artifacts/macos-build/*.dmg
+            artifacts/macos-build/*.zip
+            artifacts/macos-build/*.blockmap
+            artifacts/macos-build/*.yml
             artifacts/windows-build/*.exe
+            artifacts/windows-build/*.blockmap
+            artifacts/windows-build/*.yml
           body: |
-            ## Ito ${{ github.ref_name || github.event.inputs.version }}
+            ## Ito ${{ steps.version.outputs.tag }}
             
             ### Downloads
             - **macOS (Universal)**: Download the DMG file

@@ -1,11 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   InfoCircle,
-  Play,
-  Stop,
   Copy,
   Check,
-  Download,
 } from '@mynaui/icons-react'
 import { EXTERNAL_LINKS } from '@/lib/constants/external-links'
 import { useSettingsStore } from '../../../store/useSettingsStore'
@@ -14,7 +11,6 @@ import { useAuthStore } from '@/app/store/useAuthStore'
 import { Interaction } from '@/lib/main/sqlite/models'
 import { ItoMode } from '@/app/generated/ito_pb'
 import { getKeyDisplay } from '@/app/utils/keyboard'
-import { createStereo48kWavFromMonoPCM } from '@/app/utils/audioUtils'
 import { KeyName } from '@/lib/types/keyboard'
 import { usePlatform } from '@/app/hooks/usePlatform'
 import { ProUpgradeDialog } from '../ProUpgradeDialog'
@@ -73,8 +69,7 @@ export default function HomeContent({
   const INTERACTIONS_PAGE_SIZE = 50
   const [interactions, setInteractions] = useState<Interaction[]>([])
   const [loading, setLoading] = useState(true)
-  const [playingAudio, setPlayingAudio] = useState<string | null>(null)
-  const audioInstancesRef = useRef<Map<string, HTMLAudioElement>>(new Map())
+
   const [visibleCount, setVisibleCount] = useState(INTERACTIONS_PAGE_SIZE)
   const [copiedItems, setCopiedItems] = useState<Set<string>>(new Set())
   const [openTooltipKey, setOpenTooltipKey] = useState<string | null>(null)
@@ -324,43 +319,6 @@ export default function HomeContent({
     setVisibleCount(INTERACTIONS_PAGE_SIZE)
   }, [interactions.length])
 
-  // Cleanup audio instances on unmount
-  useEffect(() => {
-    const map = audioInstancesRef.current
-    return () => {
-      map.forEach(audio => {
-        try {
-          audio.pause()
-          audio.currentTime = 0
-          if (audio.src?.startsWith('blob:')) {
-            URL.revokeObjectURL(audio.src)
-          }
-        } catch {
-          /* ignore */
-        }
-      })
-      map.clear()
-    }
-  }, [])
-
-  const MAX_AUDIO_CACHE = 5
-
-  const evictOldestAudio = useCallback(() => {
-    const map = audioInstancesRef.current
-    if (map.size <= MAX_AUDIO_CACHE) return
-    const oldestKey = map.keys().next().value
-    if (oldestKey) {
-      const oldAudio = map.get(oldestKey)
-      if (oldAudio) {
-        oldAudio.pause()
-        if (oldAudio.src?.startsWith('blob:')) {
-          URL.revokeObjectURL(oldAudio.src)
-        }
-      }
-      map.delete(oldestKey)
-    }
-  }, [])
-
   const formatTime = (dateString: string) => {
     const date = new Date(dateString)
     return date.toLocaleString('en-US', {
@@ -454,89 +412,6 @@ export default function HomeContent({
     }
   }
 
-  const handleAudioPlayStop = async (interaction: Interaction) => {
-    try {
-      // If this interaction is currently playing, stop it
-      if (playingAudio === interaction.id) {
-        const current = audioInstancesRef.current.get(interaction.id)
-        if (current) {
-          current.pause()
-          current.currentTime = 0
-        }
-        setPlayingAudio(null)
-        return
-      }
-
-      // Stop any other playing audio
-      if (playingAudio) {
-        const other = audioInstancesRef.current.get(playingAudio)
-        if (other) {
-          other.pause()
-          other.currentTime = 0
-        }
-      }
-
-      if (!interaction.has_raw_audio) {
-        console.warn('No audio data available for this interaction')
-        return
-      }
-
-      // Set playing state immediately for responsive UI
-      setPlayingAudio(interaction.id)
-
-      // Reuse existing audio instance if available
-      let audio = audioInstancesRef.current.get(interaction.id)
-
-      if (!audio) {
-        const fullInteraction = await window.api.interactions.getById(
-          interaction.id,
-        )
-        if (!fullInteraction?.raw_audio) {
-          console.warn('Failed to load audio data')
-          setPlayingAudio(null)
-          return
-        }
-        const pcmData = new Uint8Array(fullInteraction.raw_audio)
-        try {
-          // Convert raw PCM (mono, typically 16 kHz) to 48 kHz stereo WAV for smoother playback
-          const wavBuffer = createStereo48kWavFromMonoPCM(
-            pcmData,
-            interaction.sample_rate || 16000,
-            48000,
-          )
-          const audioBlob = new Blob([wavBuffer], { type: 'audio/wav' })
-          const audioUrl = URL.createObjectURL(audioBlob)
-
-          audio = new Audio(audioUrl)
-          audio.onended = () => {
-            setPlayingAudio(null)
-          }
-          audio.onerror = err => {
-            console.error('Audio playback error:', err)
-            setPlayingAudio(null)
-          }
-
-          audioInstancesRef.current.set(interaction.id, audio!)
-          evictOldestAudio()
-        } catch (error) {
-          console.error('Failed to create audio instance:', error)
-          setPlayingAudio(null)
-          return
-        }
-      }
-
-      try {
-        await audio.play()
-      } catch (playError) {
-        console.error('Failed to start audio playback:', playError)
-        setPlayingAudio(null)
-      }
-    } catch (error) {
-      console.error('Failed to play/stop audio:', error)
-      setPlayingAudio(null)
-    }
-  }
-
   const visibleInteractions = useMemo(
     () => interactions.slice(0, visibleCount),
     [interactions, visibleCount],
@@ -567,55 +442,6 @@ export default function HomeContent({
       }, 2000)
     } catch (error) {
       console.error('Failed to copy text:', error)
-    }
-  }
-
-  const handleAudioDownload = async (interaction: Interaction) => {
-    try {
-      if (!interaction.has_raw_audio) {
-        console.warn('No audio data available for download')
-        return
-      }
-
-      const fullInteraction = await window.api.interactions.getById(
-        interaction.id,
-      )
-      if (!fullInteraction?.raw_audio) {
-        console.warn('Failed to load audio data for download')
-        return
-      }
-
-      const pcmData = new Uint8Array(fullInteraction.raw_audio)
-      // Convert raw PCM to WAV format
-      const wavBuffer = createStereo48kWavFromMonoPCM(
-        pcmData,
-        interaction.sample_rate || 16000,
-        48000,
-      )
-      const audioBlob = new Blob([wavBuffer], { type: 'audio/wav' })
-      const audioUrl = URL.createObjectURL(audioBlob)
-
-      // Format filename with timestamp (YYYYMMDD_HHMMSS)
-      const date = new Date(interaction.created_at)
-      const timestamp = date
-        .toISOString()
-        .replace(/[-:]/g, '')
-        .replace('T', '_')
-        .slice(0, 15)
-      const filename = `ito-recording-${timestamp}.wav`
-
-      // Create temporary link and trigger download
-      const link = document.createElement('a')
-      link.href = audioUrl
-      link.download = filename
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-
-      // Clean up the blob URL
-      URL.revokeObjectURL(audioUrl)
-    } catch (error) {
-      console.error('Failed to download audio:', error)
     }
   }
 
@@ -744,11 +570,8 @@ export default function HomeContent({
                             </div>
                           </div>
 
-                          {/* Copy, Download, and Play buttons - only show on hover or when playing */}
-                          <div
-                            className={`flex items-center gap-2 ${playingAudio === interaction.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-200`}
-                          >
-                            {/* Copy button */}
+                          {/* Copy button - only show on hover */}
+                          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                             {!displayInfo.isError && (
                               <Tooltip
                                 open={
@@ -796,72 +619,6 @@ export default function HomeContent({
                                 </TooltipContent>
                               </Tooltip>
                             )}
-
-                            {/* Download button */}
-                            {interaction.has_raw_audio && (
-                              <Tooltip
-                                open={
-                                  openTooltipKey ===
-                                  `download:${interaction.id}`
-                                }
-                                onOpenChange={open => {
-                                  setOpenTooltipKey(
-                                    open ? `download:${interaction.id}` : null,
-                                  )
-                                }}
-                              >
-                                <TooltipTrigger asChild>
-                                  <button
-                                    className="p-1.5 hover:bg-warm-200 rounded transition-colors cursor-pointer text-[var(--color-subtext)]"
-                                    onClick={() =>
-                                      handleAudioDownload(interaction)
-                                    }
-                                  >
-                                    <Download className="w-4 h-4" />
-                                  </button>
-                                </TooltipTrigger>
-                                <TooltipContent side="top" sideOffset={5}>
-                                  Download audio
-                                </TooltipContent>
-                              </Tooltip>
-                            )}
-
-                            {/* Play/Stop button with tooltip */}
-                            <Tooltip
-                              open={openTooltipKey === `play:${interaction.id}`}
-                              onOpenChange={open => {
-                                setOpenTooltipKey(
-                                  open ? `play:${interaction.id}` : null,
-                                )
-                              }}
-                            >
-                              <TooltipTrigger asChild>
-                                <button
-                                  className={`p-1.5 hover:bg-warm-200 rounded transition-colors cursor-pointer ${
-                                    playingAudio === interaction.id
-                                      ? 'bg-blue-50 text-blue-600'
-                                      : 'text-[var(--color-subtext)]'
-                                  }`}
-                                  onClick={() =>
-                                    handleAudioPlayStop(interaction)
-                                  }
-                                  disabled={!interaction.has_raw_audio}
-                                >
-                                  {playingAudio === interaction.id ? (
-                                    <Stop className="w-4 h-4" />
-                                  ) : (
-                                    <Play className="w-4 h-4" />
-                                  )}
-                                </button>
-                              </TooltipTrigger>
-                              <TooltipContent side="top" sideOffset={5}>
-                                {!interaction.has_raw_audio
-                                  ? 'No audio available'
-                                  : playingAudio === interaction.id
-                                    ? 'Stop'
-                                    : 'Play'}
-                              </TooltipContent>
-                            </Tooltip>
                           </div>
                         </div>
                       )

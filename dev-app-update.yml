@@ -1,6 +1,3 @@
-owner: heyito
-repo: ito
-provider: s3
-bucket: dev-ito-releases
-path: manual-test/
-region: us-west-2
+owner: samaleh2017-eng
+repo: ito-speech-to-text
+provider: github

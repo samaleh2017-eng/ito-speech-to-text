@@ -18,7 +18,6 @@ import { setupProtocolHandling, processStartupProtocolUrl } from '../protocol'
 import { startKeyListener } from '../media/keyboard'
 // Import the grpcClient singleton
 import { grpcClient } from '../clients/grpcClient'
-import { preventAppNap } from './appNap'
 import { syncService } from './syncService'
 import { checkAccessibilityPermission } from '../utils/crossPlatform'
 import mainStore, { initializeStore } from './store'
@@ -134,9 +133,6 @@ app.whenReady().then(async () => {
 
   // Setup protocol handling for deep links
   setupProtocolHandling()
-
-  // Prevent app nap
-  preventAppNap()
 
   // Register the handler for the 'res' protocol now that the app is ready.
   const appId = ITO_ENV === 'prod' ? 'ai.ito.ito' : `ai.ito.ito-${ITO_ENV}`
