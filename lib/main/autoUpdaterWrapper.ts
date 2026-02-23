@@ -47,8 +47,6 @@ export function initializeAutoUpdater() {
         provider: 'github',
         owner: 'samaleh2017-eng',
         repo: 'ito-speech-to-text',
-        private: true,
-        token: process.env.GH_TOKEN || '',
       })
 
       log.transports.file.level = 'debug'
