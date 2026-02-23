@@ -3,7 +3,6 @@ import log from 'electron-log'
 import { autoUpdater } from 'electron-updater'
 import { mainWindow } from './app'
 import { hardKillAll, teardown } from './teardown'
-import { ITO_ENV } from './env'
 
 export interface UpdateStatus {
   updateAvailable: boolean
@@ -39,21 +38,15 @@ export function initializeAutoUpdater() {
           : 'Development auto-updater enabled, initializing...',
       )
 
-      const bucket = import.meta.env.VITE_UPDATER_BUCKET
-      if (!bucket) {
-        throw new Error('VITE_UPDATER_BUCKET environment variable is not set')
-      }
-
       // Force dev updates if in development mode
       if (!app.isPackaged) {
         autoUpdater.forceDevUpdateConfig = true
       }
 
       autoUpdater.setFeedURL({
-        provider: 's3',
-        bucket,
-        path: 'releases/',
-        region: 'us-west-2',
+        provider: 'github',
+        owner: 'samaleh2017-eng',
+        repo: 'ito-speech-to-text',
       })
 
       log.transports.file.level = 'debug'

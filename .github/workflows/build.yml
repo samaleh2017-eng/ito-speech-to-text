@@ -37,7 +37,6 @@ jobs:
           echo "VITE_POSTHOG_API_KEY=\"${{ secrets.VITE_POSTHOG_API_KEY }}\"" >> .env
           echo "VITE_POSTHOG_HOST=\"${{ secrets.VITE_POSTHOG_HOST }}\"" >> .env
           echo "VITE_GRPC_BASE_URL=\"${{ vars.VITE_GRPC_BASE_URL }}\"" >> .env
-          echo "VITE_UPDATER_BUCKET=\"${{ vars.VITE_UPDATER_BUCKET }}\"" >> .env
           echo "VITE_SENTRY_DSN=\"${{ vars.VITE_SENTRY_DSN }}\"" >> .env
           echo "VITE_SENTRY_ENV=\"${{ vars.VITE_SENTRY_ENV }}\"" >> .env
           echo "VITE_SENTRY_TRACES_SAMPLE_RATE=\"${{ vars.VITE_SENTRY_TRACES_SAMPLE_RATE }}\"" >> .env
@@ -186,7 +185,6 @@ jobs:
           echo "VITE_POSTHOG_API_KEY=\"${{ secrets.VITE_POSTHOG_API_KEY }}\"" >> .env
           echo "VITE_POSTHOG_HOST=\"${{ secrets.VITE_POSTHOG_HOST }}\"" >> .env
           echo "VITE_GRPC_BASE_URL=\"${{ vars.VITE_GRPC_BASE_URL }}\"" >> .env
-          echo "VITE_UPDATER_BUCKET=\"${{ vars.VITE_UPDATER_BUCKET }}\"" >> .env
           echo "VITE_SENTRY_DSN=\"${{ vars.VITE_SENTRY_DSN }}\"" >> .env
           echo "VITE_SENTRY_ENV=\"${{ vars.VITE_SENTRY_ENV }}\"" >> .env
           echo "VITE_SENTRY_TRACES_SAMPLE_RATE=\"${{ vars.VITE_SENTRY_TRACES_SAMPLE_RATE }}\"" >> .env
@@ -305,7 +303,7 @@ jobs:
             dist/*.zip
             dist/*.blockmap
 
-  upload-to-s3:
+  upload-to-github-release:
     runs-on: ubuntu-latest
     needs: [build-mac, sign-windows]
     environment: ${{ github.event.release.target_commitish == 'main' && 'production' || 'develop' }}
@@ -323,107 +321,24 @@ jobs:
           name: Windows-Build-Artifacts
           path: windows-dist
 
-      - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam::287641434880:role/ItoGitHubCiCdRole
-          aws-region: us-west-2
-
-      - name: Upload Build Output to S3
+      - name: Display downloaded files
         run: |
-          echo "Deploying version ${{ github.ref_name }} to S3"
+          echo "Mac artifacts:"
+          find mac-dist -type f -ls
+          echo "Windows artifacts:"
+          find windows-dist -type f -ls
 
-          BUCKET=s3://${{ vars.AWS_STAGE }}-ito-releases/releases
-
-          echo "Listing existing files in root of releases/"
-          aws s3 ls "$BUCKET/" | grep -vE '/$' | awk '{print $4}' > existing_files.txt
-
-          echo "Combining Mac and Windows artifacts"
-          mkdir -p combined-dist
-
-          # Copy Mac artifacts
-          if [ -d "mac-dist" ]; then
-            cp -r mac-dist/* combined-dist/
-          fi
-
-          # Copy Windows artifacts
-          if [ -d "windows-dist" ]; then
-            cp -r windows-dist/* combined-dist/
-          fi
-
-          echo "Files to upload:"
-          ls -la combined-dist/
-
-          echo "Identifying which files to delete post-upload"
-          find combined-dist -maxdepth 1 \( \
-            -name '*.yml' -o \
-            -name '*universal-mac.zip' -o \
-            -name '*universal-mac.zip.blockmap' -o \
-            -name '*.dmg' -o \
-            -name '*.dmg.blockmap' -o \
-            -name '*.exe' -o \
-            -name '*.nsis.7z' -o \
-            -name '*.zip' -o \
-            -name '*.blockmap' \
-          \) | xargs -I{} basename {} > uploaded_root_files.txt
-
-          echo "Uploading full combined dist to versioned folder: $BUCKET/${{ github.ref_name }}/"
-          aws s3 cp combined-dist $BUCKET/${{ github.ref_name }}/ --recursive
-
-          echo "Uploading selected files to root of releases/"
-          for FILE in \
-            $(find combined-dist -maxdepth 1 -name '*.yml') \
-            $(find combined-dist -maxdepth 1 -name '*universal-mac.zip') \
-            $(find combined-dist -maxdepth 1 -name '*universal-mac.zip.blockmap') \
-            $(find combined-dist -maxdepth 1 -name '*.dmg') \
-            $(find combined-dist -maxdepth 1 -name '*.dmg.blockmap') \
-            $(find combined-dist -maxdepth 1 -name '*.exe') \
-            $(find combined-dist -maxdepth 1 -name '*.nsis.7z') \
-            $(find combined-dist -maxdepth 1 -name '*.zip') \
-            $(find combined-dist -maxdepth 1 -name '*.blockmap')
-          do
-            if [ -f "$FILE" ]; then
-              aws s3 cp "$FILE" $BUCKET/
-            fi
-          done
-
-          # Compare and find stale files (exist in bucket but not in upload list)
-          # Exclude .blockmap files from deletion to preserve differential update capability
-          echo "Existing files in bucket root:"
-          cat existing_files.txt
-          echo ""
-          echo "Files uploaded to bucket root:"
-          cat uploaded_root_files.txt
-          echo ""
-          echo "Computing stale files (existing - uploaded)..."
-          comm -23 <(sort existing_files.txt) <(sort uploaded_root_files.txt) > all_stale_files.txt
-          echo "All stale files before filtering:"
-          cat all_stale_files.txt || echo "(none)"
-          echo ""
-          echo "Filtering out .blockmap files..."
-          grep -v '\.blockmap$' all_stale_files.txt > stale_files.txt || echo "(no non-blockmap stale files found)"
-
-          echo "Stale files identified for deletion (excluding .blockmap files for differential updates):"
-          cat stale_files.txt || echo "(none)"
-
-          # Delete each stale file (but preserve blockmaps)
-          while IFS= read -r file; do
-            echo "Deleting stale file: $file"
-            aws s3 rm "$BUCKET/$file"
-          done < stale_files.txt
-
-      - name: Invalidate CDN Cache for Release Files
-        run: |
-          echo "Invalidating cache for release files on distribution: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}. Updated files should be available within 15 minutes."
-
-          aws cloudfront create-invalidation \
-            --distribution-id "${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}" \
-            --paths "/*.yml" "/*.dmg" "/*.exe" "/*.zip" "/*.blockmap"
-
-      - name: Upload installers to GitHub Release
+      - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
           files: |
             mac-dist/*.dmg
+            mac-dist/*.zip
+            mac-dist/*.blockmap
+            mac-dist/*.yml
             windows-dist/*.exe
+            windows-dist/*.nsis.7z
+            windows-dist/*.zip
+            windows-dist/*.blockmap
+            windows-dist/*.yml
