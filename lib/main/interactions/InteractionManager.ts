@@ -84,7 +84,7 @@ export class InteractionManager {
         title,
         asr_output: asrOutput,
         llm_output: errorMessage ? { error: errorMessage } : {},
-        raw_audio: audioBuffer.length > 0 ? audioBuffer : null,
+        raw_audio: null, // Never store audio — Wispr Flow model
         raw_audio_id: null,
         duration_ms: durationMs,
         sample_rate: sampleRate,

@@ -85,7 +85,7 @@ export class SyncService {
 
     // Initial sync on startup, then schedule periodic syncs
     await this.runSync()
-    this.syncInterval = setInterval(() => this.runSync(), 1000 * 30) // Sync every 30 seconds
+    this.syncInterval = setInterval(() => this.runSync(), 1000 * 300) // 5 minutes
   }
 
   public stop() {
@@ -265,19 +265,6 @@ export class SyncService {
           continue
         }
 
-        // Convert Uint8Array back to Buffer
-        let audioBuffer: Buffer | null = null
-        if (
-          remoteInteraction.rawAudio &&
-          remoteInteraction.rawAudio.length > 0
-        ) {
-          audioBuffer = Buffer.from(
-            remoteInteraction.rawAudio.buffer,
-            remoteInteraction.rawAudio.byteOffset,
-            remoteInteraction.rawAudio.byteLength,
-          )
-        }
-
         const localInteraction: Interaction = {
           id: remoteInteraction.id,
           user_id: remoteInteraction.userId || null,
@@ -288,12 +275,12 @@ export class SyncService {
           llm_output: remoteInteraction.llmOutput
             ? JSON.parse(remoteInteraction.llmOutput)
             : null,
-          raw_audio: audioBuffer,
+          raw_audio: null,
           duration_ms: remoteInteraction.durationMs || 0,
           created_at: remoteInteraction.createdAt,
           updated_at: remoteInteraction.updatedAt,
           deleted_at: remoteInteraction.deletedAt || null,
-          raw_audio_id: remoteInteraction.rawAudioId,
+          raw_audio_id: remoteInteraction.rawAudioId || null,
           sample_rate: null,
         }
         await InteractionsTable.upsert(localInteraction)
