@@ -95,6 +95,14 @@ export class InteractionManager {
 
       await InteractionsTable.upsert(interactionData)
 
+      // Notify sync service of activity to keep active sync interval
+      try {
+        const { SyncService } = await import('../syncService')
+        SyncService.getInstance().notifyActivity()
+      } catch (e) {
+        console.warn('[InteractionManager] Failed to notify sync service:', e)
+      }
+
       // Notify all windows about the new interaction
       BrowserWindow.getAllWindows().forEach(window => {
         window.webContents.send('interaction-created', {

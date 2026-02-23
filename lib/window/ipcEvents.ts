@@ -566,6 +566,25 @@ export function registerIPC() {
     InteractionsTable.softDelete(id),
   )
 
+  handleIPC('interactions:get-remote-audio', async (_e, id: string) => {
+    try {
+      const { grpcClient } = await import('../clients/grpcClient')
+      const remoteInteraction = await grpcClient.getInteraction(id)
+      if (remoteInteraction.rawAudio && remoteInteraction.rawAudio.length > 0) {
+        const audioBuffer = Buffer.from(
+          remoteInteraction.rawAudio.buffer,
+          remoteInteraction.rawAudio.byteOffset,
+          remoteInteraction.rawAudio.byteLength,
+        )
+        return { raw_audio: audioBuffer, sample_rate: null }
+      }
+      return null
+    } catch (error) {
+      console.error('[IPC] Failed to fetch remote audio:', error)
+      return null
+    }
+  })
+
   // User Data Deletion
   handleIPC('delete-user-data', async _e => {
     const userId = getCurrentUserId()

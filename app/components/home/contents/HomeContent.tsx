@@ -488,15 +488,28 @@ export default function HomeContent({
       let audio = audioInstancesRef.current.get(interaction.id)
 
       if (!audio) {
+        // Try local first, then fetch from server on-demand
+        let rawAudioData: Buffer | null = null
         const fullInteraction = await window.api.interactions.getById(
           interaction.id,
         )
-        if (!fullInteraction?.raw_audio) {
-          console.warn('Failed to load audio data')
+        if (fullInteraction?.raw_audio) {
+          rawAudioData = fullInteraction.raw_audio
+        } else {
+          // Audio not stored locally — fetch from server (lazy-load)
+          console.log('[Audio] Fetching audio from server for interaction:', interaction.id)
+          const remoteAudio = await window.api.interactions.getRemoteAudio(interaction.id)
+          if (remoteAudio?.raw_audio) {
+            rawAudioData = remoteAudio.raw_audio
+          }
+        }
+
+        if (!rawAudioData) {
+          console.warn('Failed to load audio data from local or server')
           setPlayingAudio(null)
           return
         }
-        const pcmData = new Uint8Array(fullInteraction.raw_audio)
+        const pcmData = new Uint8Array(rawAudioData)
         try {
           // Convert raw PCM (mono, typically 16 kHz) to 48 kHz stereo WAV for smoother playback
           const wavBuffer = createStereo48kWavFromMonoPCM(
@@ -577,15 +590,27 @@ export default function HomeContent({
         return
       }
 
+      // Try local first, then fetch from server on-demand
+      let rawAudioData: Buffer | null = null
       const fullInteraction = await window.api.interactions.getById(
         interaction.id,
       )
-      if (!fullInteraction?.raw_audio) {
+      if (fullInteraction?.raw_audio) {
+        rawAudioData = fullInteraction.raw_audio
+      } else {
+        console.log('[Audio] Fetching audio from server for download:', interaction.id)
+        const remoteAudio = await window.api.interactions.getRemoteAudio(interaction.id)
+        if (remoteAudio?.raw_audio) {
+          rawAudioData = remoteAudio.raw_audio
+        }
+      }
+
+      if (!rawAudioData) {
         console.warn('Failed to load audio data for download')
         return
       }
 
-      const pcmData = new Uint8Array(fullInteraction.raw_audio)
+      const pcmData = new Uint8Array(rawAudioData)
       // Convert raw PCM to WAV format
       const wavBuffer = createStereo48kWavFromMonoPCM(
         pcmData,
