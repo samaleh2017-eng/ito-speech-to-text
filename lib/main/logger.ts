@@ -52,6 +52,17 @@ export function initializeLogging() {
     (store.get(LOG_QUEUE_KEY) as LogEvent[] | undefined) ?? []
   const queue: LogEvent[] = [...initialEvents]
 
+  // Cache analytics preference to avoid store read on every log call
+  let _shareAnalyticsCached = false
+  const refreshAnalyticsFlag = () => {
+    try {
+      const settings = store.get(STORE_KEYS.SETTINGS)
+      _shareAnalyticsCached = settings?.shareAnalytics ?? false
+    } catch { /* ignore */ }
+  }
+  refreshAnalyticsFlag()
+  const analyticsRefreshTimer = setInterval(refreshAnalyticsFlag, 60_000)
+
   const persistQueue = () => {
     store.set(LOG_QUEUE_KEY, queue)
   }
@@ -101,7 +112,7 @@ export function initializeLogging() {
         // If more remain, schedule another cycle
         scheduleFlush()
       }
-    }, 10_000)
+    }, 60_000)
   }
 
   const toEvent = (
@@ -147,9 +158,11 @@ export function initializeLogging() {
 
   console.log = (...args: any[]) => {
     try {
-      queue.push(toEvent('log', String(args[0] ?? ''), { args }))
-      if (queue.length > MAX_QUEUE) queue.splice(0, queue.length - MAX_QUEUE)
-      scheduleFlush()
+      if (_shareAnalyticsCached) {
+        queue.push(toEvent('log', String(args[0] ?? ''), { args }))
+        if (queue.length > MAX_QUEUE) queue.splice(0, queue.length - MAX_QUEUE)
+        scheduleFlush()
+      }
     } catch (err) {
       originalError('Failed to enqueue log event (log):', err)
     }
@@ -157,9 +170,11 @@ export function initializeLogging() {
   }
   console.info = (...args: any[]) => {
     try {
-      queue.push(toEvent('info', String(args[0] ?? ''), { args }))
-      if (queue.length > MAX_QUEUE) queue.splice(0, queue.length - MAX_QUEUE)
-      scheduleFlush()
+      if (_shareAnalyticsCached) {
+        queue.push(toEvent('info', String(args[0] ?? ''), { args }))
+        if (queue.length > MAX_QUEUE) queue.splice(0, queue.length - MAX_QUEUE)
+        scheduleFlush()
+      }
     } catch (err) {
       originalError('Failed to enqueue log event (info):', err)
     }
@@ -167,9 +182,11 @@ export function initializeLogging() {
   }
   console.warn = (...args: any[]) => {
     try {
-      queue.push(toEvent('warn', String(args[0] ?? ''), { args }))
-      if (queue.length > MAX_QUEUE) queue.splice(0, queue.length - MAX_QUEUE)
-      scheduleFlush()
+      if (_shareAnalyticsCached) {
+        queue.push(toEvent('warn', String(args[0] ?? ''), { args }))
+        if (queue.length > MAX_QUEUE) queue.splice(0, queue.length - MAX_QUEUE)
+        scheduleFlush()
+      }
     } catch (err) {
       originalError('Failed to enqueue log event (warn):', err)
     }
@@ -177,6 +194,7 @@ export function initializeLogging() {
   }
   console.error = (...args: any[]) => {
     try {
+      // Always send errors to server for crash/bug visibility
       queue.push(toEvent('error', String(args[0] ?? ''), { args }))
       if (queue.length > MAX_QUEUE) queue.splice(0, queue.length - MAX_QUEUE)
       scheduleFlush()
@@ -204,9 +222,12 @@ export function initializeLogging() {
     ;(log as any)[method] = (...args: any[]) => {
       try {
         const mapped = levelMap[method] || 'info'
-        queue.push(toEvent(mapped as any, String(args[0] ?? ''), { args }))
-        if (queue.length > MAX_QUEUE) queue.splice(0, queue.length - MAX_QUEUE)
-        scheduleFlush()
+        const isError = method === 'error'
+        if (isError || _shareAnalyticsCached) {
+          queue.push(toEvent(mapped as any, String(args[0] ?? ''), { args }))
+          if (queue.length > MAX_QUEUE) queue.splice(0, queue.length - MAX_QUEUE)
+          scheduleFlush()
+        }
       } catch (err) {
         originalError(`Failed to enqueue electron-log event (${method}):`, err)
       }
@@ -217,6 +238,7 @@ export function initializeLogging() {
   // Best-effort flush when the app is quitting; durability is ensured by persistence
   app.on('before-quit', () => {
     clearInterval(persistTimer)
+    clearInterval(analyticsRefreshTimer)
     if (flushTimer) {
       clearTimeout(flushTimer)
       flushTimer = null

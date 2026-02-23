@@ -8,6 +8,7 @@ import { contextGrabber, ContextData } from './context/ContextGrabber'
 import { GrammarRulesService } from './grammar/GrammarRulesService'
 import { getAdvancedSettings } from './store'
 import log from 'electron-log'
+import { preventAppNap, allowAppNap } from './appNap'
 import { timingCollector, TimingEventName } from './timing/TimingCollector'
 import { SonioxStreamingService } from './soniox/SonioxStreamingService'
 import { sonioxTempKeyManager } from './soniox/SonioxTempKeyManager'
@@ -75,6 +76,7 @@ export class ItoSessionManager {
     voiceInputService.startAudioRecording()
     itoStreamController.setMode(mode)
     recordingStateNotifier.notifyRecordingStarted(mode)
+    preventAppNap()
 
     this.fetchAndSendContext().catch(error => {
       log.error('[itoSessionManager] Failed to fetch/send context:', error)
@@ -105,6 +107,7 @@ export class ItoSessionManager {
 
     voiceInputService.startAudioRecording()
     recordingStateNotifier.notifyRecordingStarted(mode)
+    preventAppNap()
 
     try {
       const connectWithTimeout = async () => {
@@ -236,6 +239,7 @@ export class ItoSessionManager {
       timingCollector.clearInteraction()
       interactionManager.clearCurrentInteraction()
       this.cleanupSonioxState()
+      allowAppNap()
       return
     }
 
@@ -257,6 +261,7 @@ export class ItoSessionManager {
         console.log('[itoSessionManager] Stream cancelled as expected:', error)
       }
     }
+    allowAppNap()
   }
 
   public async completeSession() {
@@ -291,6 +296,7 @@ export class ItoSessionManager {
           )
         }
       }
+      allowAppNap()
       return
     }
 
@@ -361,6 +367,7 @@ export class ItoSessionManager {
     if (!rawTranscript || rawTranscript.trim().length === 0) {
       console.warn('[itoSessionManager] No speech detected from Soniox')
       recordingStateNotifier.notifyProcessingStopped()
+      allowAppNap()
       this.cleanupSonioxState()
       return
     }
@@ -442,6 +449,7 @@ export class ItoSessionManager {
       console.error('[itoSessionManager] Failed to create interaction:', error)
     }
 
+    allowAppNap()
     this.cleanupSonioxState()
   }
 
@@ -526,6 +534,7 @@ export class ItoSessionManager {
       interactionManager.clearCurrentInteraction()
       itoStreamController.clearInteractionAudio()
     }
+    allowAppNap()
   }
 
   private async handleTranscriptionError(error: any) {
@@ -536,6 +545,7 @@ export class ItoSessionManager {
     timingCollector.clearInteraction()
     interactionManager.clearCurrentInteraction()
     itoStreamController.clearInteractionAudio()
+    allowAppNap()
   }
 
   private handleSonioxStreamError(error: Error) {
@@ -570,6 +580,7 @@ export class ItoSessionManager {
     recordingStateNotifier.notifyRecordingStopped()
     timingCollector.clearInteraction()
     interactionManager.clearCurrentInteraction()
+    allowAppNap()
     this.cleanupSonioxState()
   }
 }

@@ -9,7 +9,7 @@ const tracesSampleRateRaw = (import.meta as any).env
 const tracesSampleRate = Number.parseFloat(
   typeof tracesSampleRateRaw === 'string' && tracesSampleRateRaw.trim() !== ''
     ? tracesSampleRateRaw
-    : '0.2',
+    : '0.05',
 )
 
 const profilesSampleRateRaw = (import.meta as any).env
@@ -18,7 +18,7 @@ const profilesSampleRate = Number.parseFloat(
   typeof profilesSampleRateRaw === 'string' &&
     profilesSampleRateRaw.trim() !== ''
     ? profilesSampleRateRaw
-    : '0.2',
+    : '0.05',
 )
 
 Sentry.init({

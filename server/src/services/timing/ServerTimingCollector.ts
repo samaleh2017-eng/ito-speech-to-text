@@ -59,7 +59,7 @@ export class ServerTimingCollector {
   private FIRST_EVENT = ServerTimingEventName.TOTAL_PROCESSING
 
   // Configuration - more aggressive flushing for server to reduce memory
-  private readonly FLUSH_INTERVAL_MS = 2_000 // 2 seconds
+  private readonly FLUSH_INTERVAL_MS = 30_000 // 30 seconds
   private readonly BATCH_SIZE = 5 // Smaller batches
   private readonly MAX_QUEUE_SIZE = 50
 

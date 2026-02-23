@@ -46,7 +46,7 @@ export class TimingCollector {
   private FIRST_EVENT = TimingEventName.INTERACTION_ACTIVE
 
   // Configuration
-  private readonly FLUSH_INTERVAL_MS = 5_000
+  private readonly FLUSH_INTERVAL_MS = 60_000
   private readonly BATCH_SIZE = 10
   private readonly MAX_QUEUE_SIZE = 100
 
